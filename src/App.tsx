@@ -19,6 +19,7 @@ import { FaqPage } from './views/FaqPage';
 import { AcharyaAssignmentPage } from './views/AcharyaAssignmentPage';
 import { WhatsAppAdminPage } from './views/WhatsAppAdminPage';
 import { AdminDashboardPage } from './views/AdminDashboardPage';
+import { PanditPanelPage } from './views/PanditPanelPage';
 import { CustomerPortalModal } from './components/CustomerPortalModal';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ParticleCanvas } from './components/ParticleCanvas';
@@ -115,6 +116,10 @@ export function App({ initialPath }: { initialPath?: string }) {
         return <TemplateLibraryPage />;
       case '/admin/whatsapp':
         return <WhatsAppAdminPage navigate={navigate} />;
+      case '/pandit':
+      case '/pandit/panel':
+      case '/acharya/panel':
+        return <PanditPanelPage navigate={navigate} />;
       case '/privacy':
       case '/terms':
       case '/cancellation':

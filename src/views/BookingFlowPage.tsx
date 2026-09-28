@@ -718,7 +718,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                       <Lock className="w-4 h-4 text-[#8C5D0D]" />
                     )}
                     <strong className="text-xs text-[#1F1914]">
-                      {isPhoneVerified ? 'Preview Code Verified' : 'Preview Phone Verification'}
+                      {isPhoneVerified ? 'Mobile Verified' : 'Mobile Number Verification'}
                     </strong>
                   </div>
                   {isPhoneVerified && (
@@ -731,7 +731,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                 {!isPhoneVerified ? (
                   <div className="space-y-2.5 pt-1">
                     <p className="text-[11.5px] text-[#5C5147]">
-                      Try the verification flow with your mobile number. This local preview displays the code here; it sends no message.
+                      Enter your mobile number to receive a WhatsApp verification code. This confirms your contact for ceremony coordination.
                     </p>
 
                     <div className="flex gap-2">
@@ -756,8 +756,8 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                     {otpSent && (
                       <div className="p-3 bg-white rounded-lg border border-[#D5C2A4] space-y-2">
                         <div className="flex items-center justify-between text-xs">
-                          <label className="font-semibold text-[#1F1914]">Enter Verification Code</label>
-                          <span className="text-[10.5px] text-[#8C5D0D]">Preview code: {demoCode}</span>
+                          <label className="font-semibold text-[#1F1914]">Enter WhatsApp Verification Code</label>
+                          <span className="text-[10.5px] text-[#8C5D0D]">Sent to +91 {phone.replace(/\D/g,'').slice(-10)}</span>
                         </div>
                         <div className="flex gap-2">
                           <input 
@@ -765,7 +765,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                             maxLength={6}
                             value={otpCode} 
                             onChange={(e) => setOtpCode(e.target.value)} 
-                            placeholder="6-digit preview code"
+                            placeholder="6-digit code"
                             className="w-28 px-3 py-1.5 rounded border border-[#D5C2A4] text-center font-mono text-sm"
                           />
                           <button
@@ -773,7 +773,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                             onClick={handleVerifyOtp}
                             className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded"
                           >
-                            Verify Mobile
+                            Verify
                           </button>
                         </div>
                       </div>
@@ -785,7 +785,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                   </div>
                 ) : (
                   <p className="text-xs text-emerald-800">
-                    Verified Mobile: <strong>+91 {phone}</strong>. Preview only; this does not verify ownership of the phone.
+                    Mobile verified: <strong>+91 {phone.replace(/\D/g,'').slice(-10)}</strong>. This number will be used for ceremony WhatsApp coordination.
                   </p>
                 )}
               </div>
