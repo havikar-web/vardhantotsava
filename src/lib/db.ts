@@ -111,17 +111,30 @@ export async function syncBookingToNeon(booking: BookingPlan): Promise<boolean> 
 }
 
 /**
- * Fetch bookings from Neon PostgreSQL
+ * Fetch bookings from Neon PostgreSQL (by userId, phone, or both)
  */
-export async function fetchBookingsFromNeon(phone?: string): Promise<BookingPlan[]> {
+export async function fetchBookingsFromNeon(identifier?: { phone?: string; userId?: string } | string): Promise<BookingPlan[]> {
   try {
-    const url = phone ? `/api/bookings/sync?phone=${encodeURIComponent(phone)}` : '/api/bookings/sync';
-    const res = await fetch(url);
+    let query = '';
+    if (typeof identifier === 'string') {
+      if (identifier.includes('-') && identifier.length === 36) {
+        query = `?userId=${encodeURIComponent(identifier)}`;
+      } else {
+        query = `?phone=${encodeURIComponent(identifier)}`;
+      }
+    } else if (identifier) {
+      const parts = [];
+      if (identifier.userId) parts.push(`userId=${encodeURIComponent(identifier.userId)}`);
+      if (identifier.phone) parts.push(`phone=${encodeURIComponent(identifier.phone)}`);
+      query = parts.length > 0 ? `?${parts.join('&')}` : '';
+    }
+    const res = await fetch(`/api/bookings/sync${query}`);
     if (!res.ok) return [];
     const data = await res.json();
     if (data.ok && Array.isArray(data.bookings)) {
       return data.bookings.map((b: any) => ({
         id: b.id,
+        userId: b.user_id || undefined,
         name: b.celebrant_name,
         dob: b.dob ? String(b.dob).slice(0, 10) : '',
         birthTime: b.birth_time || undefined,
@@ -141,7 +154,9 @@ export async function fetchBookingsFromNeon(phone?: string): Promise<BookingPlan
         bookedAt: b.created_at || new Date().toISOString(),
         phone: b.user_phone,
         mapsLink: b.maps_link || undefined,
-        assignedPanditId: b.assigned_acharya_id || undefined
+        assignedPanditId: b.assigned_acharya_id || undefined,
+        razorpayOrderId: b.razorpay_order_id || undefined,
+        razorpayPaymentId: b.razorpay_payment_id || undefined
       }));
     }
   } catch (err) {
@@ -150,11 +165,63 @@ export async function fetchBookingsFromNeon(phone?: string): Promise<BookingPlan
   return [];
 }
 
-export async function syncGiftOrderToNeon(_o: GiftOrder): Promise<boolean> {
-  return true;
+export async function syncGiftOrderToNeon(order: GiftOrder): Promise<boolean> {
+  try {
+    const res = await fetch('/api/gifts/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Neon gift order sync warning:', err);
+    return false;
+  }
 }
 
-export async function fetchGiftOrdersFromNeon(): Promise<GiftOrder[]> {
+export async function fetchGiftOrdersFromNeon(identifier?: { phone?: string; userId?: string } | string): Promise<GiftOrder[]> {
+  try {
+    let query = '';
+    if (typeof identifier === 'string') {
+      if (identifier.includes('-') && identifier.length === 36) {
+        query = `?userId=${encodeURIComponent(identifier)}`;
+      } else {
+        query = `?phone=${encodeURIComponent(identifier)}`;
+      }
+    } else if (identifier) {
+      const parts = [];
+      if (identifier.userId) parts.push(`userId=${encodeURIComponent(identifier.userId)}`);
+      if (identifier.phone) parts.push(`phone=${encodeURIComponent(identifier.phone)}`);
+      query = parts.length > 0 ? `?${parts.join('&')}` : '';
+    }
+    const res = await fetch(`/api/gifts/sync${query}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.orders)) {
+      return data.orders.map((o: any) => ({
+        id: o.id,
+        userId: o.user_id || undefined,
+        customerName: o.customer_name,
+        customerPhone: o.customer_phone,
+        customerEmail: o.customer_email || undefined,
+        recipientName: o.recipient_name || undefined,
+        giftMessage: o.gift_message || undefined,
+        deliveryAddress: o.delivery_address,
+        city: o.city,
+        pincode: o.pincode,
+        items: o.items || [],
+        boxPackaging: Boolean(o.box_packaging),
+        boxPrice: o.box_price || 0,
+        totalAmount: o.total_amount || 0,
+        paymentId: o.razorpay_payment_id || '',
+        razorpayOrderId: o.razorpay_order_id || undefined,
+        status: o.status || 'draft',
+        createdAt: o.created_at || new Date().toISOString()
+      }));
+    }
+  } catch (err) {
+    console.warn('Neon fetch gift orders warning:', err);
+  }
   return [];
 }
 

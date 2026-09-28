@@ -57,6 +57,7 @@ export interface NotificationMessage {
 
 export interface BookingPlan {
   id: string;
+  userId?: string;
   name: string;
   occasion?: string;
   relationship?: string;
@@ -84,6 +85,8 @@ export interface BookingPlan {
   status: 'confirmed' | 'draft' | 'completed';
   bookedAt: string;
   assignedPanditId?: string;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
 }
 
 export interface GiftPlan {
@@ -384,6 +387,7 @@ export interface GiftOrderItem {
 
 export interface GiftOrder {
   id: string;
+  userId?: string;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
@@ -397,6 +401,7 @@ export interface GiftOrder {
   boxPrice: number;
   totalAmount: number;
   paymentId: string;
+  razorpayOrderId?: string;
   status: 'draft' | 'paid' | 'shipped' | 'delivered';
   createdAt: string;
 }

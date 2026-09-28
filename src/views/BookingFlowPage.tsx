@@ -8,6 +8,7 @@ import { saveBooking, BookingPlan, getUserProfile, saveUserProfile, UserProfile,
 import { AkshataCelebration } from '../components/AkshataCelebration';
 import { sendOtpMessage, sendWelcomeCatalogMessage, sendBookingConfirmedMessage, sendAcharyaAlertMessage } from '../lib/whatsapp';
 import { syncBookingToNeon, fetchUserProfileFromNeon, saveUserProfileToNeon } from '../lib/db';
+import { launchRazorpayCheckout } from '../lib/razorpay';
 
 const VEDIC_GOTRAS = [
   'Kashyapa', 'Bharadwaja', 'Vashistha', 'Vishwamitra', 'Gautama', 
@@ -242,7 +243,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     }
   };
 
-  const processSuccessfulPayment = (paymentId: string) => {
+  const processSuccessfulPayment = (paymentId: string, orderId?: string) => {
     const effectiveGotra = gotra === 'Other' ? customGotra.trim() : gotra;
     const effectiveNakshatra = nakshatra.trim() || 'Will verify with Acharya';
 
@@ -250,8 +251,12 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       ? mapsLink.trim() 
       : `https://${mapsLink.trim()}`;
 
+    const profile = getUserProfile();
+    const resolvedUserId = profile?.id && profile.id.length === 36 ? profile.id : undefined;
+
     const newPlan: BookingPlan = {
       id: `MK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      userId: resolvedUserId,
       name,
       occasion,
       relationship,
@@ -274,9 +279,11 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       packageName: selectedPkg.name + (upgradeToHomeHoma && selectedPackageId === 'sampoorna' ? ' (Upgraded to At-Home Homa)' : ''),
       addons: selectedAddons,
       totalPrice: grandTotal,
-      status: 'draft',
+      status: 'confirmed',
       bookedAt: new Date().toISOString(),
-      assignedPanditId: undefined
+      assignedPanditId: undefined,
+      razorpayPaymentId: paymentId,
+      razorpayOrderId: orderId
     };
     if (!saveBooking(newPlan)) {setOtpError('Could not save this draft. Check browser storage and try again.');setIsPaying(false);return;}
 
@@ -302,10 +309,51 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       return;
     }
 
-    if(!isDemoPhoneVerified(phone)){setIsPhoneVerified(false);setStep(3);setOtpError('Preview verification expired. Request another code.');return;}
-    if(celebrationDate<earliestCeremonyDate()){setStep(2);setOtpError('Please allow at least two days to arrange your ceremony.');return;}
-    if(!mapsLink || !mapsLink.trim()){setStep(3);setOtpError('Google Maps location link is compulsory for the Acharya to navigate to your venue.');return;}
-    processSuccessfulPayment('demo_no_payment');
+    if (!isDemoPhoneVerified(phone)) {
+      setIsPhoneVerified(false);
+      setStep(3);
+      setOtpError('Phone verification expired. Request another verification code.');
+      return;
+    }
+    if (celebrationDate < earliestCeremonyDate()) {
+      setStep(2);
+      setOtpError('Please allow at least two days to arrange your ceremony.');
+      return;
+    }
+    if (!mapsLink || !mapsLink.trim()) {
+      setStep(3);
+      setOtpError('Google Maps location link is compulsory for the Acharya to navigate to your venue.');
+      return;
+    }
+
+    setIsPaying(true);
+    setOtpError('');
+
+    const profile = getUserProfile();
+    const tempBookingId = `MK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const effectivePackageName = selectedPkg.name + (upgradeToHomeHoma && selectedPackageId === 'sampoorna' ? ' (Upgraded to At-Home Homa)' : '');
+
+    // Launch official Razorpay Checkout modal
+    launchRazorpayCheckout({
+      bookingId: tempBookingId,
+      amount: grandTotal,
+      packageName: effectivePackageName,
+      customerName: name,
+      customerPhone: phone,
+      customerEmail: email,
+      userId: profile?.id,
+      onSuccess: (res) => {
+        processSuccessfulPayment(res.paymentId, res.orderId);
+      },
+      onFailure: (errMsg) => {
+        setIsPaying(false);
+        setOtpError(errMsg || 'Payment was not completed. You can try again or use direct UPI.');
+        setShowRazorpayModal(true);
+      },
+      onDismiss: () => {
+        setIsPaying(false);
+      }
+    });
   };
 
   const stepLabels = ['1. Details', '2. Date & Time', '3. Verification & Address', '4. Package', '5. Review & Confirm'];
@@ -1078,14 +1126,17 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
 
                 <div className="pt-2 flex justify-between items-center text-sm">
                   <span className="font-serif font-bold text-[#1F1914]">Reservation Status:</span>
-                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Draft · payment not collected</span>
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Payment via Razorpay</span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-white border border-[#D5C2A4] text-xs text-[#5C5147] flex items-center gap-2.5">
-                <Shield className="w-4 h-4 text-[#B37418] flex-shrink-0" />
-                <span>
-                  No hidden dakshina requests. All sacred samagri, dravyas, and Acharya travel across Bengaluru included.
+              <div className="p-3 rounded-xl bg-white border border-[#D5C2A4] text-xs text-[#5C5147] flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-[#B37418] flex-shrink-0" />
+                  <span>256-bit SSL Encrypted & PCI-DSS Compliant</span>
+                </div>
+                <span className="font-mono text-[10px] font-bold text-[#0C2340] bg-[#FAF6EE] px-2 py-0.5 rounded border border-[#D5C2A4]">
+                  RAZORPAY
                 </span>
               </div>
 
@@ -1101,14 +1152,14 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                   type="button"
                   disabled={isPaying}
                   onClick={handleCompleteBooking}
-                  className="flex-1 bg-[#B37418] hover:bg-[#8C5D0D] text-white text-xs uppercase tracking-wider font-semibold py-3 rounded-xl shadow-sacred flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 bg-[#B37418] hover:bg-[#8C5D0D] text-white text-xs uppercase tracking-wider font-semibold py-3 rounded-xl shadow-sacred flex items-center justify-center gap-2 cursor-pointer transition-all"
                 >
                   {isPaying ? (
-                    <span>Saving draft...</span>
+                    <span>Launching Razorpay Checkout...</span>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Save Booking Draft</span>
+                      <Lock className="w-4 h-4" />
+                      <span>Confirm & Pay via Razorpay</span>
                     </>
                   )}
                 </button>

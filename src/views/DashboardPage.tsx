@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
   Clock, 
@@ -11,7 +11,8 @@ import {
   Compass, 
   FileText 
 } from 'lucide-react';
-import { getSavedBooking, getAllBookings, BookingPlan } from '../lib/store';
+import { getSavedBooking, getAllBookings, BookingPlan, getUserProfile } from '../lib/store';
+import { fetchBookingsFromNeon } from '../lib/db';
 import { ACHARYA_SCHOLARS } from '../lib/content';
 
 interface DashboardProps {
@@ -19,12 +20,30 @@ interface DashboardProps {
 }
 
 export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
-  const [allBookings] = useState<BookingPlan[]>(() => {
+  const [allBookings, setAllBookings] = useState<BookingPlan[]>(() => {
     const list = getAllBookings();
     if (list.length > 0) return list;
     const single = getSavedBooking();
     return single ? [single] : [];
   });
+
+  // Sync user bookings from Neon backend by user ID and phone
+  useEffect(() => {
+    const profile = getUserProfile();
+    const identifier = profile ? { userId: profile.id, phone: profile.phone } : undefined;
+    fetchBookingsFromNeon(identifier)
+      .then((neonBookings) => {
+        if (neonBookings.length > 0) {
+          setAllBookings((prev) => {
+            const map = new Map<string, BookingPlan>();
+            prev.forEach((b) => map.set(b.id, b));
+            neonBookings.forEach((b) => map.set(b.id, b));
+            return Array.from(map.values());
+          });
+        }
+      })
+      .catch((err) => console.warn('Could not sync user bookings from Neon:', err));
+  }, []);
 
   const [selectedBookingId, setSelectedBookingId] = useState<string>(() => {
     const list = getAllBookings();

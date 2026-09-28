@@ -7,3 +7,6 @@ node_modules/
 dist/
 .next/
 /*.png
+.neon
+.agents/
+skills-lock.json

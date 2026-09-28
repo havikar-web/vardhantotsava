@@ -89,6 +89,21 @@ export async function POST(request: Request) {
     );
 
     const u = rows[0];
+
+    // Associate any unlinked bookings with this user's phone to this user's account ID
+    try {
+      const variants = normalizePhoneVariants(phone);
+      await sql.query(
+        `UPDATE bookings 
+         SET user_id = $1 
+         WHERE user_id IS NULL 
+           AND user_phone = ANY($2::text[])`,
+        [u.id, variants]
+      );
+    } catch (e) {
+      console.warn('Could not backfill user_id on bookings:', e);
+    }
+
     return NextResponse.json({
       ok: true,
       user: {

@@ -17,8 +17,9 @@ import {
   HeartHandshake
 } from 'lucide-react';
 import { HAVIKAR_PRODUCTS, HavikarProduct } from '../lib/content';
-import { saveGiftOrder, GiftOrder, GiftOrderItem } from '../lib/store';
+import { saveGiftOrder, GiftOrder, GiftOrderItem, getUserProfile } from '../lib/store';
 import { saveWhatsAppMessage, WhatsAppMessage } from '../lib/whatsapp';
+import { launchRazorpayCheckout } from '../lib/razorpay';
 
 interface Props {
   navigate: (path: string) => void;
@@ -101,10 +102,32 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
     if (!/^[1-9]\d{5}$/.test(pincode.trim()) || deliveryAddress.trim().length < 8 || !city.trim() || !customerName.trim()) { alert('Enter your full name, complete delivery address, city and a valid six-digit PIN.'); return; }
     setIsProcessing(true);
 
-    completeGiftOrder('demo_no_payment');
+    const profile = getUserProfile();
+    const orderId = `HVK-GIFT-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    launchRazorpayCheckout({
+      bookingId: orderId,
+      amount: grandTotal,
+      packageName: 'Havikar Sacred Gift Keepsakes',
+      customerName: customerName.trim(),
+      customerPhone: customerPhone.trim(),
+      customerEmail: customerEmail.trim(),
+      userId: profile?.id,
+      onSuccess: (res) => {
+        completeGiftOrder(res.paymentId, res.orderId, orderId);
+      },
+      onFailure: (errMsg) => {
+        setIsProcessing(false);
+        alert(errMsg || 'Payment was not completed. You can try again.');
+      },
+      onDismiss: () => {
+        setIsProcessing(false);
+      }
+    });
   };
 
-  const completeGiftOrder = (paymentId: string) => {
+  const completeGiftOrder = (paymentId: string, razorpayOrderId?: string, passedOrderId?: string) => {
+    const profile = getUserProfile();
     const orderItems: GiftOrderItem[] = Object.entries(cart).map(([id, qty]) => {
       const prod = HAVIKAR_PRODUCTS.find(p => p.id === id)!;
       return {
@@ -117,10 +140,11 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
       };
     });
 
-    const orderId = `HVK-GIFT-${Math.floor(100000 + Math.random() * 900000)}`;
+    const orderId = passedOrderId || `HVK-GIFT-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const newOrder: GiftOrder = {
       id: orderId,
+      userId: profile?.id,
       customerName: customerName || 'Sacred Patron',
       customerPhone: customerPhone.trim(),
       customerEmail: customerEmail.trim(),
@@ -133,14 +157,13 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
       boxPackaging: includeKeepsakeBox,
       boxPrice: keepsakeBoxPrice,
       totalAmount: grandTotal,
-      paymentId: '',
-      status: 'draft',
+      paymentId: paymentId || '',
+      razorpayOrderId: razorpayOrderId || undefined,
+      status: paymentId ? 'paid' : 'draft',
       createdAt: new Date().toISOString()
     };
 
     if(!saveGiftOrder(newOrder)){setIsProcessing(false);alert('Could not save your order draft. Check browser storage and try again.');return;}
-
-    // Keep preview order local; no notification is sent.
 
     setIsProcessing(false);
     setIsCheckoutOpen(false);
@@ -535,14 +558,14 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                 </div>
               </div>
 
-              {/* Razorpay Test Mode Badge */}
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-900">
+              {/* Razorpay Secure Checkout Badge */}
+              <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between text-xs text-blue-900">
                 <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-[#B37418]" />
-                  <span>Local draft only · no payment collected</span>
+                  <CreditCard className="w-4 h-4 text-[#0C2340]" />
+                  <span>Secured by Razorpay · UPI, Cards, Netbanking</span>
                 </div>
-                <span className="font-mono text-[10px] font-bold px-2 py-0.5 bg-amber-200 rounded text-amber-800">
-                  PREVIEW
+                <span className="font-mono text-[10px] font-bold px-2 py-0.5 bg-blue-200 rounded text-blue-800">
+                  RAZORPAY
                 </span>
               </div>
 
@@ -552,7 +575,7 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                 className="w-full py-3.5 bg-[#B37418] hover:bg-[#8C5D0D] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sacred transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Lock className="w-4 h-4" />
-                <span>{isProcessing ? 'Saving draft...' : `Save order draft · ₹${grandTotal}`}</span>
+                <span>{isProcessing ? 'Opening Razorpay...' : `Pay via Razorpay · ₹${grandTotal}`}</span>
               </button>
             </form>
 
