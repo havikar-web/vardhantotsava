@@ -71,7 +71,20 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
-  const [demoCode,setDemoCode]=useState('');
+  const [demoCode, setDemoCode] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown(prev => Math.max(0, prev - 1));
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [resendCooldown]);
 
   // Razorpay Checkout State
   const [showRazorpayModal, setShowRazorpayModal] = useState(false);
@@ -163,12 +176,14 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
   };
 
   const handleSendOtp = () => {
+    if (resendCooldown > 0) return;
     const result = requestDemoOtp(phone);
     setOtpError(result.error || '');
     if (!result.code) return;
     setDemoCode(result.code);
     setOtpSent(true);
     setOtpCode('');
+    setResendCooldown(30);
     // Dispatch real WhatsApp OTP via Meta Cloud API template hav_otp1
     sendOtpMessage(phone, result.code);
   };
@@ -707,9 +722,10 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                       <button
                         type="button"
                         onClick={handleSendOtp}
-                        className="px-4 py-2 bg-[#B37418] hover:bg-[#8C5D0D] text-white text-xs font-semibold rounded-lg"
+                        disabled={resendCooldown > 0}
+                        className="px-4 py-2 bg-[#B37418] hover:bg-[#8C5D0D] text-white text-xs font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
-                        {otpSent ? 'Resend' : 'Send Code'}
+                        {otpSent ? (resendCooldown > 0 ? `Resend (${resendCooldown}s)` : 'Resend Code') : 'Send Code'}
                       </button>
                     </div>
 

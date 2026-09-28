@@ -112,8 +112,22 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
     }
   }, [isOpen, initialTab]);
 
-  const [demoCode,setDemoCode]=useState('');
-  const [authError,setAuthError]=useState('');
+  const [demoCode, setDemoCode] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [resendTimer, setResendTimer] = useState(30);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (authStep === 'otp' && resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer(prev => Math.max(0, prev - 1));
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [authStep, resendTimer]);
+
   if (!isOpen) return null;
 
   // --- AUTH HANDLERS ---
@@ -125,7 +139,20 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
       setDemoCode(result.code);
       setOtpCode('');
       setAuthStep('otp');
+      setResendTimer(30);
       // Dispatch real WhatsApp OTP via Meta Cloud API template hav_otp1
+      sendOtpMessage(phoneNumber, result.code);
+    }
+  };
+
+  const handleResendOtp = () => {
+    if (resendTimer > 0) return;
+    const result = requestDemoOtp(phoneNumber);
+    setAuthError('');
+    if (result.code) {
+      setDemoCode(result.code);
+      setOtpCode('');
+      setResendTimer(30);
       sendOtpMessage(phoneNumber, result.code);
     }
   };
@@ -390,13 +417,24 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                     <span>→</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setAuthStep('phone')}
-                    className="text-xs text-[#8C7E72] hover:text-[#B37418]"
-                  >
-                    Change phone number
-                  </button>
+                  <div className="flex items-center justify-between pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setAuthStep('phone')}
+                      className="text-xs text-[#8C7E72] hover:text-[#B37418] underline"
+                    >
+                      Change phone number
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={resendTimer > 0}
+                      onClick={handleResendOtp}
+                      className="text-xs font-semibold text-[#B37418] hover:text-[#8C5D0D] disabled:opacity-50 disabled:text-[#8C7E72] disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : 'Resend OTP'}
+                    </button>
+                  </div>
                 </form>
               )}
 
