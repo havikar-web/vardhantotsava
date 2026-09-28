@@ -6,29 +6,50 @@ import {
   Clock,
   MapPin,
   Phone,
-  User,
+  UserPlus,
   RefreshCw,
   Lock,
   AlertCircle,
   ArrowRight,
   Search,
   ChevronDown,
-  MessageSquare,
   ShieldCheck,
   LogOut,
   ExternalLink,
+  X,
+  Save,
 } from 'lucide-react';
 import { BookingPlan, getAllBookings } from '../lib/store';
-import { ACHARYA_SCHOLARS } from '../lib/content';
 import { fetchBookingsFromNeon } from '../lib/db';
-import { sendAcharyaAssignedMessage, sendAcharyaOrderDispatchMessage } from '../lib/whatsapp';
+import { sendAcharyaOrderDispatchMessage, sendAcharyaAssignedMessage } from '../lib/whatsapp';
+import { AcharyaScholar } from '../lib/content';
 import { BrandLogo } from '../components/BrandLogo';
 
 interface Props {
   navigate: (path: string) => void;
 }
 
+interface SavedPandit {
+  id: string;
+  name: string;
+  phone: string;
+}
+
 const PANDIT_PANEL_PASSWORD = 'havikar2025';
+const SAVED_PANDITS_KEY = 'mantrakshata_saved_pandits';
+
+function getSavedPandits(): SavedPandit[] {
+  try {
+    const raw = localStorage.getItem(SAVED_PANDITS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function savePandits(pandits: SavedPandit[]): void {
+  try {
+    localStorage.setItem(SAVED_PANDITS_KEY, JSON.stringify(pandits));
+  } catch {}
+}
 
 export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
   const [isAuthed, setIsAuthed] = useState(false);
@@ -44,22 +65,25 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'completed' | 'unassigned'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Assignment form state (per booking)
   const [assigningId, setAssigningId] = useState<string | null>(null);
+  const [assignName, setAssignName] = useState('');
+  const [assignPhone, setAssignPhone] = useState('');
+  const [assignError, setAssignError] = useState('');
   const [assignSuccess, setAssignSuccess] = useState<string | null>(null);
+
+  // Saved pandits quick-pick
+  const [savedPandits, setSavedPandits] = useState<SavedPandit[]>([]);
 
   const loadBookings = useCallback(async () => {
     setLoading(true);
     setSyncError(null);
     try {
       const neonData = await fetchBookingsFromNeon();
-      if (neonData.length > 0) {
-        setBookings(neonData);
-      } else {
-        setBookings(getAllBookings());
-      }
+      setBookings(neonData.length > 0 ? neonData : getAllBookings());
       setLastSync(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
     } catch (e: any) {
-      setSyncError(e?.message || 'Failed to load bookings from database.');
+      setSyncError(e?.message || 'Failed to load from database.');
       setBookings(getAllBookings());
     } finally {
       setLoading(false);
@@ -67,14 +91,14 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
   }, []);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem('pandit_panel_authed');
-    if (saved === '1') {
-      setIsAuthed(true);
-    }
+    if (sessionStorage.getItem('pandit_panel_authed') === '1') setIsAuthed(true);
   }, []);
 
   useEffect(() => {
-    if (isAuthed) loadBookings();
+    if (isAuthed) {
+      loadBookings();
+      setSavedPandits(getSavedPandits());
+    }
   }, [isAuthed, loadBookings]);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -94,54 +118,92 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
     setPasswordInput('');
   };
 
-  const handleAssign = async (bookingId: string, acharyaId: string) => {
-    setAssigningId(bookingId + acharyaId);
-    const booking = bookings.find(b => b.id === bookingId);
-    if (!booking) { setAssigningId(null); return; }
-    const acharya = ACHARYA_SCHOLARS.find(a => a.id === acharyaId);
-    if (!acharya) { setAssigningId(null); return; }
+  const openAssignForm = (bookingId: string) => {
+    const b = bookings.find(bk => bk.id === bookingId);
+    // Pre-fill if already assigned
+    const existing = savedPandits.find(p => p.id === b?.assignedPanditId);
+    setAssignName(existing?.name || '');
+    setAssignPhone(existing?.phone || '');
+    setAssignError('');
+    setAssigningId(bookingId);
+  };
 
-    const updated: BookingPlan = { ...booking, assignedPanditId: acharyaId, status: 'confirmed' };
+  const handleConfirmAssign = async () => {
+    if (!assigningId) return;
+    if (!assignName.trim()) { setAssignError('Enter the pandit name.'); return; }
+    if (!assignPhone.trim()) { setAssignError('Enter the pandit phone number.'); return; }
 
+    const panditId = 'p_' + assignName.trim().toLowerCase().replace(/\s+/g, '_');
+
+    // Save pandit to quick-pick list if not already there
+    const existing = savedPandits.find(p => p.phone.replace(/\D/g,'') === assignPhone.replace(/\D/g,''));
+    let updatedPandits = savedPandits;
+    if (!existing) {
+      updatedPandits = [...savedPandits, { id: panditId, name: assignName.trim(), phone: assignPhone.trim() }];
+      setSavedPandits(updatedPandits);
+      savePandits(updatedPandits);
+    }
+
+    const updated: BookingPlan = {
+      ...bookings.find(b => b.id === assigningId)!,
+      assignedPanditId: panditId,
+      status: 'confirmed',
+    };
+
+    // Sync to Neon
     try {
       await fetch('/api/bookings/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...updated,
-          assignedPanditId: acharyaId,
-        }),
+        body: JSON.stringify({ ...updated, assignedPanditId: panditId }),
       });
     } catch {}
 
-    // WhatsApp notifications
-    sendAcharyaOrderDispatchMessage(updated, acharya);
-    sendAcharyaAssignedMessage(updated, acharya);
+    // Dispatch official Meta WhatsApp templates
+    const panditObj: AcharyaScholar = {
+      id: panditId,
+      name: assignName.trim(),
+      title: 'Assigned Pandit',
+      institution: 'Vedic Acharya Parishad',
+      vedicTradition: 'Rigveda / Yajurveda Prayoga',
+      experienceYears: 10,
+      languages: ['Kannada', 'Sanskrit'],
+      area: 'Bengaluru',
+      phone: assignPhone.trim(),
+    };
 
-    setBookings(prev => prev.map(b => b.id === bookingId ? updated : b));
+    // 1. Send mantrakshata_pandit_booking_details to assigned Pandit's phone
+    sendAcharyaOrderDispatchMessage(updated, panditObj, assignPhone.trim());
+
+    // 2. Send mantrakshata_customer_pandit_details to host Customer's phone
+    sendAcharyaAssignedMessage(updated, panditObj);
+
+    setBookings(prev => prev.map(b => b.id === assigningId ? updated : b));
     setAssigningId(null);
-    setAssignSuccess(bookingId);
-    setTimeout(() => setAssignSuccess(null), 3000);
+    setAssignName('');
+    setAssignPhone('');
+    setAssignSuccess(assigningId);
+    setTimeout(() => setAssignSuccess(null), 4000);
   };
 
-  // Filter
-  const filtered = bookings.filter(b => {
-    const q = search.toLowerCase();
-    const matchSearch = !q ||
-      b.name.toLowerCase().includes(q) ||
-      b.phone.includes(q) ||
-      b.id.toLowerCase().includes(q) ||
-      (b.celebrationDate || '').includes(q);
-    const matchStatus = statusFilter === 'all'
-      ? true
-      : statusFilter === 'unassigned'
-        ? !b.assignedPanditId
+  // Filters
+  const filtered = bookings
+    .filter(b => {
+      const q = search.toLowerCase();
+      const matchSearch = !q ||
+        b.name.toLowerCase().includes(q) ||
+        b.phone.includes(q) ||
+        b.id.toLowerCase().includes(q) ||
+        (b.celebrationDate || '').includes(q);
+      const matchStatus = statusFilter === 'all' ? true
+        : statusFilter === 'unassigned' ? !b.assignedPanditId
         : b.status === statusFilter;
-    return matchSearch && matchStatus;
-  }).sort((a, b) => a.celebrationDate > b.celebrationDate ? 1 : -1);
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => a.celebrationDate > b.celebrationDate ? 1 : -1);
 
   const pendingCount = bookings.filter(b => !b.assignedPanditId).length;
-  const confirmedCount = bookings.filter(b => b.assignedPanditId).length;
+  const assignedCount = bookings.filter(b => !!b.assignedPanditId && b.status !== 'completed').length;
   const completedCount = bookings.filter(b => b.status === 'completed').length;
 
   // --- LOGIN GATE ---
@@ -168,9 +230,7 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
               </p>
             )}
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold uppercase text-[#5C5147]">
-                Access Code
-              </label>
+              <label className="text-[11px] font-semibold uppercase text-[#5C5147]">Access Code</label>
               <div className="flex rounded-xl border border-[#E3D6C3] overflow-hidden focus-within:border-[#B37418]">
                 <span className="px-3 py-3 border-r border-[#E3D6C3] bg-[#FAF5ED]">
                   <Lock className="w-4 h-4 text-[#8C5D0D]" />
@@ -201,19 +261,110 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
   // --- PANDIT PANEL ---
   return (
     <div className="min-h-screen bg-[#FAF5ED] text-[#1F1914]">
+
+      {/* Assignment Modal */}
+      {assigningId && (() => {
+        const b = bookings.find(bk => bk.id === assigningId);
+        if (!b) return null;
+        return (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md rounded-3xl border border-[#E3D6C3] shadow-2xl p-7 space-y-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-serif text-lg text-[#1F1914]">Assign Pandit</h3>
+                  <p className="text-xs text-[#7A6B5D] mt-0.5">
+                    Booking for <strong>{b.name}</strong> on {b.celebrationDate}
+                  </p>
+                </div>
+                <button onClick={() => setAssigningId(null)} className="p-1.5 rounded-full hover:bg-[#F4EADA] text-[#7A6B5D]">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Quick-pick from saved pandits */}
+              {savedPandits.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider font-bold text-[#B37418]">Quick Select</p>
+                  <div className="flex flex-wrap gap-2">
+                    {savedPandits.map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => { setAssignName(p.name); setAssignPhone(p.phone); setAssignError(''); }}
+                        className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                          assignName === p.name
+                            ? 'border-[#B37418] bg-[#B37418]/10 text-[#8C5D0D]'
+                            : 'border-[#D5C2A4] bg-[#FAF5ED] text-[#5C5147] hover:border-[#B37418]'
+                        }`}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold uppercase text-[#5C5147]">Pandit Name</label>
+                  <input
+                    type="text"
+                    value={assignName}
+                    onChange={e => { setAssignName(e.target.value); setAssignError(''); }}
+                    placeholder="e.g. Sri Ramesh Sharma"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5C2A4] bg-[#FAF8F5] text-sm focus:outline-none focus:border-[#B37418]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold uppercase text-[#5C5147]">Pandit Phone Number</label>
+                  <div className="flex rounded-xl border border-[#D5C2A4] bg-[#FAF8F5] overflow-hidden focus-within:border-[#B37418]">
+                    <span className="px-3 py-2.5 text-xs font-semibold text-[#5C5147] border-r border-[#D5C2A4]">+91</span>
+                    <input
+                      type="tel"
+                      value={assignPhone}
+                      onChange={e => { setAssignPhone(e.target.value); setAssignError(''); }}
+                      placeholder="10-digit mobile number"
+                      className="flex-1 px-3 py-2.5 text-sm bg-transparent focus:outline-none"
+                    />
+                  </div>
+                </div>
+                {assignError && (
+                  <p className="text-xs text-red-700 font-medium">{assignError}</p>
+                )}
+                <p className="text-[10.5px] text-[#8C7E72]">
+                  A WhatsApp order alert will be sent to this pandit's number with the ceremony details, address, and Maps link. The customer will also receive a confirmation.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setAssigningId(null)}
+                  className="flex-1 py-2.5 border border-[#D5C2A4] rounded-xl text-xs font-semibold text-[#5C5147] hover:bg-[#F4EADA] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmAssign}
+                  className="flex-1 py-2.5 bg-[#B37418] hover:bg-[#8C5D0D] text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  Confirm Assignment
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white border-b border-[#E3D6C3] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BrandLogo className="h-8 w-auto" variant="light" />
             <div className="h-4 w-px bg-[#D5C2A4]" />
             <div>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-[#B37418] block">
-                Acharya Coordination Panel
-              </span>
-              <span className="text-xs font-semibold text-[#1F1914]">
-                Main Acharya — Booking Management
-              </span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-[#B37418] block">Acharya Coordination Panel</span>
+              <span className="text-xs font-semibold text-[#1F1914]">Booking Management</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -236,15 +387,15 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-        {/* Stats Row */}
+        {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: 'Total Bookings', value: bookings.length, color: 'text-[#1F1914]' },
             { label: 'Awaiting Assignment', value: pendingCount, color: pendingCount > 0 ? 'text-amber-700' : 'text-emerald-700' },
-            { label: 'Acharya Assigned', value: confirmedCount, color: 'text-emerald-700' },
-            { label: 'Ceremonies Completed', value: completedCount, color: 'text-blue-700' },
+            { label: 'Pandit Assigned', value: assignedCount, color: 'text-emerald-700' },
+            { label: 'Completed', value: completedCount, color: 'text-blue-700' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-2xl border border-[#E3D6C3] p-4 text-center shadow-sm">
               <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
@@ -253,58 +404,17 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
           ))}
         </div>
 
-        {/* Sync message */}
         {syncError && (
           <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>Database sync error: {syncError}. Showing locally saved data.</span>
+            <span>Database sync issue: {syncError}. Showing locally saved data.</span>
           </div>
         )}
         {lastSync && !syncError && (
-          <p className="text-[10.5px] text-[#8C7E72]">Last synced from Neon at {lastSync}</p>
+          <p className="text-[10.5px] text-[#8C7E72]">Last synced from database at {lastSync}</p>
         )}
 
-        {/* Acharya Availability Summary */}
-        <div className="bg-white rounded-2xl border border-[#E3D6C3] shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-[#EFE5D5] bg-[#FAF5ED]">
-            <span className="text-xs uppercase tracking-widest font-bold text-[#B37418]">
-              Acharya Roster
-            </span>
-          </div>
-          <div className="divide-y divide-[#F0E8DA]">
-            {ACHARYA_SCHOLARS.map(a => {
-              const assigned = bookings.filter(b => b.assignedPanditId === a.id && b.status !== 'completed');
-              return (
-                <div key={a.id} className="px-5 py-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-[#1F1914]">{a.name}</p>
-                    <p className="text-[11px] text-[#7A6B5D]">{a.title} — {a.area}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-                      assigned.length === 0
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : assigned.length < 3
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-red-100 text-red-800'
-                    }`}>
-                      {assigned.length} active booking{assigned.length !== 1 ? 's' : ''}
-                    </span>
-                    <a
-                      href={`tel:${a.phone}`}
-                      className="text-[11px] flex items-center gap-1 text-[#B37418] hover:underline font-medium"
-                    >
-                      <Phone className="w-3 h-3" />
-                      {a.phone}
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Bookings Table */}
+        {/* Bookings */}
         <div className="bg-white rounded-2xl border border-[#E3D6C3] shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-[#EFE5D5] bg-[#FAF5ED] flex flex-col sm:flex-row sm:items-center gap-3">
             <span className="text-xs uppercase tracking-widest font-bold text-[#B37418] flex-shrink-0">
@@ -328,7 +438,7 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
               >
                 <option value="all">All bookings</option>
                 <option value="unassigned">Awaiting assignment</option>
-                <option value="confirmed">Confirmed</option>
+                <option value="confirmed">Assigned</option>
                 <option value="completed">Completed</option>
               </select>
             </div>
@@ -337,28 +447,25 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
           {loading && (
             <div className="px-5 py-10 text-center text-sm text-[#7A6B5D]">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-[#B37418]" />
-              Loading bookings from Neon database...
+              Loading bookings from database...
             </div>
           )}
 
           {!loading && filtered.length === 0 && (
             <div className="px-5 py-10 text-center text-sm text-[#7A6B5D]">
-              No bookings found. {bookings.length > 0 ? 'Try adjusting your search or filter.' : 'No bookings exist yet.'}
+              {bookings.length === 0 ? 'No bookings yet.' : 'No bookings match your search or filter.'}
             </div>
           )}
 
           {!loading && filtered.length > 0 && (
             <div className="divide-y divide-[#F0E8DA]">
               {filtered.map(b => {
-                const assignedAcharya = b.assignedPanditId
-                  ? ACHARYA_SCHOLARS.find(a => a.id === b.assignedPanditId)
-                  : null;
+                const assignedPandit = savedPandits.find(p => p.id === b.assignedPanditId);
                 const isExpanded = expandedId === b.id;
-                const isSuccess = assignSuccess === b.id;
+                const isJustAssigned = assignSuccess === b.id;
 
                 return (
                   <div key={b.id} className="px-5 py-4">
-                    {/* Booking Row */}
                     <div
                       className="flex items-start justify-between gap-4 cursor-pointer"
                       onClick={() => setExpandedId(isExpanded ? null : b.id)}
@@ -373,10 +480,10 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {b.status === 'completed' ? 'Completed' : b.assignedPanditId ? 'Assigned' : 'Awaiting Assignment'}
+                            {b.status === 'completed' ? 'Completed' : b.assignedPanditId ? 'Pandit Assigned' : 'Awaiting Assignment'}
                           </span>
-                          {isSuccess && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white animate-pulse">
+                          {isJustAssigned && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">
                               Assigned!
                             </span>
                           )}
@@ -396,24 +503,26 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
                           </span>
                           <span className="font-medium text-[#1F1914]">{b.packageName}</span>
                         </div>
-                        {assignedAcharya && (
+                        {b.assignedPanditId && (
                           <p className="text-[11px] text-emerald-700 font-semibold">
-                            Acharya: {assignedAcharya.name}
+                            Pandit: {assignedPandit?.name || b.assignedPanditId}
+                            {assignedPandit?.phone && (
+                              <span className="text-[#7A6B5D] font-normal ml-2">{assignedPandit.phone}</span>
+                            )}
                           </p>
                         )}
                       </div>
                       <ChevronDown className={`w-4 h-4 flex-shrink-0 text-[#8C7E72] transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                     </div>
 
-                    {/* Expanded Detail */}
                     {isExpanded && (
-                      <div className="mt-4 space-y-4 animate-fadeIn">
+                      <div className="mt-4 space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#5C5147]">
                           <div className="bg-[#FAF5ED] rounded-xl p-3 space-y-1.5">
-                            <p className="font-bold text-[#1F1914] text-[10px] uppercase tracking-wider">Ceremony Details</p>
+                            <p className="font-bold text-[#1F1914] text-[10px] uppercase tracking-wider mb-1">Ceremony Details</p>
                             <p><span className="text-[#7A6B5D]">Booking ID:</span> <span className="font-mono">{b.id}</span></p>
                             <p><span className="text-[#7A6B5D]">Package:</span> {b.packageName} — Rs. {b.totalPrice?.toLocaleString('en-IN')}</p>
-                            <p><span className="text-[#7A6B5D]">Date:</span> {b.celebrationDate} at {b.timeSlot}</p>
+                            <p><span className="text-[#7A6B5D]">Date & Time:</span> {b.celebrationDate} at {b.timeSlot}</p>
                             {b.gotra && <p><span className="text-[#7A6B5D]">Gotra:</span> {b.gotra}</p>}
                             {b.nakshatra && <p><span className="text-[#7A6B5D]">Nakshatra:</span> {b.nakshatra}</p>}
                             {b.addons && b.addons.length > 0 && (
@@ -421,7 +530,7 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
                             )}
                           </div>
                           <div className="bg-[#FAF5ED] rounded-xl p-3 space-y-1.5">
-                            <p className="font-bold text-[#1F1914] text-[10px] uppercase tracking-wider">Address & Contact</p>
+                            <p className="font-bold text-[#1F1914] text-[10px] uppercase tracking-wider mb-1">Address & Contact</p>
                             <p className="flex items-start gap-1">
                               <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0 text-[#B37418]" />
                               {b.address}{b.landmark ? `, near ${b.landmark}` : ''}, {b.pincode}
@@ -430,9 +539,7 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
                               <Phone className="w-3 h-3 flex-shrink-0 text-[#B37418]" />
                               <a href={`tel:${b.phone}`} className="text-[#B37418] hover:underline">{b.phone}</a>
                             </p>
-                            {b.email && (
-                              <p className="text-[#7A6B5D]">Email: {b.email}</p>
-                            )}
+                            {b.email && <p className="text-[#7A6B5D]">Email: {b.email}</p>}
                             {b.mapsLink && (
                               <a
                                 href={b.mapsLink}
@@ -447,64 +554,24 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
                           </div>
                         </div>
 
-                        {/* Acharya Assignment */}
+                        {/* Assign / Reassign button */}
                         {b.status !== 'completed' && (
-                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
-                              Assign Acharya for this Ceremony
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                              {ACHARYA_SCHOLARS.map(a => {
-                                const isCurrentlyAssigned = b.assignedPanditId === a.id;
-                                const activeCount = bookings.filter(bk => bk.assignedPanditId === a.id && bk.status !== 'completed' && bk.id !== b.id).length;
-                                const isWorking = assigningId === b.id + a.id;
-                                return (
-                                  <button
-                                    key={a.id}
-                                    onClick={() => !isCurrentlyAssigned && handleAssign(b.id, a.id)}
-                                    disabled={isCurrentlyAssigned || isWorking}
-                                    className={`p-3 rounded-xl border text-left text-xs transition-all ${
-                                      isCurrentlyAssigned
-                                        ? 'border-emerald-400 bg-emerald-50 cursor-default'
-                                        : 'border-[#D5C2A4] bg-white hover:border-[#B37418] hover:bg-[#FDF8F0] cursor-pointer'
-                                    }`}
-                                  >
-                                    <p className="font-bold text-[#1F1914] text-[11px]">{a.name}</p>
-                                    <p className="text-[10px] text-[#7A6B5D] mt-0.5">{a.area}</p>
-                                    <div className="flex items-center justify-between mt-1.5">
-                                      <span className={`text-[10px] font-semibold ${
-                                        activeCount === 0 ? 'text-emerald-700' : activeCount < 3 ? 'text-amber-700' : 'text-red-700'
-                                      }`}>
-                                        {activeCount} active
-                                      </span>
-                                      {isCurrentlyAssigned && (
-                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                                      )}
-                                      {isWorking && (
-                                        <RefreshCw className="w-3.5 h-3.5 text-[#B37418] animate-spin" />
-                                      )}
-                                      {!isCurrentlyAssigned && !isWorking && (
-                                        <ArrowRight className="w-3 h-3 text-[#B37418]" />
-                                      )}
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <p className="text-[10px] text-amber-800">
-                              Assigning an Acharya will immediately dispatch a WhatsApp alert to the Acharya and a confirmation to the customer.
-                            </p>
-                          </div>
+                          <button
+                            onClick={() => openAssignForm(b.id)}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-[#B37418] hover:bg-[#8C5D0D] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
+                          >
+                            <UserPlus className="w-3.5 h-3.5" />
+                            {b.assignedPanditId ? 'Reassign Pandit' : 'Assign Pandit'}
+                          </button>
                         )}
 
                         {b.status === 'completed' && (
-                          <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-800 font-medium flex items-center gap-2">
+                          <div className="flex items-center gap-2 text-xs text-blue-800 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 font-medium">
                             <CheckCircle2 className="w-4 h-4" />
-                            This ceremony has been marked completed.
+                            Ceremony completed.
                           </div>
                         )}
 
-                        {/* Payment info */}
                         {(b.razorpayOrderId || b.razorpayPaymentId) && (
                           <div className="text-[10.5px] text-[#7A6B5D] font-mono space-y-0.5">
                             {b.razorpayOrderId && <p>Razorpay Order: {b.razorpayOrderId}</p>}
@@ -520,7 +587,6 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
           )}
         </div>
 
-        {/* Footer nav */}
         <div className="flex items-center justify-between pb-8">
           <button
             onClick={() => navigate('/admin')}
@@ -529,10 +595,7 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
             <ArrowRight className="w-3.5 h-3.5 rotate-180" />
             Full Admin Dashboard
           </button>
-          <button
-            onClick={() => navigate('/')}
-            className="text-xs text-[#7A6B5D] hover:underline"
-          >
+          <button onClick={() => navigate('/')} className="text-xs text-[#7A6B5D] hover:underline">
             Back to Website
           </button>
         </div>

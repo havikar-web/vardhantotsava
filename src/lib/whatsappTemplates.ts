@@ -168,9 +168,9 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
     name: 'mantrakshata_customer_pandit_details',
     category: 'UTILITY',
     language: 'en',
-    status: 'PENDING',
+    status: 'APPROVED',
     purpose: 'Notifies customer with assigned Pandit name, contact number, and arrival schedule.',
-    body: 'Namaskara {{1}}, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: {{2}}\nPandit: {{3}}\nContact: {{4}}\nDate: {{5}}\nCeremony time: {{6}} IST\nExpected arrival: {{7}} IST\n\nPlease keep your phone available for coordination.',
+    body: 'Namaskara {{1}}, your Pandit has been assigned for the Vardhantotsava. Booking ID: {{2}} Pandit: {{3}} Contact: {{4}} Date: {{5}} Ceremony time: {{6}} IST Expected arrival: {{7}} IST Please keep your phone available for coordination.',
     variableKeys: [
       'customer_name',
       'booking_id',
@@ -205,7 +205,7 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
     language: 'en',
     status: 'APPROVED',
     purpose: 'Complete itinerary, venue navigation, and Sankalpa dispatched directly to assigned Pandit.',
-    body: 'Namaskara Pandit {{1}}, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: {{2}}\nCelebrant: {{3}}\nCustomer contact: {{4}}\nDate: {{5}}\nCeremony time: {{6}} IST\nArrival time: {{7}} IST\nVenue: {{8}}\nRitual / package: {{9}}\nSankalpa details: {{10}}\nSpecial instructions: {{11}}\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.',
+    body: 'Namaskara Pandit {{1}}, Main Acharya has assigned this Vardhantotsava to you. Booking ID: {{2}} Celebrant: {{3}} Customer contact: {{4}} Date: {{5}} Ceremony time: {{6}} IST Arrival time: {{7}} IST Venue: {{8}} Ritual / package: {{9}} Sankalpa details: {{10}} Special instructions: {{11}} Please review the details and contact the Main Acharya promptly if you cannot attend.',
     variableKeys: [
       'pandit_name',
       'booking_id',
@@ -248,11 +248,11 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
   },
   {
     name: 'mantrakshata_reminder_1day',
-    category: 'UTILITY',
+    category: 'MARKETING',
     language: 'en',
-    status: 'PENDING',
+    status: 'APPROVED',
     purpose: '24-hour advance ceremony reminder sent to the customer.',
-    body: 'Namaskara {{1}}, this is a reminder for {{2}}\'s Vardhantotsava tomorrow, {{3}} at {{4}} IST.\n\nBooking ID: {{5}}\nVenue: {{6}}\nAssigned Pandit: {{7}}\n\nPlease ensure the family and preparation items are ready. Reply here if you need assistance.',
+    body: 'Namaskara {{1}}, a reminder that {{2}}\'s Vardhantotsava is scheduled for {{3}} at {{4}} IST. Booking ID: {{5}} Venue: {{6}} Preparation checklist: {{7}} Please keep the space and items ready and inform us of any changes. We look forward to celebrating with your family.',
     variableKeys: [
       'customer_name',
       'celebrant_name',
@@ -260,7 +260,7 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       'ceremony_time',
       'booking_id',
       'venue_with_maps',
-      'pandit_name'
+      'preparation_checklist'
     ],
     sampleVariables: [
       '*Aditya*',
@@ -269,7 +269,7 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       '*07:30 AM*',
       '*BK-108*',
       '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample',
-      '*Vedamurthy Sri Narayan Bhat*'
+      '*Clean prayer space, brass deepa plate, 5 bananas, fresh flowers, traditional vastra*'
     ],
     variables: [
       { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: '*Aditya*' },
@@ -278,16 +278,16 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       { position: '{{4}}', name: 'ceremony_time', description: 'Ceremony time', sample: '*07:30 AM*' },
       { position: '{{5}}', name: 'booking_id', description: 'Booking ID', sample: '*BK-108*' },
       { position: '{{6}}', name: 'venue_with_maps', description: 'Address and Google Maps link', sample: '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample' },
-      { position: '{{7}}', name: 'pandit_name', description: 'Assigned scholar', sample: '*Vedamurthy Sri Narayan Bhat*' }
+      { position: '{{7}}', name: 'preparation_checklist', description: 'Preparation checklist items', sample: '*Clean prayer space, brass deepa plate, 5 bananas, fresh flowers, traditional vastra*' }
     ]
   },
   {
     name: 'mantrakshata_reminder_2hours',
     category: 'UTILITY',
     language: 'en',
-    status: 'PENDING',
+    status: 'APPROVED',
     purpose: '2-hour departure reminder sent to customer on ceremony morning.',
-    body: 'Namaskara {{1}}, {{2}}\'s Vardhantotsava begins in 2 hours, at {{3}} IST.\n\nBooking ID: {{4}}\nVenue: {{5}}\n\nPlease have the family and preparation items ready, and keep your phone available for coordination. Reply here if you need assistance.',
+    body: 'Namaskara {{1}}, {{2}}\'s Vardhantotsava begins in 2 hours, at {{3}} IST. Booking ID: {{4}} Venue: {{5}} Please have the family and preparation items ready, and keep your phone available for coordination. Contact us for assistance',
     variableKeys: [
       'customer_name',
       'celebrant_name',
@@ -308,13 +308,6 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       { position: '{{3}}', name: 'ceremony_time', description: 'Ceremony time', sample: '*07:30 AM*' },
       { position: '{{4}}', name: 'booking_id', description: 'Booking ID', sample: '*BK-108*' },
       { position: '{{5}}', name: 'venue_with_maps', description: 'Venue with Google Maps link', sample: '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample' }
-    ],
-    buttons: [
-      {
-        type: 'PHONE_NUMBER',
-        text: 'Call Support',
-        phone_number: '+918296925577'
-      }
     ]
   },
   {

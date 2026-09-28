@@ -373,7 +373,7 @@ export function sendOneDayReminderMessage(booking: BookingPlan, acharya?: Achary
     recipientRole: 'customer',
     type: 'reminder_1day',
     title: '1-Day Before Reminder & Preparation Checklist',
-    body: `Namaskara *${booking.name}*, a reminder that *${booking.name}*'s Vardhantotsava is scheduled for *${booking.celebrationDate}* at *${booking.timeSlot} IST*.\n\nBooking ID: *${booking.id}*\nVenue: ${venue}\nPreparation checklist: *${preparationChecklist}*\n\nPlease keep the space ready and inform us of any changes. We look forward to celebrating with your family.`,
+    body: `Namaskara *${booking.name}*, a reminder that *${booking.name}*'s Vardhantotsava is scheduled for *${booking.celebrationDate}* at *${booking.timeSlot} IST*. Booking ID: *${booking.id}* Venue: ${venue} Preparation checklist: *${preparationChecklist}* Please keep the space and items ready and inform us of any changes. We look forward to celebrating with your family.`,
     sentAt: new Date().toISOString(),
     status: 'draft'
   };
@@ -386,7 +386,7 @@ export function sendOneDayReminderMessage(booking: BookingPlan, acharya?: Achary
     bold(`${booking.timeSlot} IST`),
     bold(booking.id),
     venue,
-    bold(acharya?.name || 'Vedamurthy Sri Narayan Bhat')
+    bold(preparationChecklist)
   ];
 
   dispatchMetaCloudTemplate(booking.phone, 'mantrakshata_reminder_1day', params)
@@ -412,7 +412,7 @@ export function sendTwoHourReminderMessage(booking: BookingPlan): WhatsAppMessag
     recipientRole: 'customer',
     type: 'reminder_1day',
     title: '2 Hours Before Ceremony Reminder',
-    body: `Namaskara *${booking.name}*, *${booking.name}*'s Vardhantotsava begins in 2 hours, at *${booking.timeSlot} IST*.\n\nBooking ID: *${booking.id}*\nVenue: ${venue}\n\nPlease have the family and preparation items ready, and keep your phone available for coordination. Reply here if you need assistance.`,
+    body: `Namaskara *${booking.name}*, *${booking.name}*'s Vardhantotsava begins in 2 hours, at *${booking.timeSlot} IST*. Booking ID: *${booking.id}* Venue: ${venue} Please have the family and preparation items ready, and keep your phone available for coordination. Contact us for assistance`,
     sentAt: new Date().toISOString(),
     status: 'draft'
   };
@@ -663,21 +663,21 @@ export const META_APPROVED_SCHEMAS: Record<string, TemplateMetaDefinition> = {
   mantrakshata_customer_pandit_details: {
     name: 'mantrakshata_customer_pandit_details',
     language: 'en',
-    status: 'PENDING',
+    status: 'APPROVED',
     bodyVarCount: 7,
     hasDynamicButton: false
   },
   mantrakshata_reminder_1day: {
     name: 'mantrakshata_reminder_1day',
     language: 'en',
-    status: 'PENDING',
+    status: 'APPROVED',
     bodyVarCount: 7,
     hasDynamicButton: false
   },
   mantrakshata_reminder_2hours: {
     name: 'mantrakshata_reminder_2hours',
     language: 'en',
-    status: 'PENDING',
+    status: 'APPROVED',
     bodyVarCount: 5,
     hasDynamicButton: false
   },
