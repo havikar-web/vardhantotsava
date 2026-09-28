@@ -18,7 +18,8 @@ import {
   MetaTemplateSpec,
   dispatchMetaCloudTemplate,
   getWhatsAppCredentials,
-  getWhatsAppShareLink
+  getWhatsAppShareLink,
+  bold
 } from '../../lib/whatsapp';
 import { getAllBookings, BookingPlan } from '../../lib/store';
 import { fetchWhatsAppLogsFromNeon, logWhatsAppToNeon } from '../../lib/db';
@@ -56,7 +57,17 @@ export const WhatsAppTesterTab: React.FC = () => {
     if (!selectedTemplate) return;
     const initialParams: Record<string, string> = {};
     selectedTemplate.variables.forEach((v, idx) => {
-      initialParams[String(idx + 1)] = v.sample || '';
+      const sample = v.sample || '';
+      if (selectedTemplate.name === 'hav_otp1') {
+        initialParams[String(idx + 1)] = sample;
+      } else if (sample.startsWith('http://') || sample.startsWith('https://')) {
+        initialParams[String(idx + 1)] = sample;
+      } else if (sample.includes('Maps:')) {
+        const parts = sample.split(' | Maps: ');
+        initialParams[String(idx + 1)] = parts.length === 2 ? `*${parts[0]}* | Maps: ${parts[1]}` : sample;
+      } else {
+        initialParams[String(idx + 1)] = bold(sample);
+      }
     });
     setParamValues(initialParams);
 
@@ -81,7 +92,7 @@ export const WhatsAppTesterTab: React.FC = () => {
 
     setButtonParam(b.id);
     const mapsText = b.mapsLink ? ` | Maps: ${b.mapsLink}` : '';
-    const fullVenue = `${b.address}, Bengaluru - ${b.pincode}${mapsText}`;
+    const fullVenue = `*${b.address}, Bengaluru - ${b.pincode}*${mapsText}`;
 
     const newParams: Record<string, string> = {};
 
@@ -89,26 +100,28 @@ export const WhatsAppTesterTab: React.FC = () => {
       const pos = String(idx + 1);
       const name = v.name.toLowerCase();
 
-      if (name.includes('celebrant') || name.includes('host') || name.includes('name')) {
-        newParams[pos] = b.name;
+      if (name.includes('celebrant') || name.includes('host') || (name.includes('name') && !name.includes('package') && !name.includes('pandit') && !name.includes('acharya'))) {
+        newParams[pos] = `*${b.name}*`;
       } else if (name.includes('id') || name.includes('booking')) {
-        newParams[pos] = b.id;
+        newParams[pos] = `*${b.id}*`;
       } else if (name.includes('date')) {
-        newParams[pos] = b.celebrationDate;
+        newParams[pos] = `*${b.celebrationDate}*`;
       } else if (name.includes('time') || name.includes('muhurta')) {
-        newParams[pos] = b.timeSlot;
+        newParams[pos] = `*${b.timeSlot}*`;
       } else if (name.includes('star') || name.includes('nakshatra')) {
-        newParams[pos] = `${b.nakshatra || 'Ashwini'} (Pada ${b.pada || 1})`;
+        newParams[pos] = `*${b.nakshatra || 'Ashwini'} (Pada ${b.pada || 1})*`;
       } else if (name.includes('venue') || name.includes('address')) {
         newParams[pos] = fullVenue;
       } else if (name.includes('package')) {
-        newParams[pos] = b.packageName;
+        newParams[pos] = `*${b.packageName}*`;
       } else if (name.includes('acharya') || name.includes('pandit')) {
-        newParams[pos] = 'Vedamurthy Sri Narayan Bhat';
+        newParams[pos] = '*Vedamurthy Sri Narayan Bhat*';
       } else if (name.includes('phone') || name.includes('contact')) {
-        newParams[pos] = '+91 94481 23456';
-      } else {
+        newParams[pos] = '*+91 94481 23456*';
+      } else if (name.includes('url') || (v.sample && v.sample.startsWith('http'))) {
         newParams[pos] = v.sample || '';
+      } else {
+        newParams[pos] = bold(v.sample);
       }
     });
 
@@ -410,7 +423,16 @@ export const WhatsAppTesterTab: React.FC = () => {
             {/* Bubble */}
             <div className="bg-white p-3.5 rounded-2xl rounded-tl-none shadow-xs border border-black/5 space-y-2.5">
               <p className="text-xs text-charcoal whitespace-pre-wrap leading-relaxed font-sans">
-                {renderedText}
+                {renderedText.split(/(\*[^*\n]+\*)/g).map((part, index) => {
+                  if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+                    return (
+                      <strong key={index} className="font-bold text-charcoal">
+                        {part.slice(1, -1)}
+                      </strong>
+                    );
+                  }
+                  return part;
+                })}
               </p>
 
               <div className="text-[9px] text-charcoal/40 text-right">

@@ -85,7 +85,7 @@ export function sendOtpMessage(phone: string, code = '1008'): WhatsAppMessage {
     recipientRole: 'customer',
     type: 'otp',
     title: 'Verification Code (OTP)',
-    body: `OTP Code: ${code}. This is your OTP for Verification. The OTP is valid for 10 mins. Call +91 82969 25577 if you did not perform this request.`,
+    body: `OTP Code: *${code}*. This is your OTP for Verification. The OTP is valid for 10 mins. Call +91 82969 25577 if you did not perform this request.`,
     sentAt: new Date().toISOString(),
     status: 'draft'
   };
@@ -107,7 +107,23 @@ export function sendOtpMessage(phone: string, code = '1008'): WhatsAppMessage {
 }
 
 /**
- * Format venue address combined with Google Maps pin/link
+ * Wraps variable values in asterisks (*value*) so WhatsApp renders them in bold.
+ * Does not wrap if already formatted with asterisks, or if value contains a URL.
+ */
+export function bold(val: string | number | undefined | null): string {
+  if (val === undefined || val === null) return '';
+  const str = String(val).trim();
+  if (!str) return '';
+  if (str.startsWith('*') && str.endsWith('*') && str.length >= 2) return str;
+  if (/^https?:\/\//i.test(str) || str.includes('http://') || str.includes('https://')) return str;
+  if (str.includes('*')) return str;
+  return `*${str}*`;
+}
+
+/**
+ * Format venue address combined with Google Maps pin/link.
+ * The address text is wrapped in asterisks for bold rendering,
+ * while the Google Maps URL remains un-wrapped so it remains a clickable link.
  */
 export function formatVenueWithMaps(booking: BookingPlan): string {
   const parts: string[] = [booking.address];
@@ -117,10 +133,14 @@ export function formatVenueWithMaps(booking: BookingPlan): string {
   if (booking.pincode) {
     parts.push(`Bengaluru - ${booking.pincode}`);
   }
+  const cleanAddress = parts.filter(Boolean).join(', ');
+  const boldAddress = cleanAddress ? `*${cleanAddress}*` : '';
+
   if (booking.mapsLink && booking.mapsLink.trim()) {
-    parts.push(`Google Maps: ${booking.mapsLink.trim()}`);
+    const cleanMaps = booking.mapsLink.trim();
+    return boldAddress ? `${boldAddress} | Maps: ${cleanMaps}` : `Maps: ${cleanMaps}`;
   }
-  return parts.join(', ');
+  return boldAddress;
 }
 
 /**
@@ -140,7 +160,7 @@ export function sendAcharyaOrderDispatchMessage(booking: BookingPlan, acharya: A
     recipientRole: 'acharya',
     type: 'acharya_order',
     title: 'Pandit Booking Details & Schedule',
-    body: `Namaskara Pandit ${acharya.name}, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: ${booking.id}\nCelebrant: ${booking.name}\nCustomer contact: ${booking.phone}\nDate: ${booking.celebrationDate}\nCeremony time: ${booking.timeSlot} IST\nArrival time: 07:00 AM IST\nVenue: ${venue}\nRitual / package: ${booking.packageName}\nSankalpa details: ${sankalpaDetails}\nSpecial instructions: ${specialInstructions}\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.`,
+    body: `Namaskara Pandit *${acharya.name}*, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nCustomer contact: *${booking.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nArrival time: *07:00 AM IST*\nVenue: ${venue}\nRitual / package: *${booking.packageName}*\nSankalpa details: *${sankalpaDetails}*\nSpecial instructions: *${specialInstructions}*\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.`,
     dynamicLink: `/portal?id=${booking.id}`,
     actionRequired: true,
     actionCompleted: false,
@@ -150,17 +170,17 @@ export function sendAcharyaOrderDispatchMessage(booking: BookingPlan, acharya: A
   saveWhatsAppMessage(msg);
 
   const params = [
-    acharya.name,
-    booking.id,
-    booking.name,
-    booking.phone,
-    booking.celebrationDate,
-    `${booking.timeSlot} IST`,
-    '07:00 AM IST',
+    bold(acharya.name),
+    bold(booking.id),
+    bold(booking.name),
+    bold(booking.phone),
+    bold(booking.celebrationDate),
+    bold(`${booking.timeSlot} IST`),
+    bold('07:00 AM IST'),
     venue,
-    booking.packageName,
-    sankalpaDetails,
-    specialInstructions
+    bold(booking.packageName),
+    bold(sankalpaDetails),
+    bold(specialInstructions)
   ];
 
   dispatchMetaCloudTemplate(targetPhone, 'mantrakshata_pandit_booking_details', params)
@@ -184,14 +204,14 @@ export function sendWelcomeCatalogMessage(phone: string, name: string): WhatsApp
     recipientRole: 'customer',
     type: 'welcome_catalog',
     title: 'Welcome to Mantrakshata',
-    body: `Namaskara ${name}, welcome to Mantrakshata. Your mobile number has been verified. In Havikar tradition, every birthday is celebrated with Vedic blessings, consecrated Sandalwood bracelets, and sacred fire. Tap the button below to explore our authentic offerings and sacred keepsakes.`,
+    body: `Namaskara *${name}*, welcome to Mantrakshata. Your mobile number has been verified. In Havikar tradition, every birthday is celebrated with Vedic blessings, consecrated Sandalwood bracelets, and sacred fire. Tap the button below to explore our authentic offerings and sacred keepsakes.`,
     sentAt: new Date().toISOString(),
     status: 'draft',
     dynamicLink: '/gifts'
   };
   saveWhatsAppMessage(msg);
 
-  dispatchMetaCloudTemplate(phone, 'mantrakshata_welcome_catalog', [name])
+  dispatchMetaCloudTemplate(phone, 'mantrakshata_welcome_catalog', [bold(name)])
     .then((res) => {
       if (res.ok) updateWhatsAppMessageStatus(msg.id, 'sent');
       else console.warn('Welcome catalog dispatch failed:', res.error);
@@ -221,7 +241,7 @@ export function sendBookingConfirmedMessage(booking: BookingPlan): WhatsAppMessa
     recipientRole: 'customer',
     type: 'booking_confirmed',
     title: 'Vardhantotsava Booking Confirmed',
-    body: `Shubhamastu ${booking.name}! Your Vardhantotsava celebration booking #${booking.id} for ${booking.name} (Gotra: ${booking.gotra || 'Kashyapa'}, Nakshatra: ${booking.nakshatra || 'Chitra'}) is confirmed for ${booking.celebrationDate} during ${booking.timeSlot}. Selected Package: ${booking.packageName}. Our Chief Vedic Coordinator is assigning an initiated Acharya. View details: ${customerBookingUrl}\nThank You`,
+    body: `Shubhamastu *${booking.name}*! Your Vardhantotsava celebration booking #*${booking.id}* for *${booking.name}* (Gotra: *${booking.gotra || 'Kashyapa'}*, Nakshatra: *${booking.nakshatra || 'Chitra'}*) is confirmed for *${booking.celebrationDate}* during *${booking.timeSlot}*. Selected Package: *${booking.packageName}*. Our Chief Vedic Coordinator is assigning an initiated Acharya. View details: ${customerBookingUrl}\nThank You`,
     sentAt: new Date().toISOString(),
     status: 'draft',
     dynamicLink: `/portal?id=${booking.id}`
@@ -229,14 +249,14 @@ export function sendBookingConfirmedMessage(booking: BookingPlan): WhatsAppMessa
   saveWhatsAppMessage(msg);
 
   const params = [
-    booking.name,
-    booking.id,
-    booking.name,
-    booking.gotra || 'Kashyapa',
-    booking.nakshatra || 'Chitra',
-    booking.celebrationDate,
-    booking.timeSlot,
-    booking.packageName,
+    bold(booking.name),
+    bold(booking.id),
+    bold(booking.name),
+    bold(booking.gotra || 'Kashyapa'),
+    bold(booking.nakshatra || 'Chitra'),
+    bold(booking.celebrationDate),
+    bold(booking.timeSlot),
+    bold(booking.packageName),
     customerBookingUrl
   ];
 
@@ -267,7 +287,7 @@ export function sendAcharyaAlertMessage(booking: BookingPlan): WhatsAppMessage {
     recipientRole: 'acharya',
     type: 'acharya_alert',
     title: 'Assign Pandit for Confirmed Vardhantotsava',
-    body: `Namaskara Acharya Vedamurthy Sri Narayan Bhat, please assign a Pandit for this confirmed Vardhantotsava.\n\nBooking ID: ${booking.id}\nCelebrant: ${booking.name}\nDate: ${booking.celebrationDate}\nTime: ${booking.timeSlot} IST\nRitual / package: ${booking.packageName}\nVenue: ${venue}\n\nTap Assign Pandit below. Enter the Pandit's name, WhatsApp number and expected arrival time, then confirm the assignment.\n\n— Mantrakshata Coordination`,
+    body: `Namaskara Acharya *Vedamurthy Sri Narayan Bhat*, please assign a Pandit for this confirmed Vardhantotsava.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nDate: *${booking.celebrationDate}*\nTime: *${booking.timeSlot} IST*\nRitual / package: *${booking.packageName}*\nVenue: ${venue}\n\nTap Assign Pandit below. Enter the Pandit's name, WhatsApp number and expected arrival time, then confirm the assignment.\n\n— Mantrakshata Coordination`,
     dynamicLink,
     actionRequired: true,
     actionCompleted: false,
@@ -277,12 +297,12 @@ export function sendAcharyaAlertMessage(booking: BookingPlan): WhatsAppMessage {
   saveWhatsAppMessage(msg);
 
   const params = [
-    'Vedamurthy Sri Narayan Bhat',
-    booking.id,
-    booking.name,
-    booking.celebrationDate,
-    `${booking.timeSlot} IST`,
-    booking.packageName,
+    bold('Vedamurthy Sri Narayan Bhat'),
+    bold(booking.id),
+    bold(booking.name),
+    bold(booking.celebrationDate),
+    bold(`${booking.timeSlot} IST`),
+    bold(booking.packageName),
     venue
   ];
 
@@ -311,7 +331,7 @@ export function sendAcharyaAssignedMessage(booking: BookingPlan, acharya: Achary
     recipientRole: 'customer',
     type: 'acharya_assigned',
     title: 'Pandit Assigned Details',
-    body: `Namaskara ${booking.name}, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: ${booking.id}\nPandit: ${acharya.name}\nContact: ${acharya.phone}\nDate: ${booking.celebrationDate}\nCeremony time: ${booking.timeSlot} IST\nExpected arrival: 07:00 AM IST\n\nPlease keep your phone available for coordination. Reply here if you need help.`,
+    body: `Namaskara *${booking.name}*, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: *${booking.id}*\nPandit: *${acharya.name}*\nContact: *${acharya.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nExpected arrival: *07:00 AM IST*\n\nPlease keep your phone available for coordination. Reply here if you need help.`,
     sentAt: new Date().toISOString(),
     status: 'draft',
     dynamicLink: `/portal?id=${booking.id}`
@@ -319,13 +339,13 @@ export function sendAcharyaAssignedMessage(booking: BookingPlan, acharya: Achary
   saveWhatsAppMessage(msg);
 
   const params = [
-    booking.name,
-    booking.id,
-    acharya.name,
-    acharya.phone,
-    booking.celebrationDate,
-    `${booking.timeSlot} IST`,
-    '07:00 AM IST'
+    bold(booking.name),
+    bold(booking.id),
+    bold(acharya.name),
+    bold(acharya.phone),
+    bold(booking.celebrationDate),
+    bold(`${booking.timeSlot} IST`),
+    bold('07:00 AM IST')
   ];
 
   dispatchMetaCloudTemplate(booking.phone, 'mantrakshata_customer_pandit_details', params)
@@ -353,20 +373,20 @@ export function sendOneDayReminderMessage(booking: BookingPlan, acharya?: Achary
     recipientRole: 'customer',
     type: 'reminder_1day',
     title: '1-Day Before Reminder & Preparation Checklist',
-    body: `Namaskara ${booking.name}, a reminder that ${booking.name}'s Vardhantotsava is scheduled for ${booking.celebrationDate} at ${booking.timeSlot} IST.\n\nBooking ID: ${booking.id}\nVenue: ${venue}\nPreparation checklist: ${preparationChecklist}\n\nPlease keep the space ready and inform us of any changes. We look forward to celebrating with your family.`,
+    body: `Namaskara *${booking.name}*, a reminder that *${booking.name}*'s Vardhantotsava is scheduled for *${booking.celebrationDate}* at *${booking.timeSlot} IST*.\n\nBooking ID: *${booking.id}*\nVenue: ${venue}\nPreparation checklist: *${preparationChecklist}*\n\nPlease keep the space ready and inform us of any changes. We look forward to celebrating with your family.`,
     sentAt: new Date().toISOString(),
     status: 'draft'
   };
   saveWhatsAppMessage(msg);
 
   const params = [
-    booking.name,
-    booking.name,
-    booking.celebrationDate,
-    `${booking.timeSlot} IST`,
-    booking.id,
+    bold(booking.name),
+    bold(booking.name),
+    bold(booking.celebrationDate),
+    bold(`${booking.timeSlot} IST`),
+    bold(booking.id),
     venue,
-    acharya?.name || 'Vedamurthy Sri Narayan Bhat'
+    bold(acharya?.name || 'Vedamurthy Sri Narayan Bhat')
   ];
 
   dispatchMetaCloudTemplate(booking.phone, 'mantrakshata_reminder_1day', params)
@@ -392,17 +412,17 @@ export function sendTwoHourReminderMessage(booking: BookingPlan): WhatsAppMessag
     recipientRole: 'customer',
     type: 'reminder_1day',
     title: '2 Hours Before Ceremony Reminder',
-    body: `Namaskara ${booking.name}, ${booking.name}'s Vardhantotsava begins in 2 hours, at ${booking.timeSlot} IST.\n\nBooking ID: ${booking.id}\nVenue: ${venue}\n\nPlease have the family and preparation items ready, and keep your phone available for coordination. Reply here if you need assistance.`,
+    body: `Namaskara *${booking.name}*, *${booking.name}*'s Vardhantotsava begins in 2 hours, at *${booking.timeSlot} IST*.\n\nBooking ID: *${booking.id}*\nVenue: ${venue}\n\nPlease have the family and preparation items ready, and keep your phone available for coordination. Reply here if you need assistance.`,
     sentAt: new Date().toISOString(),
     status: 'draft'
   };
   saveWhatsAppMessage(msg);
 
   const params = [
-    booking.name,
-    booking.name,
-    `${booking.timeSlot} IST`,
-    booking.id,
+    bold(booking.name),
+    bold(booking.name),
+    bold(`${booking.timeSlot} IST`),
+    bold(booking.id),
     venue
   ];
 
@@ -428,7 +448,7 @@ export function sendMorningStreamMessage(booking: BookingPlan, acharya: AcharyaS
     recipientRole: 'customer',
     type: 'morning_stream',
     title: 'Ayushya Homa Livestream',
-    body: `Shubhodaya ${booking.name}! May this auspicious day bring abundant health, longevity, and spiritual peace.\n\nAcharya ${acharya.name} is on the way to your residence.\n\nPrivate Family Broadcast Link:\nhttps://www.mantrakshata.com/portal?id=${booking.id}`,
+    body: `Shubhodaya *${booking.name}*! May this auspicious day bring abundant health, longevity, and spiritual peace.\n\nAcharya *${acharya.name}* is on the way to your residence.\n\nPrivate Family Broadcast Link:\nhttps://www.mantrakshata.com/portal?id=${booking.id}`,
     sentAt: new Date().toISOString(),
     status: 'draft'
   };
@@ -448,16 +468,16 @@ export function sendNextDayFollowupMessage(booking: BookingPlan): WhatsAppMessag
     recipientRole: 'customer',
     type: 'completed_thankyou',
     title: 'Next-Day Experience Follow-up',
-    body: `Namaskara ${booking.name}, thank you for celebrating ${booking.name}'s Vardhantotsava with Mantrakshata. We hope the ceremony brought joy and blessings to your family.\n\nBooking ID: ${booking.id}\nHow was your experience? Please reply with your feedback or any support you need.\n\nReply STOP to stop feedback messages.`,
+    body: `Namaskara *${booking.name}*, thank you for celebrating *${booking.name}*'s Vardhantotsava with Mantrakshata. We hope the ceremony brought joy and blessings to your family.\n\nBooking ID: *${booking.id}*\nHow was your experience? Please reply with your feedback or any support you need.\n\nReply STOP to stop feedback messages.`,
     sentAt: new Date().toISOString(),
     status: 'draft'
   };
   saveWhatsAppMessage(msg);
 
   const params = [
-    booking.name,
-    booking.name,
-    booking.id
+    bold(booking.name),
+    bold(booking.name),
+    bold(booking.id)
   ];
 
   dispatchMetaCloudTemplate(booking.phone, 'mantrakshata_next_day_followup', params)
@@ -678,6 +698,7 @@ export async function dispatchMetaCloudTemplate(
 ): Promise<{ ok: boolean; messageId?: string; error?: string; raw?: any }> {
   const cleanTo = to.replace(/\D/g, '');
   const formattedTo = cleanTo.length === 10 ? '91' + cleanTo : cleanTo;
+  const safeParameters = name === 'hav_otp1' ? parameters : parameters.map(p => bold(p));
 
   // 1. Try local server-side API proxy route first
   try {
@@ -687,7 +708,7 @@ export async function dispatchMetaCloudTemplate(
       body: JSON.stringify({
         to: formattedTo,
         templateName: name,
-        parameters,
+        parameters: safeParameters,
         buttonParam: button
       })
     });
@@ -727,10 +748,10 @@ export async function dispatchMetaCloudTemplate(
         parameters: [{ type: 'text', text: code }]
       });
     } else {
-      if (parameters.length > 0) {
+      if (safeParameters.length > 0) {
         components.push({
           type: 'body',
-          parameters: parameters.map(p => ({ type: 'text', text: String(p ?? '') }))
+          parameters: safeParameters.map(p => ({ type: 'text', text: String(p ?? '') }))
         });
       }
       if (button) {

@@ -47,9 +47,16 @@ export async function POST(request: Request) {
       });
     } else {
       if (parameters.length > 0) {
+        const formattedParams = parameters.map((p: any) => {
+          const str = String(p ?? '').trim();
+          if (!str) return '';
+          if (str.startsWith('*') && str.endsWith('*') && str.length >= 2) return str;
+          if (/^https?:\/\//i.test(str) || str.includes('http://') || str.includes('https://') || str.includes('*')) return str;
+          return `*${str}*`;
+        });
         components.push({
           type: 'body',
-          parameters: parameters.map((p: any) => ({ type: 'text', text: String(p ?? '') }))
+          parameters: formattedParams.map((text: string) => ({ type: 'text', text }))
         });
       }
 

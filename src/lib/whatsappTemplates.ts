@@ -62,9 +62,9 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
     purpose: 'Post-verification welcome message introducing sacred Vardhantotsava traditions and keepsakes.',
     body: 'Namaskara {{1}}, welcome to Mantrakshata. Your mobile number has been verified. In Havikar tradition, every birthday is celebrated with Vedic blessings, consecrated Sandalwood bracelets, and sacred fire. Tap the button below to explore our authentic offerings and sacred keepsakes.',
     variableKeys: ['customer_name'],
-    sampleVariables: ['Aditya'],
+    sampleVariables: ['*Aditya*'],
     variables: [
-      { position: '{{1}}', name: 'customer_name', description: 'Customer given name', sample: 'Aditya' }
+      { position: '{{1}}', name: 'customer_name', description: 'Customer given name', sample: '*Aditya*' }
     ],
     buttons: [
       {
@@ -93,25 +93,25 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       'details_url'
     ],
     sampleVariables: [
-      'Aditya',
-      'BK-108',
-      'Aditya Hegde',
-      'Kashyapa',
-      'Chitra',
-      '14 October 2026',
-      '07:30 AM',
-      'Sampoorna Vardhantotsava',
+      '*Aditya*',
+      '*BK-108*',
+      '*Aditya Hegde*',
+      '*Kashyapa*',
+      '*Chitra*',
+      '*14 October 2026*',
+      '*07:30 AM*',
+      '*Sampoorna Vardhantotsava*',
       'https://www.mantrakshata.com/portal?id=BK-108'
     ],
     variables: [
-      { position: '{{1}}', name: 'customer_name', description: 'Host customer name', sample: 'Aditya' },
-      { position: '{{2}}', name: 'booking_id', description: 'Celebration reference ID', sample: 'BK-108' },
-      { position: '{{3}}', name: 'celebrant_name', description: 'Birthday celebrant name', sample: 'Aditya Hegde' },
-      { position: '{{4}}', name: 'gotra', description: 'Family gotra', sample: 'Kashyapa' },
-      { position: '{{5}}', name: 'nakshatra', description: 'Birth star and pada', sample: 'Chitra' },
-      { position: '{{6}}', name: 'ceremony_date', description: 'Celebration date', sample: '14 October 2026' },
-      { position: '{{7}}', name: 'ceremony_time', description: 'Muhurta time slot', sample: '07:30 AM' },
-      { position: '{{8}}', name: 'package_name', description: 'Ceremony package tier', sample: 'Sampoorna Vardhantotsava' },
+      { position: '{{1}}', name: 'customer_name', description: 'Host customer name', sample: '*Aditya*' },
+      { position: '{{2}}', name: 'booking_id', description: 'Celebration reference ID', sample: '*BK-108*' },
+      { position: '{{3}}', name: 'celebrant_name', description: 'Birthday celebrant name', sample: '*Aditya Hegde*' },
+      { position: '{{4}}', name: 'gotra', description: 'Family gotra', sample: '*Kashyapa*' },
+      { position: '{{5}}', name: 'nakshatra', description: 'Birth star and pada', sample: '*Chitra*' },
+      { position: '{{6}}', name: 'ceremony_date', description: 'Celebration date', sample: '*14 October 2026*' },
+      { position: '{{7}}', name: 'ceremony_time', description: 'Muhurta time slot', sample: '*07:30 AM*' },
+      { position: '{{8}}', name: 'package_name', description: 'Ceremony package tier', sample: '*Sampoorna Vardhantotsava*' },
       { position: '{{9}}', name: 'details_url', description: 'Portal details URL', sample: 'https://www.mantrakshata.com/portal?id=BK-108' }
     ],
     buttons: [
@@ -139,22 +139,22 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       'venue_with_maps'
     ],
     sampleVariables: [
-      'Vedamurthy Sri Narayan Bhat',
-      'BK-108',
-      'Aditya Hegde',
-      '14 October 2026',
-      '07:30 AM',
-      'Sampoorna Vardhantotsava',
-      '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample'
+      '*Vedamurthy Sri Narayan Bhat*',
+      '*BK-108*',
+      '*Aditya Hegde*',
+      '*14 October 2026*',
+      '*07:30 AM*',
+      '*Sampoorna Vardhantotsava*',
+      '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample'
     ],
     variables: [
-      { position: '{{1}}', name: 'chief_acharya_name', description: 'Chief coordinator name', sample: 'Vedamurthy Sri Narayan Bhat' },
-      { position: '{{2}}', name: 'booking_id', description: 'Celebration reference ID', sample: 'BK-108' },
-      { position: '{{3}}', name: 'celebrant_name', description: 'Birthday celebrant name', sample: 'Aditya Hegde' },
-      { position: '{{4}}', name: 'ceremony_date', description: 'Celebration date', sample: '14 October 2026' },
-      { position: '{{5}}', name: 'ceremony_time', description: 'Muhurta time slot', sample: '07:30 AM' },
-      { position: '{{6}}', name: 'package_name', description: 'Ceremony package tier', sample: 'Sampoorna Vardhantotsava' },
-      { position: '{{7}}', name: 'venue_with_maps', description: 'Bengaluru venue and Google Maps link', sample: '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample' }
+      { position: '{{1}}', name: 'chief_acharya_name', description: 'Chief coordinator name', sample: '*Vedamurthy Sri Narayan Bhat*' },
+      { position: '{{2}}', name: 'booking_id', description: 'Celebration reference ID', sample: '*BK-108*' },
+      { position: '{{3}}', name: 'celebrant_name', description: 'Birthday celebrant name', sample: '*Aditya Hegde*' },
+      { position: '{{4}}', name: 'ceremony_date', description: 'Celebration date', sample: '*14 October 2026*' },
+      { position: '{{5}}', name: 'ceremony_time', description: 'Muhurta time slot', sample: '*07:30 AM*' },
+      { position: '{{6}}', name: 'package_name', description: 'Ceremony package tier', sample: '*Sampoorna Vardhantotsava*' },
+      { position: '{{7}}', name: 'venue_with_maps', description: 'Bengaluru venue and Google Maps link', sample: '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample' }
     ],
     buttons: [
       {
@@ -181,22 +181,22 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       'arrival_time'
     ],
     sampleVariables: [
-      'Aditya',
-      'BK-108',
-      'Vedamurthy Sri Narayan Bhat',
-      '+91 94481 23456',
-      '14 October 2026',
-      '07:30 AM',
-      '07:00 AM'
+      '*Aditya*',
+      '*BK-108*',
+      '*Vedamurthy Sri Narayan Bhat*',
+      '*+91 94481 23456*',
+      '*14 October 2026*',
+      '*07:30 AM*',
+      '*07:00 AM*'
     ],
     variables: [
-      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: 'Aditya' },
-      { position: '{{2}}', name: 'booking_id', description: 'Booking ID', sample: 'BK-108' },
-      { position: '{{3}}', name: 'pandit_name', description: 'Assigned scholar name', sample: 'Vedamurthy Sri Narayan Bhat' },
-      { position: '{{4}}', name: 'pandit_contact', description: 'Scholar phone number', sample: '+91 94481 23456' },
-      { position: '{{5}}', name: 'ceremony_date', description: 'Celebration date', sample: '14 October 2026' },
-      { position: '{{6}}', name: 'ceremony_time', description: 'Ceremony start time', sample: '07:30 AM' },
-      { position: '{{7}}', name: 'arrival_time', description: 'Expected Pandit arrival', sample: '07:00 AM' }
+      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: '*Aditya*' },
+      { position: '{{2}}', name: 'booking_id', description: 'Booking ID', sample: '*BK-108*' },
+      { position: '{{3}}', name: 'pandit_name', description: 'Assigned scholar name', sample: '*Vedamurthy Sri Narayan Bhat*' },
+      { position: '{{4}}', name: 'pandit_contact', description: 'Scholar phone number', sample: '*+91 94481 23456*' },
+      { position: '{{5}}', name: 'ceremony_date', description: 'Celebration date', sample: '*14 October 2026*' },
+      { position: '{{6}}', name: 'ceremony_time', description: 'Ceremony start time', sample: '*07:30 AM*' },
+      { position: '{{7}}', name: 'arrival_time', description: 'Expected Pandit arrival', sample: '*07:00 AM*' }
     ]
   },
   {
@@ -220,30 +220,30 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       'special_instructions'
     ],
     sampleVariables: [
-      'Vedamurthy Sri Narayan Bhat',
-      'BK-108',
-      'Aditya Hegde',
-      '+91 98450 24156',
-      '14 October 2026',
-      '07:30 AM',
-      '07:00 AM',
-      '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample',
-      'Sampoorna Vardhantotsava',
-      'Gotra: Kashyapa, Nakshatra: Chitra, Pada: 1',
-      'Deepa Prajwalana with pure desi cow ghee'
+      '*Vedamurthy Sri Narayan Bhat*',
+      '*BK-108*',
+      '*Aditya Hegde*',
+      '*+91 98450 24156*',
+      '*14 October 2026*',
+      '*07:30 AM*',
+      '*07:00 AM*',
+      '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample',
+      '*Sampoorna Vardhantotsava*',
+      '*Gotra: Kashyapa, Nakshatra: Chitra, Pada: 1*',
+      '*Deepa Prajwalana with pure desi cow ghee*'
     ],
     variables: [
-      { position: '{{1}}', name: 'pandit_name', description: 'Assigned scholar name', sample: 'Vedamurthy Sri Narayan Bhat' },
-      { position: '{{2}}', name: 'booking_id', description: 'Booking ID', sample: 'BK-108' },
-      { position: '{{3}}', name: 'celebrant_name', description: 'Celebrant name', sample: 'Aditya Hegde' },
-      { position: '{{4}}', name: 'customer_contact', description: 'Customer contact phone', sample: '+91 98450 24156' },
-      { position: '{{5}}', name: 'ceremony_date', description: 'Date of ceremony', sample: '14 October 2026' },
-      { position: '{{6}}', name: 'ceremony_time', description: 'Ceremony start time', sample: '07:30 AM' },
-      { position: '{{7}}', name: 'arrival_time', description: 'Reporting time', sample: '07:00 AM' },
-      { position: '{{8}}', name: 'venue_with_maps', description: 'Address and Google Maps location', sample: '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample' },
-      { position: '{{9}}', name: 'package_name', description: 'Package name', sample: 'Sampoorna Vardhantotsava' },
-      { position: '{{10}}', name: 'sankalpa_details', description: 'Gotra, Nakshatra, and Pada', sample: 'Gotra: Kashyapa, Nakshatra: Chitra, Pada: 1' },
-      { position: '{{11}}', name: 'special_instructions', description: 'Ritual notes', sample: 'Deepa Prajwalana with pure desi cow ghee' }
+      { position: '{{1}}', name: 'pandit_name', description: 'Assigned scholar name', sample: '*Vedamurthy Sri Narayan Bhat*' },
+      { position: '{{2}}', name: 'booking_id', description: 'Booking ID', sample: '*BK-108*' },
+      { position: '{{3}}', name: 'celebrant_name', description: 'Celebrant name', sample: '*Aditya Hegde*' },
+      { position: '{{4}}', name: 'customer_contact', description: 'Customer contact phone', sample: '*+91 98450 24156*' },
+      { position: '{{5}}', name: 'ceremony_date', description: 'Date of ceremony', sample: '*14 October 2026*' },
+      { position: '{{6}}', name: 'ceremony_time', description: 'Ceremony start time', sample: '*07:30 AM*' },
+      { position: '{{7}}', name: 'arrival_time', description: 'Reporting time', sample: '*07:00 AM*' },
+      { position: '{{8}}', name: 'venue_with_maps', description: 'Address and Google Maps location', sample: '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample' },
+      { position: '{{9}}', name: 'package_name', description: 'Package name', sample: '*Sampoorna Vardhantotsava*' },
+      { position: '{{10}}', name: 'sankalpa_details', description: 'Gotra, Nakshatra, and Pada', sample: '*Gotra: Kashyapa, Nakshatra: Chitra, Pada: 1*' },
+      { position: '{{11}}', name: 'special_instructions', description: 'Ritual notes', sample: '*Deepa Prajwalana with pure desi cow ghee*' }
     ]
   },
   {
@@ -263,22 +263,22 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       'pandit_name'
     ],
     sampleVariables: [
-      'Aditya',
-      'Aditya Hegde',
-      '14 October 2026',
-      '07:30 AM',
-      'BK-108',
-      '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample',
-      'Vedamurthy Sri Narayan Bhat'
+      '*Aditya*',
+      '*Aditya Hegde*',
+      '*14 October 2026*',
+      '*07:30 AM*',
+      '*BK-108*',
+      '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample',
+      '*Vedamurthy Sri Narayan Bhat*'
     ],
     variables: [
-      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: 'Aditya' },
-      { position: '{{2}}', name: 'celebrant_name', description: 'Celebrant name', sample: 'Aditya Hegde' },
-      { position: '{{3}}', name: 'ceremony_date', description: 'Tomorrow date', sample: '14 October 2026' },
-      { position: '{{4}}', name: 'ceremony_time', description: 'Ceremony time', sample: '07:30 AM' },
-      { position: '{{5}}', name: 'booking_id', description: 'Booking ID', sample: 'BK-108' },
-      { position: '{{6}}', name: 'venue_with_maps', description: 'Address and Google Maps link', sample: '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample' },
-      { position: '{{7}}', name: 'pandit_name', description: 'Assigned scholar', sample: 'Vedamurthy Sri Narayan Bhat' }
+      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: '*Aditya*' },
+      { position: '{{2}}', name: 'celebrant_name', description: 'Celebrant name', sample: '*Aditya Hegde*' },
+      { position: '{{3}}', name: 'ceremony_date', description: 'Tomorrow date', sample: '*14 October 2026*' },
+      { position: '{{4}}', name: 'ceremony_time', description: 'Ceremony time', sample: '*07:30 AM*' },
+      { position: '{{5}}', name: 'booking_id', description: 'Booking ID', sample: '*BK-108*' },
+      { position: '{{6}}', name: 'venue_with_maps', description: 'Address and Google Maps link', sample: '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample' },
+      { position: '{{7}}', name: 'pandit_name', description: 'Assigned scholar', sample: '*Vedamurthy Sri Narayan Bhat*' }
     ]
   },
   {
@@ -296,18 +296,18 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
       'venue_with_maps'
     ],
     sampleVariables: [
-      'Aditya',
-      'Aditya Hegde',
-      '07:30 AM',
-      'BK-108',
-      '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample'
+      '*Aditya*',
+      '*Aditya Hegde*',
+      '*07:30 AM*',
+      '*BK-108*',
+      '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample'
     ],
     variables: [
-      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: 'Aditya' },
-      { position: '{{2}}', name: 'celebrant_name', description: 'Celebrant name', sample: 'Aditya Hegde' },
-      { position: '{{3}}', name: 'ceremony_time', description: 'Ceremony time', sample: '07:30 AM' },
-      { position: '{{4}}', name: 'booking_id', description: 'Booking ID', sample: 'BK-108' },
-      { position: '{{5}}', name: 'venue_with_maps', description: 'Venue with Google Maps link', sample: '108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003 | Maps: https://maps.app.goo.gl/sample' }
+      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: '*Aditya*' },
+      { position: '{{2}}', name: 'celebrant_name', description: 'Celebrant name', sample: '*Aditya Hegde*' },
+      { position: '{{3}}', name: 'ceremony_time', description: 'Ceremony time', sample: '*07:30 AM*' },
+      { position: '{{4}}', name: 'booking_id', description: 'Booking ID', sample: '*BK-108*' },
+      { position: '{{5}}', name: 'venue_with_maps', description: 'Venue with Google Maps link', sample: '*108 Sankalpa Nilaya, Malleshwaram, Bengaluru - 560003* | Maps: https://maps.app.goo.gl/sample' }
     ],
     buttons: [
       {
@@ -325,11 +325,11 @@ export const lifecycleTemplates: LifecycleTemplate[] = [
     purpose: 'Post-ceremony inquiry regarding family satisfaction and blessings.',
     body: 'Namaskara {{1}}, thank you for celebrating {{2}}\'s Vardhantotsava with Mantrakshata. We hope the ceremony brought joy and blessings to your family.\n\nBooking ID: {{3}}\nHow was your experience? Please reply with your feedback or any support you need.\n\nReply STOP to stop feedback messages.',
     variableKeys: ['customer_name', 'celebrant_name', 'booking_id'],
-    sampleVariables: ['Aditya', 'Aditya Hegde', 'BK-108'],
+    sampleVariables: ['*Aditya*', '*Aditya Hegde*', '*BK-108*'],
     variables: [
-      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: 'Aditya' },
-      { position: '{{2}}', name: 'celebrant_name', description: 'Celebrant name', sample: 'Aditya Hegde' },
-      { position: '{{3}}', name: 'booking_id', description: 'Booking ID', sample: 'BK-108' }
+      { position: '{{1}}', name: 'customer_name', description: 'Customer name', sample: '*Aditya*' },
+      { position: '{{2}}', name: 'celebrant_name', description: 'Celebrant name', sample: '*Aditya Hegde*' },
+      { position: '{{3}}', name: 'booking_id', description: 'Booking ID', sample: '*BK-108*' }
     ]
   }
 ];
