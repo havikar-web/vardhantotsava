@@ -45,12 +45,14 @@ export async function POST(request: Request) {
         id, user_id, celebrant_name, user_phone, dob, birth_time, birth_place,
         gotra, nakshatra, pada, celebration_date, time_slot,
         venue_address, pincode, package_id, package_name, addons,
-        total_price, status, maps_link, razorpay_order_id, razorpay_payment_id
+        total_price, status, maps_link, razorpay_order_id, razorpay_payment_id,
+        assigned_acharya_id, assigned_acharya_name, assigned_acharya_phone
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7,
         $8, $9, $10, $11, $12,
         $13, $14, $15, $16, $17,
-        $18, $19, $20, $21, $22
+        $18, $19, $20, $21, $22,
+        $23, $24, $25
       )
       ON CONFLICT (id) DO UPDATE SET
         user_id = COALESCE(EXCLUDED.user_id, bookings.user_id),
@@ -65,7 +67,9 @@ export async function POST(request: Request) {
         maps_link = COALESCE(EXCLUDED.maps_link, bookings.maps_link),
         razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, bookings.razorpay_order_id),
         razorpay_payment_id = COALESCE(EXCLUDED.razorpay_payment_id, bookings.razorpay_payment_id),
-        assigned_acharya_id = COALESCE(EXCLUDED.assigned_acharya_id, bookings.assigned_acharya_id)
+        assigned_acharya_id = COALESCE(EXCLUDED.assigned_acharya_id, bookings.assigned_acharya_id),
+        assigned_acharya_name = COALESCE(EXCLUDED.assigned_acharya_name, bookings.assigned_acharya_name),
+        assigned_acharya_phone = COALESCE(EXCLUDED.assigned_acharya_phone, bookings.assigned_acharya_phone)
       RETURNING *`,
       [
         booking.id,
@@ -89,7 +93,10 @@ export async function POST(request: Request) {
         booking.status || 'confirmed',
         booking.mapsLink || null,
         booking.razorpayOrderId || null,
-        booking.razorpayPaymentId || null
+        booking.razorpayPaymentId || null,
+        booking.assignedPanditId || booking.assignedAcharyaId || null,
+        booking.assignedPanditName || booking.assignedAcharyaName || null,
+        booking.assignedPanditPhone || booking.assignedAcharyaPhone || null
       ]
     );
 

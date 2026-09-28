@@ -85,6 +85,8 @@ export interface BookingPlan {
   status: 'confirmed' | 'draft' | 'completed';
   bookedAt: string;
   assignedPanditId?: string;
+  assignedPanditName?: string;
+  assignedPanditPhone?: string;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
 }

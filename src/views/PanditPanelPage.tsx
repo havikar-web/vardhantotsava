@@ -19,7 +19,7 @@ import {
   X,
   Save,
 } from 'lucide-react';
-import { BookingPlan, getAllBookings } from '../lib/store';
+import { BookingPlan, getAllBookings, saveBooking } from '../lib/store';
 import { fetchBookingsFromNeon } from '../lib/db';
 import { sendAcharyaOrderDispatchMessage, sendAcharyaAssignedMessage } from '../lib/whatsapp';
 import { AcharyaScholar } from '../lib/content';
@@ -80,7 +80,32 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
     setSyncError(null);
     try {
       const neonData = await fetchBookingsFromNeon();
-      setBookings(neonData.length > 0 ? neonData : getAllBookings());
+      const loaded = neonData.length > 0 ? neonData : getAllBookings();
+      setBookings(loaded);
+
+      // Auto-seed saved pandits list from database bookings
+      const currentSaved = getSavedPandits();
+      const existingPhones = new Set(currentSaved.map(p => p.phone.replace(/\D/g, '')));
+      const discovered: SavedPandit[] = [];
+      loaded.forEach(b => {
+        if (b.assignedPanditName && b.assignedPanditPhone) {
+          const clean = b.assignedPanditPhone.replace(/\D/g, '');
+          if (clean && !existingPhones.has(clean)) {
+            existingPhones.add(clean);
+            discovered.push({
+              id: b.assignedPanditId || 'p_' + b.assignedPanditName.toLowerCase().replace(/\s+/g, '_'),
+              name: b.assignedPanditName,
+              phone: b.assignedPanditPhone
+            });
+          }
+        }
+      });
+      if (discovered.length > 0) {
+        const merged = [...currentSaved, ...discovered];
+        setSavedPandits(merged);
+        savePandits(merged);
+      }
+
       setLastSync(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
     } catch (e: any) {
       setSyncError(e?.message || 'Failed to load from database.');
@@ -122,8 +147,8 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
     const b = bookings.find(bk => bk.id === bookingId);
     // Pre-fill if already assigned
     const existing = savedPandits.find(p => p.id === b?.assignedPanditId);
-    setAssignName(existing?.name || '');
-    setAssignPhone(existing?.phone || '');
+    setAssignName(b?.assignedPanditName || existing?.name || '');
+    setAssignPhone(b?.assignedPanditPhone || existing?.phone || '');
     setAssignError('');
     setAssigningId(bookingId);
   };
@@ -147,17 +172,24 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
     const updated: BookingPlan = {
       ...bookings.find(b => b.id === assigningId)!,
       assignedPanditId: panditId,
+      assignedPanditName: assignName.trim(),
+      assignedPanditPhone: assignPhone.trim(),
       status: 'confirmed',
     };
 
-    // Sync to Neon
+    // Save locally
+    saveBooking(updated);
+
+    // Sync assigned pandit directly to Neon database backend
     try {
       await fetch('/api/bookings/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...updated, assignedPanditId: panditId }),
+        body: JSON.stringify(updated),
       });
-    } catch {}
+    } catch (e) {
+      console.warn('Neon backend sync failed:', e);
+    }
 
     // Dispatch official Meta WhatsApp templates
     const panditObj: AcharyaScholar = {
@@ -505,9 +537,9 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
                         </div>
                         {b.assignedPanditId && (
                           <p className="text-[11px] text-emerald-700 font-semibold">
-                            Pandit: {assignedPandit?.name || b.assignedPanditId}
-                            {assignedPandit?.phone && (
-                              <span className="text-[#7A6B5D] font-normal ml-2">{assignedPandit.phone}</span>
+                            Pandit: {b.assignedPanditName || assignedPandit?.name || b.assignedPanditId}
+                            {(b.assignedPanditPhone || assignedPandit?.phone) && (
+                              <span className="text-[#7A6B5D] font-normal ml-2">{b.assignedPanditPhone || assignedPandit?.phone}</span>
                             )}
                           </p>
                         )}

@@ -114,6 +114,8 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
     );
   }
 
+  const assignedName = booking?.assignedPanditName || (booking?.assignedPanditId ? ACHARYA_SCHOLARS.find(a => a.id === booking.assignedPanditId)?.name : null);
+  const assignedPhone = booking?.assignedPanditPhone || (booking?.assignedPanditId ? ACHARYA_SCHOLARS.find(a => a.id === booking.assignedPanditId)?.phone : null);
   const assignedAcharya = booking?.assignedPanditId 
     ? ACHARYA_SCHOLARS.find(a => a.id === booking.assignedPanditId) || null 
     : null;
@@ -123,7 +125,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
     { title: 'Sankalpa Details Review', desc: 'Awaiting coordinator verification', completed: false },
     { 
       title: 'Acharya Assigned', 
-      desc: assignedAcharya ? assignedAcharya.name : 'In review with Main Acharya', 
+      desc: assignedName || 'In review with Main Acharya', 
       completed: Boolean(booking?.assignedPanditId) 
     },
     { 
@@ -363,7 +365,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
           <div className="lg:col-span-5 space-y-6 text-left">
             
             {/* Acharya Scholar Card (Conditional on assignment) */}
-            {booking.assignedPanditId && assignedAcharya ? (
+            {booking.assignedPanditId && (assignedAcharya || assignedName) ? (
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-gold-dark block">
                   Your Assigned Acharya
@@ -371,22 +373,22 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
 
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-cream border-2 border-gold/40 flex items-center justify-center font-serif text-xl font-bold text-gold-dark shadow-inner">
-                    {assignedAcharya.name.charAt(0)}
+                    {(assignedName || assignedAcharya?.name || 'A').charAt(0)}
                   </div>
                   <div>
                     <h4 className="font-serif text-lg font-bold text-charcoal">
-                      {assignedAcharya.name}
+                      {assignedName || assignedAcharya?.name}
                     </h4>
                     <p className="text-xs text-gold-dark font-medium">
-                      {assignedAcharya.vedicTradition} · {assignedAcharya.experienceYears} Yrs Exp
+                      {assignedAcharya ? `${assignedAcharya.vedicTradition} · ${assignedAcharya.experienceYears} Yrs Exp` : 'Vedic Acharya · Assigned for Vardhantotsava'}
                     </p>
                     <p className="text-[11px] text-charcoal/60">
-                      Languages: {assignedAcharya.languages.join(', ')}
+                      Languages: {assignedAcharya ? assignedAcharya.languages.join(', ') : 'Kannada, Sanskrit'}
                     </p>
                   </div>
                 </div>
 
-                {assignedAcharya.bio && assignedAcharya.bio.trim() ? (
+                {assignedAcharya?.bio && assignedAcharya.bio.trim() ? (
                   <p className="text-xs text-charcoal/75 leading-relaxed bg-[#FAF8F5] p-3 rounded-xl border border-gold/20">
                     "{assignedAcharya.bio}"
                   </p>
@@ -394,8 +396,8 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
 
                 <div className="pt-1 space-y-2 text-xs border-t border-gold/15">
                   <div className="flex items-center justify-between">
-                    <span className="text-charcoal/60">Coordinator Phone:</span>
-                    <strong className="text-charcoal font-semibold">{assignedAcharya.phone}</strong>
+                    <span className="text-charcoal/60">Pandit Contact:</span>
+                    <strong className="text-charcoal font-semibold">{assignedPhone || assignedAcharya?.phone || '+91 99020 45009'}</strong>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-charcoal/60">Expected Arrival:</span>

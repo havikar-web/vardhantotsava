@@ -155,6 +155,8 @@ export async function fetchBookingsFromNeon(identifier?: { phone?: string; userI
         phone: b.user_phone,
         mapsLink: b.maps_link || undefined,
         assignedPanditId: b.assigned_acharya_id || undefined,
+        assignedPanditName: b.assigned_acharya_name || undefined,
+        assignedPanditPhone: b.assigned_acharya_phone || undefined,
         razorpayOrderId: b.razorpay_order_id || undefined,
         razorpayPaymentId: b.razorpay_payment_id || undefined
       }));

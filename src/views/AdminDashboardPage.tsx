@@ -38,7 +38,7 @@ import {
   sendAcharyaAssignedMessage,
   sendAcharyaOrderDispatchMessage 
 } from '../lib/whatsapp';
-import { checkNeonConnection, fetchBookingsFromNeon, fetchGiftOrdersFromNeon } from '../lib/db';
+import { checkNeonConnection, fetchBookingsFromNeon, fetchGiftOrdersFromNeon, syncBookingToNeon } from '../lib/db';
 import { WhatsAppTesterTab } from '../components/admin/WhatsAppTesterTab';
 import { CredentialsTab } from '../components/admin/CredentialsTab';
 
@@ -124,10 +124,13 @@ export const AdminDashboardPage: React.FC<Props> = ({ navigate }) => {
     const updated: BookingPlan = {
       ...booking,
       assignedPanditId: newAcharyaId,
+      assignedPanditName: acharya.name,
+      assignedPanditPhone: acharya.phone,
       status: 'confirmed'
     };
     updateBookingInList(updated);
     setBookings(getAllBookings());
+    syncBookingToNeon(updated).catch(e => console.warn('Neon sync warning:', e));
 
     // 1. Dispatch ceremony order with Date, Time, Venue directly to the assigned Acharya's phone
     sendAcharyaOrderDispatchMessage(updated, acharya);
@@ -143,6 +146,7 @@ export const AdminDashboardPage: React.FC<Props> = ({ navigate }) => {
     };
     updateBookingInList(updated);
     setBookings(getAllBookings());
+    syncBookingToNeon(updated).catch(e => console.warn('Neon sync warning:', e));
     sendCompletionThankYouMessage(updated);
   };
 

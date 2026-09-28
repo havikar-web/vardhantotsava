@@ -693,7 +693,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                             <div className="flex items-center gap-3">
                               <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                               <span className="font-medium text-[#1F1914]">
-                                Acharya assigned ({ACHARYA_SCHOLARS.find(a => a.id === booking.assignedPanditId)?.name || 'Initiated Scholar'})
+                                Acharya assigned ({booking.assignedPanditName || ACHARYA_SCHOLARS.find(a => a.id === booking.assignedPanditId)?.name || 'Initiated Vedic Pandit'})
                               </span>
                             </div>
                           ) : (
@@ -980,12 +980,17 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                                   </div>
 
                                   {/* Acharya Assigned Status */}
-                                  {cb.assignedPanditId && sch ? (
+                                  {cb.assignedPanditId && (sch || cb.assignedPanditName) ? (
                                     <div className="p-3.5 bg-[#FAF8F5] rounded-2xl border border-[#E3D6C3] flex items-center justify-between text-xs">
                                       <div>
                                         <span className="text-[10px] text-[#7A6E62] block">Assigned Acharya</span>
-                                        <strong className="text-[#1F1914]">{sch.name}</strong>
-                                        <p className="text-[10px] text-[#5C5147]">{sch.vedicTradition} · {sch.languages.join(', ')} · {sch.experienceYears} Yrs Exp</p>
+                                        <strong className="text-[#1F1914]">{cb.assignedPanditName || sch?.name}</strong>
+                                        <p className="text-[10px] text-[#5C5147]">
+                                          {sch ? `${sch.vedicTradition} · ${sch.languages.join(', ')} · ${sch.experienceYears} Yrs Exp` : 'Vedic Acharya · Assigned for Vardhantotsava'}
+                                        </p>
+                                        {cb.assignedPanditPhone && (
+                                          <p className="text-[10.5px] text-[#8C5D0D] font-medium mt-0.5">Contact: {cb.assignedPanditPhone}</p>
+                                        )}
                                       </div>
                                       <a
                                         href={`https://wa.me/919902045009?text=${encodeURIComponent(`Namaskara, inquiring about booking #${cb.id} for ${cb.name}`)}`}
