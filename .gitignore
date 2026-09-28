@@ -5,4 +5,5 @@ server/data/
 *.sqlite*
 node_modules/
 dist/
+.next/
 /*.png

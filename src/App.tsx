@@ -1,22 +1,24 @@
-import { SecurePortalPage } from './pages/SecurePortalPage';
-import { TemplateLibraryPage } from './pages/TemplateLibraryPage';
+'use client';
+
+import { SecurePortalPage } from './views/SecurePortalPage';
+import { TemplateLibraryPage } from './views/TemplateLibraryPage';
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { StickyBottomBar } from './components/StickyBottomBar';
-import { HomePage } from './pages/HomePage';
-import { VardhantotsavaPage } from './pages/VardhantotsavaPage';
-import { HowItWorksPage } from './pages/HowItWorksPage';
-import { PackagesPage } from './pages/PackagesPage';
-import { GiftPage } from './pages/GiftPage';
-import { GiftsStorePage } from './pages/GiftsStorePage';
-import { BookingFlowPage } from './pages/BookingFlowPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { AboutPage } from './pages/AboutPage';
-import { FaqPage } from './pages/FaqPage';
-import { AcharyaAssignmentPage } from './pages/AcharyaAssignmentPage';
-import { WhatsAppAdminPage } from './pages/WhatsAppAdminPage';
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { HomePage } from './views/HomePage';
+import { VardhantotsavaPage } from './views/VardhantotsavaPage';
+import { HowItWorksPage } from './views/HowItWorksPage';
+import { PackagesPage } from './views/PackagesPage';
+import { GiftPage } from './views/GiftPage';
+import { GiftsStorePage } from './views/GiftsStorePage';
+import { BookingFlowPage } from './views/BookingFlowPage';
+import { DashboardPage } from './views/DashboardPage';
+import { AboutPage } from './views/AboutPage';
+import { FaqPage } from './views/FaqPage';
+import { AcharyaAssignmentPage } from './views/AcharyaAssignmentPage';
+import { WhatsAppAdminPage } from './views/WhatsAppAdminPage';
+import { AdminDashboardPage } from './views/AdminDashboardPage';
 import { CustomerPortalModal } from './components/CustomerPortalModal';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ParticleCanvas } from './components/ParticleCanvas';
@@ -24,13 +26,20 @@ import { SacredCursor } from './components/SacredCursor';
 import { MotionConfig, useReducedMotion } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 
-export function App() {
+export function App({ initialPath }: { initialPath?: string }) {
   const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (initialPath) return initialPath;
+    if (typeof window === 'undefined') return '/';
     const p = window.location.pathname.replace(/\/$/, '') || '/';
     return p === '/portal' ? '/' : p;
   });
-  const [routeKey,setRouteKey]=useState(window.location.pathname+window.location.search);
+  const [routeKey, setRouteKey] = useState<string>(() => {
+    if (initialPath) return initialPath;
+    if (typeof window === 'undefined') return '/';
+    return window.location.pathname + window.location.search;
+  });
   const [isPortalOpen, setIsPortalOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
     return window.location.pathname.replace(/\/$/, '') === '/portal';
   });
 
