@@ -54,7 +54,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
   const booking = allBookings.find(b => b.id === selectedBookingId) || allBookings[0] || getSavedBooking();
 
   const requestedId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('bookingId') : null;
-  if (requestedId && !allBookings.some(b=>b.id===requestedId)) return <section className="p-12 text-center"><h1 className="font-serif text-3xl">Booking not found</h1><p className="my-4">This booking is not available in this browser.</p><button onClick={()=>navigate('/dashboard')}>View available drafts</button></section>;
+  if (requestedId && !allBookings.some(b=>b.id===requestedId)) return <section className="p-12 text-center"><h1 className="font-serif text-3xl">Booking not found</h1><p className="my-4">This booking is not available in this browser.</p><button onClick={()=>navigate('/dashboard')}>View my celebrations</button></section>;
   if (!booking) {
     return (
       <div className="py-24 bg-[#FAF5ED] min-h-[75vh] flex items-center justify-center">
@@ -88,9 +88,9 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
       <main className="min-h-[65vh] bg-ivory px-6 py-12">
         <section className="max-w-2xl mx-auto rounded-3xl border border-gold/30 bg-white p-8 space-y-5">
           <span className="text-xs uppercase tracking-widest text-gold-dark font-semibold">
-            Saved locally · Awaiting Confirmation
+            Payment Pending · Complete via Razorpay
           </span>
-          <h1 className="font-serif text-3xl font-bold text-charcoal">Your Celebration Draft</h1>
+          <h1 className="font-serif text-3xl font-bold text-charcoal">Complete Your Reservation</h1>
           <p className="text-sm text-charcoal/80">
             {booking.name} · {booking.celebrationDate} · {booking.timeSlot}
           </p>
@@ -101,13 +101,13 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
             Venue: {booking.address}, Bengaluru - {booking.pincode}
           </p>
           <p className="text-sm text-charcoal/70">
-            No celebration has been reserved yet. An Acharya, availability, and ceremony details still need confirmation.
+            Complete your Razorpay payment to confirm your ceremony and dispatch the Acharya notification.
           </p>
           <button 
             onClick={() => navigate('/book?name=' + encodeURIComponent(booking.name) + '&dob=' + booking.dob + '&package=' + booking.packageId)} 
-            className="rounded-xl bg-gold hover:bg-gold-hover px-5 py-3 text-white text-xs font-semibold uppercase tracking-wider cursor-pointer"
+            className="rounded-xl bg-[#B37418] hover:bg-[#8C5D0D] px-6 py-3 text-white text-xs font-semibold uppercase tracking-wider cursor-pointer shadow-sacred"
           >
-            Complete Booking
+            Pay & Confirm via Razorpay
           </button>
         </section>
       </main>

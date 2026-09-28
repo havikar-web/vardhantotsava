@@ -1,8 +1,9 @@
 import { normalizeIndianPhone } from '../lib/flowValidation';
 import React, { useState } from 'react';
-import { Gift, ArrowRight, Heart, Check, Share2, MessageSquare, Package, Sparkles } from 'lucide-react';
+import { Gift, ArrowRight, Heart, Check, Share2, MessageSquare, Package, Sparkles, Lock } from 'lucide-react';
 import { PACKAGES, HAVIKAR_PRODUCTS, HavikarProduct } from '../lib/content';
-import { saveGift, GiftPlan } from '../lib/store';
+import { saveGift, GiftPlan, getUserProfile } from '../lib/store';
+import { launchRazorpayCheckout } from '../lib/razorpay';
 
 interface GiftProps {
   navigate: (path: string) => void;
@@ -16,6 +17,8 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
   const [senderName, setSenderName] = useState('');
   const [senderPhone, setSenderPhone] = useState('');
   const [personalMessage, setPersonalMessage] = useState('');
+  const [isPaying, setIsPaying] = useState(false);
+  const [paidPaymentId, setPaidPaymentId] = useState('');
   
   // Gift options: full celebration or custom gift box
   const [giftMode, setGiftMode] = useState<'package' | 'custom_box'>('package');
@@ -57,25 +60,55 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
   const handleCreateGift = (e: React.FormEvent) => {
     e.preventDefault();
     if(step<4)return;
-    if(!normalizeIndianPhone(senderPhone))return;
-    const plan: GiftPlan = {
-      id: `GIFT-${Date.now().toString().slice(-6)}`,
-      recipientName,
-      relationship,
-      birthday,
-      senderName,
-      senderPhone,
-      personalMessage,
-      packageId: giftMode === 'package' ? selectedPackageId : 'custom-box',
+    if(!normalizeIndianPhone(senderPhone)) {
+      alert('Please enter a valid 10-digit Indian phone number.');
+      return;
+    }
+
+    setIsPaying(true);
+    const profile = getUserProfile();
+    const giftId = `GIFT-${Date.now().toString().slice(-6)}`;
+
+    launchRazorpayCheckout({
+      bookingId: giftId,
+      amount: totalGiftPrice,
       packageName: giftName,
-      totalPrice: totalGiftPrice,
-      status: 'draft',
-      giftMode,
-      itemIds: giftMode === 'custom_box' ? [...customBoxItemIds] : [],
-      createdAt: new Date().toISOString()
-    };
-    if(!saveGift(plan)){alert('Could not save your gift draft. Check browser storage and try again.');return;}
-    setGiftCreated(true);
+      customerName: senderName.trim(),
+      customerPhone: senderPhone.trim(),
+      userId: profile?.id,
+      onSuccess: (res) => {
+        const plan: GiftPlan = {
+          id: giftId,
+          userId: profile?.id,
+          recipientName,
+          relationship,
+          birthday,
+          senderName,
+          senderPhone,
+          personalMessage,
+          packageId: giftMode === 'package' ? selectedPackageId : 'custom-box',
+          packageName: giftName,
+          totalPrice: totalGiftPrice,
+          paymentId: res.paymentId,
+          razorpayOrderId: res.orderId,
+          status: 'gifted',
+          giftMode,
+          itemIds: giftMode === 'custom_box' ? [...customBoxItemIds] : [],
+          createdAt: new Date().toISOString()
+        };
+        if(!saveGift(plan)){setIsPaying(false);alert('Could not save your gift order. Check browser storage and try again.');return;}
+        setPaidPaymentId(res.paymentId);
+        setIsPaying(false);
+        setGiftCreated(true);
+      },
+      onFailure: (errMsg) => {
+        setIsPaying(false);
+        alert(errMsg || 'Payment was not completed. Please complete payment via Razorpay to confirm your sacred gift.');
+      },
+      onDismiss: () => {
+        setIsPaying(false);
+      }
+    });
   };
 
   return (
@@ -462,9 +495,17 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
                       </button>
                       <button
                         type="submit"
-                        className="flex-1 bg-gold hover:bg-gold-hover text-white text-xs uppercase tracking-widest font-semibold py-3.5 rounded-xl shadow-sacred transition-colors"
+                        disabled={isPaying}
+                        className="flex-1 bg-gold hover:bg-gold-hover text-white text-xs uppercase tracking-widest font-semibold py-3.5 rounded-xl shadow-sacred transition-colors flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        Save Gift Draft (₹{totalGiftPrice.toLocaleString('en-IN')})
+                        {isPaying ? (
+                          <span>Launching Razorpay Checkout...</span>
+                        ) : (
+                          <>
+                            <Lock className="w-4 h-4" />
+                            <span>Pay & Confirm Gift via Razorpay (₹{totalGiftPrice.toLocaleString('en-IN')})</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -520,32 +561,37 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
       ) : (
         /* Gift Created Success Screen */
         <div className="max-w-xl mx-auto px-4 text-center space-y-6 py-8">
-          <div className="w-16 h-16 rounded-full bg-gold/15 border-2 border-gold mx-auto flex items-center justify-center text-gold-dark">
-            <Gift className="w-8 h-8 text-gold" />
+          <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-400 mx-auto flex items-center justify-center text-emerald-700">
+            <Check className="w-8 h-8 text-emerald-600" />
           </div>
           
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal">
-            Your Gift Draft Is Saved
-          </h2>
+          <div className="space-y-1">
+            <span className="text-xs uppercase font-bold text-emerald-700 tracking-wider">Payment Confirmed via Razorpay</span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal">
+              Your Sacred Gift Is Confirmed
+            </h2>
+          </div>
           
           <p className="text-sm text-charcoal/75 leading-relaxed">
-            A dignified invitation has been prepared for <strong>{recipientName}</strong> with your personal blessings.
+            Payment of <strong>₹{totalGiftPrice.toLocaleString('en-IN')}</strong> has been received via Razorpay. A dignified invitation and sacred keepsakes have been scheduled for <strong>{recipientName}</strong>.
           </p>
 
           <div className="p-6 rounded-2xl bg-ivory border border-gold/30 shadow-sacred text-left space-y-3">
-            <p className="text-xs uppercase font-bold text-gold-dark">Draft invitation · no booking confirmed</p>
-            <p className="text-xs font-mono text-charcoal/80 bg-cream/40 p-3 rounded-lg break-all">
-              A shareable invitation link will be available after booking confirmation.
-            </p>
+            <p className="text-xs uppercase font-bold text-gold-dark">Confirmed Sacred Gift</p>
+            {paidPaymentId && (
+              <p className="text-xs font-mono text-charcoal/80 bg-cream/40 p-2.5 rounded-lg break-all">
+                Razorpay Payment ID: <strong>{paidPaymentId}</strong>
+              </p>
+            )}
             
             <a
-              href={`https://wa.me/?text=Namaste%20${encodeURIComponent(recipientName)}!%20${encodeURIComponent(senderName)}%20is%20planning%20a%20sacred%20Mantrakshata%20offering%20for%20your%20birthday.`}
+              href={`https://wa.me/?text=Namaste%20${encodeURIComponent(recipientName)}!%20${encodeURIComponent(senderName)}%20has%20arranged%20a%20sacred%20Mantrakshata%20offering%20for%20your%20birthday.%20Offering:%20${encodeURIComponent(giftName)}.`}
               target="_blank"
               rel="noreferrer"
               className="w-full bg-[#25D366] hover:bg-[#20BA5C] text-white text-xs font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Send Invitation on WhatsApp</span>
+              <span>Share Gift Notification on WhatsApp</span>
             </a>
           </div>
 

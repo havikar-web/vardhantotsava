@@ -82,11 +82,6 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     };
   }, [resendCooldown]);
 
-  // Razorpay Checkout State
-  const [showRazorpayModal, setShowRazorpayModal] = useState(false);
-  const [razorpayMethod, setRazorpayMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
-  const [upiId, setUpiId] = useState('user@okhdfcbank');
-  const [isProcessingRazorpay, setIsProcessingRazorpay] = useState(false);
 
   // Check saved profile on mount
   useEffect(() => {
@@ -285,7 +280,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       razorpayPaymentId: paymentId,
       razorpayOrderId: orderId
     };
-    if (!saveBooking(newPlan)) {setOtpError('Could not save this draft. Check browser storage and try again.');setIsPaying(false);return;}
+    if (!saveBooking(newPlan)) {setOtpError('Could not save your booking. Check browser storage and try again.');setIsPaying(false);return;}
 
     // 1. Dispatch Booking Confirmed WhatsApp message to Customer
     sendBookingConfirmedMessage(newPlan);
@@ -297,8 +292,6 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     syncBookingToNeon(newPlan).catch(err => console.warn('Neon sync warning:', err));
 
     setIsPaying(false);
-    setIsProcessingRazorpay(false);
-    setShowRazorpayModal(false);
     setShowCelebrationModal(true);
   };
 
@@ -347,11 +340,11 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       },
       onFailure: (errMsg) => {
         setIsPaying(false);
-        setOtpError(errMsg || 'Payment was not completed. You can try again or use direct UPI.');
-        setShowRazorpayModal(true);
+        setOtpError(errMsg || 'Payment was not completed. Please complete payment via Razorpay to confirm your ceremony.');
       },
       onDismiss: () => {
         setIsPaying(false);
+        setOtpError('Payment cancelled. Please complete payment via Razorpay to confirm your ceremony.');
       }
     });
   };
@@ -1211,175 +1204,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
         </div>
       )}
 
-      {/* Razorpay Secure Checkout Modal */}
-      {showRazorpayModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-md w-full border border-[#D5C2A4] shadow-2xl overflow-hidden text-left space-y-0">
-            
-            {/* Razorpay Brand Bar */}
-            <div className="bg-[#0C2340] text-white p-5 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs uppercase tracking-widest font-bold text-[#3395FF]">
-                    Razorpay
-                  </span>
-                  <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/80">
-                    Trusted Business
-                  </span>
-                </div>
-                <h4 className="font-serif text-lg font-bold mt-1 text-white">
-                  Mantrakshata Vardhantotsava
-                </h4>
-                <p className="text-[11px] text-white/70">
-                  {selectedPkg.name} · {name}
-                </p>
-              </div>
 
-              <div className="text-right">
-                <span className="text-[10px] text-white/60 uppercase block">Confirmation</span>
-                <span className="font-serif text-sm font-bold text-white">
-                  Vedic Reservation
-                </span>
-              </div>
-            </div>
-
-            {/* Payment Method Selector */}
-            <div className="p-6 space-y-4 text-xs">
-              <div className="flex rounded-xl bg-[#FAF6EE] p-1 border border-[#D5C2A4]">
-                <button
-                  type="button"
-                  onClick={() => setRazorpayMethod('upi')}
-                  className={`flex-1 py-2 text-center rounded-lg font-semibold transition-all ${
-                    razorpayMethod === 'upi' ? 'bg-[#0C2340] text-white shadow-xs' : 'text-charcoal/70'
-                  }`}
-                >
-                  UPI (Fast)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRazorpayMethod('card')}
-                  className={`flex-1 py-2 text-center rounded-lg font-semibold transition-all ${
-                    razorpayMethod === 'card' ? 'bg-[#0C2340] text-white shadow-xs' : 'text-charcoal/70'
-                  }`}
-                >
-                  Cards
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRazorpayMethod('netbanking')}
-                  className={`flex-1 py-2 text-center rounded-lg font-semibold transition-all ${
-                    razorpayMethod === 'netbanking' ? 'bg-[#0C2340] text-white shadow-xs' : 'text-charcoal/70'
-                  }`}
-                >
-                  NetBanking
-                </button>
-              </div>
-
-              {razorpayMethod === 'upi' && (
-                <div className="space-y-3 bg-[#FAF8F5] p-4 rounded-2xl border border-[#E3D6C3]">
-                  <label className="block text-[11px] font-semibold text-charcoal" htmlFor="bookingflowpage-field-16">
-                    Enter UPI ID (Google Pay / PhonePe / Paytm / BHIM)
-                  </label>
-                  <input id="bookingflowpage-field-16"
-                    type="text"
-                    value={upiId}
-                    onChange={(e) => setUpiId(e.target.value)}
-                    placeholder="mobile@upi"
-                    className="w-full p-2.5 rounded-xl border border-[#D5C2A4] bg-white text-xs font-mono"
-                  />
-                  <div className="flex gap-2">
-                    <span className="text-[10px] bg-white px-2 py-1 rounded border border-[#D5C2A4] text-charcoal/70">Google Pay</span>
-                    <span className="text-[10px] bg-white px-2 py-1 rounded border border-[#D5C2A4] text-charcoal/70">PhonePe</span>
-                    <span className="text-[10px] bg-white px-2 py-1 rounded border border-[#D5C2A4] text-charcoal/70">Paytm</span>
-                  </div>
-                </div>
-              )}
-
-              {razorpayMethod === 'card' && (
-                <div className="space-y-3 bg-[#FAF8F5] p-4 rounded-2xl border border-[#E3D6C3]">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-charcoal mb-1" htmlFor="bookingflowpage-field-17">Card Number</label>
-                    <input id="bookingflowpage-field-17"
-                      type="text"
-                      placeholder="4111 2222 3333 4444"
-                      defaultValue="4111 2222 3333 4444"
-                      className="w-full p-2.5 rounded-xl border border-[#D5C2A4] bg-white text-xs font-mono"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[10px] font-semibold text-charcoal mb-1" htmlFor="bookingflowpage-field-18">Expiry</label>
-                      <input id="bookingflowpage-field-18"
-                        type="text"
-                        placeholder="12/28"
-                        defaultValue="12/28"
-                        className="w-full p-2.5 rounded-xl border border-[#D5C2A4] bg-white text-xs font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-semibold text-charcoal mb-1" htmlFor="bookingflowpage-field-19">CVV</label>
-                      <input id="bookingflowpage-field-19"
-                        type="password"
-                        placeholder="•••"
-                        defaultValue="123"
-                        maxLength={3}
-                        className="w-full p-2.5 rounded-xl border border-[#D5C2A4] bg-white text-xs font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {razorpayMethod === 'netbanking' && (
-                <div className="space-y-2 bg-[#FAF8F5] p-4 rounded-2xl border border-[#E3D6C3]">
-                  <label className="block text-[11px] font-semibold text-charcoal">Select Popular Banks</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button type="button" className="p-2 bg-white rounded-lg border border-[#D5C2A4] text-left text-xs font-medium">HDFC Bank</button>
-                    <button type="button" className="p-2 bg-white rounded-lg border border-[#D5C2A4] text-left text-xs font-medium">State Bank of India</button>
-                    <button type="button" className="p-2 bg-white rounded-lg border border-[#D5C2A4] text-left text-xs font-medium">ICICI Bank</button>
-                    <button type="button" className="p-2 bg-white rounded-lg border border-[#D5C2A4] text-left text-xs font-medium">Axis Bank</button>
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-2 space-y-2">
-                <button
-                  type="button"
-                  disabled={isProcessingRazorpay}
-                  onClick={() => {
-                    setIsProcessingRazorpay(true);
-                    setTimeout(() => {
-                      processSuccessfulPayment(`pay_${Date.now()}`);
-                    }, 1200);
-                  }}
-                  className="w-full bg-[#0C2340] hover:bg-[#07182c] text-white text-xs font-semibold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>
-                    {isProcessingRazorpay 
-                      ? 'Securing Reservation...' 
-                      : 'Confirm Sacred Reservation'}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowRazorpayModal(false)}
-                  className="w-full text-center text-xs text-charcoal/60 hover:text-charcoal py-1"
-                >
-                  Cancel and review booking
-                </button>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 text-[10px] text-charcoal/50 pt-2 border-t border-gold/15">
-                <Shield className="w-3 h-3 text-[#3395FF]" />
-                <span>256-bit SSL Encrypted & PCI-DSS Compliant via Razorpay</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
 
     </div>
   );

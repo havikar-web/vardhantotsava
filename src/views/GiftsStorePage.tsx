@@ -159,11 +159,11 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
       totalAmount: grandTotal,
       paymentId: paymentId || '',
       razorpayOrderId: razorpayOrderId || undefined,
-      status: paymentId ? 'paid' : 'draft',
+      status: 'paid',
       createdAt: new Date().toISOString()
     };
 
-    if(!saveGiftOrder(newOrder)){setIsProcessing(false);alert('Could not save your order draft. Check browser storage and try again.');return;}
+    if(!saveGiftOrder(newOrder)){setIsProcessing(false);alert('Could not save your order. Check browser storage and try again.');return;}
 
     setIsProcessing(false);
     setIsCheckoutOpen(false);
@@ -592,12 +592,17 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">Draft saved — payment pending</span>
+              <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">Payment Confirmed via Razorpay</span>
               <h2 className="font-serif text-2xl font-bold text-[#1F1914]">
-                Sacred Gift Draft Saved
+                Sacred Keepsake Order Confirmed
               </h2>
               <p className="text-xs text-[#5C5147]">
                 Order Reference: <strong className="font-mono text-[#B37418]">{orderConfirmed.id}</strong>
+                {orderConfirmed.paymentId && (
+                  <span className="block text-[11px] text-[#7A6E62] mt-0.5">
+                    Razorpay Payment ID: <strong className="font-mono text-[#1F1914]">{orderConfirmed.paymentId}</strong>
+                  </span>
+                )}
               </p>
             </div>
 
@@ -617,13 +622,13 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                 <strong className="text-[#1F1914] text-right">{orderConfirmed.deliveryAddress}, {orderConfirmed.city} - {orderConfirmed.pincode}</strong>
               </div>
               <div className="flex justify-between font-bold pt-1 text-sm text-[#1F1914]">
-                <span>Quoted total:</span>
+                <span>Total Paid via Razorpay:</span>
                 <span className="text-[#B37418]">₹{orderConfirmed.totalAmount}</span>
               </div>
             </div>
 
             <p className="text-xs text-[#5C5147] leading-relaxed">
-              Your order is saved in this browser. No payment was collected, no WhatsApp message was sent, and fulfilment has not started.
+              Your payment has been received via Razorpay. Your sacred keepsakes order is confirmed and our Malnad heritage team is preparing your package for dispatch.
             </p>
 
             <div className="flex gap-3 pt-2">

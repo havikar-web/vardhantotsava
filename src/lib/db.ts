@@ -215,7 +215,7 @@ export async function fetchGiftOrdersFromNeon(identifier?: { phone?: string; use
         totalAmount: o.total_amount || 0,
         paymentId: o.razorpay_payment_id || '',
         razorpayOrderId: o.razorpay_order_id || undefined,
-        status: o.status || 'draft',
+        status: (o.status as any) || 'paid',
         createdAt: o.created_at || new Date().toISOString()
       }));
     }

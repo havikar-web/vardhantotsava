@@ -93,6 +93,7 @@ export interface GiftPlan {
   itemIds?: string[];
   giftMode?: 'package' | 'custom_box';
   id: string;
+  userId?: string;
   recipientName: string;
   relationship: string;
   birthday: string;
@@ -102,6 +103,8 @@ export interface GiftPlan {
   packageId: string;
   packageName: string;
   totalPrice: number;
+  paymentId?: string;
+  razorpayOrderId?: string;
   status: 'gifted' | 'draft';
   createdAt: string;
 }
