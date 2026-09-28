@@ -98,23 +98,23 @@ export function App({ initialPath }: { initialPath?: string }) {
       case '/store':
         return <GiftsStorePage navigate={navigate} />;
       case '/book':
-        return <SecurePortalPage mode="book" navigate={navigate} />;
+        return <BookingFlowPage navigate={navigate} />;
       case '/dashboard':
-        return <SecurePortalPage mode="dashboard" navigate={navigate} />;
+        return <DashboardPage navigate={navigate} />;
       case '/about':
         return <AboutPage navigate={navigate} />;
       case '/faqs':
         return <FaqPage navigate={navigate} />;
       case '/acharya/assign':
       case '/assign':
-        return <SecurePortalPage mode="admin" navigate={navigate} />;
+        return <AcharyaAssignmentPage navigate={navigate} />;
       case '/admin':
       case '/admin/dashboard':
-        return <SecurePortalPage mode="admin" navigate={navigate} />;
+        return <AdminDashboardPage navigate={navigate} />;
       case '/admin/templates':
         return <TemplateLibraryPage />;
       case '/admin/whatsapp':
-        return <SecurePortalPage mode="admin" navigate={navigate} />;
+        return <WhatsAppAdminPage navigate={navigate} />;
       case '/privacy':
       case '/terms':
       case '/cancellation':
@@ -144,7 +144,11 @@ export function App({ initialPath }: { initialPath?: string }) {
       {showTop && !isPortalOpen && <button className="back-to-top" aria-label="Back to top" onClick={() => window.scrollTo({ top:0, behavior: reducedMotion ? 'auto' : 'smooth' })}><ArrowUp size={18} /></button>}
 
       {/* Customer Portal Modal */}
-      {isPortalOpen && <div role="dialog" aria-modal="true" aria-label="Account sign in" className="fixed inset-0 z-50 bg-ivory overflow-y-auto"><button autoFocus className="m-4 border border-gold rounded-xl px-4 py-2" onClick={()=>setIsPortalOpen(false)}>Close account</button><SecurePortalPage navigate={navigate}/></div>}
+      <CustomerPortalModal 
+        isOpen={isPortalOpen} 
+        onClose={() => setIsPortalOpen(false)} 
+        navigate={navigate} 
+      />
     </div></MotionConfig>
   );
 }

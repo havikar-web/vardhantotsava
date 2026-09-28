@@ -28,13 +28,13 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
 
   const [selectedBookingId, setSelectedBookingId] = useState<string>(() => {
     const list = getAllBookings();
-    const requested=new URLSearchParams(window.location.search).get('bookingId');
+    const requested = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('bookingId') : null;
     return requested || list[0]?.id || getSavedBooking()?.id || '';
   });
 
   const booking = allBookings.find(b => b.id === selectedBookingId) || allBookings[0] || getSavedBooking();
 
-  const requestedId=new URLSearchParams(window.location.search).get('bookingId');
+  const requestedId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('bookingId') : null;
   if (requestedId && !allBookings.some(b=>b.id===requestedId)) return <section className="p-12 text-center"><h1 className="font-serif text-3xl">Booking not found</h1><p className="my-4">This booking is not available in this browser.</p><button onClick={()=>navigate('/dashboard')}>View available drafts</button></section>;
   if (!booking) {
     return (

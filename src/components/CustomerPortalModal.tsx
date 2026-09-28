@@ -125,7 +125,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
       setOtpCode('');
       setAuthStep('otp');
       // Dispatch real WhatsApp OTP via Meta Cloud API template hav_otp1
-      // Preview only: no live OTP dispatch.
+      sendOtpMessage(phoneNumber, result.code);
     }
   };
   const handleVerifyOtp = (e: React.FormEvent) => {
@@ -172,7 +172,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
     saveUserProfile(newUser);
     setUser(newUser);
     // Send welcome catalog message via Meta Cloud API
-    // Promotional messaging requires a real verified registration and marketing consent.
+    sendWelcomeCatalogMessage(newUser.phone, newUser.name);
   };
 
   const handleLogout = () => {

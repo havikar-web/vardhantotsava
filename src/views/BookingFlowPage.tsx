@@ -170,7 +170,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     setOtpSent(true);
     setOtpCode('');
     // Dispatch real WhatsApp OTP via Meta Cloud API template hav_otp1
-    // Preview codes are not sent to a real phone.
+    sendOtpMessage(phone, result.code);
   };
 
   const handleVerifyOtp = () => {
@@ -259,13 +259,13 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     if (!saveBooking(newPlan)) {setOtpError('Could not save this draft. Check browser storage and try again.');setIsPaying(false);return;}
 
     // 1. Dispatch Booking Confirmed WhatsApp message to Customer
-    // No confirmation is sent before verified payment and availability.
+    sendBookingConfirmedMessage(newPlan);
 
     // 2. Dispatch Alert with dynamic one-tap link to Admin and Main Acharya (919902045009)
-    // Assignment starts only after a real booking is confirmed.
+    sendAcharyaAlertMessage(newPlan);
 
     // 3. Asynchronously sync to Neon Cloud PostgreSQL
-    // Persistence is handled once by saveBooking.
+    syncBookingToNeon(newPlan).catch(err => console.warn('Neon sync warning:', err));
 
     setIsPaying(false);
     setIsProcessingRazorpay(false);
