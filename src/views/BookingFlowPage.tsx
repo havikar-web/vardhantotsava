@@ -1,13 +1,13 @@
 import { requestDemoOtp, verifyDemoOtp, isDemoPhoneVerified, normalizeIndianPhone, nextBirthday, localDate, addressError, earliestCeremonyDate } from '../lib/flowValidation';
 import { ManualVedicFields, emptyVedic } from '../components/ManualVedicFields';
 import React, { useState, useEffect } from 'react';
-import { MapPin, Check, ArrowRight, Shield, CreditCard, CheckCircle2, Lock, Box, Flame, Smartphone, Building2 } from 'lucide-react';
+import { MapPin, Check, ArrowRight, Shield, CreditCard, CheckCircle2, Lock, Box, Flame, Smartphone, Building2, Gift, Truck, Plus, Minus } from 'lucide-react';
 import { PACKAGES, PackageDetail, HAVIKAR_PRODUCTS, VEDIC_TIME_WINDOWS } from '../lib/content';
 import { NAKSHATRAS, RASHIS } from '../lib/panchanga';
-import { saveBooking, BookingPlan, getUserProfile, saveUserProfile, UserProfile, findUserProfileByPhone } from '../lib/store';
+import { saveBooking, BookingPlan, getUserProfile, saveUserProfile, UserProfile, findUserProfileByPhone, saveGiftOrder, GiftOrder } from '../lib/store';
 import { AkshataCelebration } from '../components/AkshataCelebration';
 import { sendOtpMessage, sendWelcomeCatalogMessage, sendBookingConfirmedMessage, sendAcharyaAlertMessage } from '../lib/whatsapp';
-import { syncBookingToNeon, fetchUserProfileFromNeon, saveUserProfileToNeon } from '../lib/db';
+import { syncBookingToNeon, fetchUserProfileFromNeon, saveUserProfileToNeon, syncGiftOrderToNeon } from '../lib/db';
 import { launchRazorpayCheckout } from '../lib/razorpay';
 
 const VEDIC_GOTRAS = [
@@ -109,6 +109,8 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
   );
   const [upgradeToHomeHoma, setUpgradeToHomeHoma] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [selectedGifts, setSelectedGifts] = useState<{ [productId: string]: number }>({});
+  const [giftDeliveryMode, setGiftDeliveryMode] = useState<'with_pandit' | 'courier'>('with_pandit');
   const [customGiftItems, setCustomGiftItems] = useState<string[]>([
     'sandalwood-bracelet',
     'japa-mala',
@@ -140,6 +142,25 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     }
   };
 
+  const addGiftItem = (productId: string) => {
+    setSelectedGifts(prev => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + 1
+    }));
+  };
+
+  const removeGiftItem = (productId: string) => {
+    setSelectedGifts(prev => {
+      const current = { ...prev };
+      if ((current[productId] || 0) > 1) {
+        current[productId] -= 1;
+      } else {
+        delete current[productId];
+      }
+      return current;
+    });
+  };
+
   const calculateAddonsTotal = () => {
     let sum = 0;
     selectedAddons.forEach((addonName) => {
@@ -152,7 +173,14 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     return sum;
   };
 
-  const grandTotal = selectedPkg.price + calculateAddonsTotal();
+  const calculateGiftsTotal = () => {
+    return Object.entries(selectedGifts).reduce((sum, [pId, qty]) => {
+      const p = HAVIKAR_PRODUCTS.find(item => item.id === pId);
+      return sum + (p ? p.price * qty : 0);
+    }, 0);
+  };
+
+  const grandTotal = selectedPkg.price + calculateAddonsTotal() + calculateGiftsTotal();
 
   const handleNextFromStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,8 +277,52 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     const profile = getUserProfile();
     const resolvedUserId = profile?.id && profile.id.length === 36 ? profile.id : undefined;
 
+    const bookingId = `MK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const giftsTotal = calculateGiftsTotal();
+    const giftItemsList = Object.entries(selectedGifts)
+      .filter(([_, qty]) => qty > 0)
+      .map(([pId, qty]) => {
+        const p = HAVIKAR_PRODUCTS.find(item => item.id === pId);
+        return {
+          id: pId,
+          name: p?.name || pId,
+          price: p?.price || 0,
+          quantity: qty,
+          image: p?.image || '/assets/parampara-box.png',
+          brand: (p?.brand as any) || 'Mantrakshata'
+        };
+      });
+
+    let generatedGiftOrderId: string | undefined = undefined;
+    if (giftItemsList.length > 0) {
+      generatedGiftOrderId = `HVK-GIFT-${Math.floor(100000 + Math.random() * 900000)}`;
+      const linkedGiftOrder: GiftOrder = {
+        id: generatedGiftOrderId,
+        userId: resolvedUserId,
+        customerName: name,
+        customerPhone: phone,
+        customerEmail: email,
+        recipientName: name,
+        deliveryAddress: `${address}, ${landmark ? 'Near ' + landmark + ', ' : ''}PIN ${pincode}`,
+        city: 'Bengaluru',
+        pincode: pincode,
+        items: giftItemsList,
+        boxPackaging: true,
+        boxPrice: 0,
+        totalAmount: giftsTotal,
+        paymentId: paymentId,
+        razorpayOrderId: orderId,
+        status: 'paid',
+        deliveryMode: giftDeliveryMode,
+        bookingId: bookingId,
+        createdAt: new Date().toISOString()
+      };
+      saveGiftOrder(linkedGiftOrder);
+      syncGiftOrderToNeon(linkedGiftOrder).catch(e => console.warn('Neon gift order sync warning:', e));
+    }
+
     const newPlan: BookingPlan = {
-      id: `MK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: bookingId,
       userId: resolvedUserId,
       name,
       occasion,
@@ -277,6 +349,10 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       status: 'confirmed',
       bookedAt: new Date().toISOString(),
       assignedPanditId: undefined,
+      giftOrderId: generatedGiftOrderId,
+      giftDeliveryMode: giftItemsList.length > 0 ? giftDeliveryMode : undefined,
+      giftItems: giftItemsList.length > 0 ? giftItemsList : undefined,
+      giftTotal: giftsTotal,
       razorpayPaymentId: paymentId,
       razorpayOrderId: orderId
     };
@@ -1013,18 +1089,153 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                 </div>
               </div>
 
+              {/* Sacred Gifts & Keepsakes (Order to be delivered or hand-delivered by pandit) */}
+              <div className="pt-3 border-t border-[#E5D7C3] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs uppercase tracking-wider font-semibold text-[#8C5D0D] flex items-center gap-1.5">
+                      <Gift className="w-3.5 h-3.5 text-[#B37418]" />
+                      Sacred Gifts &amp; Keepsakes
+                    </h4>
+                    <p className="text-[11px] text-[#7A6E62]">
+                      Add consecrated dravyas, malas, or mementos to your ceremony plan.
+                    </p>
+                  </div>
+                  {calculateGiftsTotal() > 0 && (
+                    <span className="text-xs font-serif font-bold text-[#8C5D0D]">
+                      +Rs. {calculateGiftsTotal().toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </div>
+
+                {/* Gifts List */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {HAVIKAR_PRODUCTS.slice(0, 6).map((product) => {
+                    const qty = selectedGifts[product.id] || 0;
+                    return (
+                      <div
+                        key={product.id}
+                        className={`p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition-all ${
+                          qty > 0 ? 'border-[#B37418] bg-[#FAF5ED]' : 'border-[#E3D6C3] bg-white'
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="font-serif text-xs font-bold text-[#1F1914] truncate">
+                            {product.name}
+                          </p>
+                          <p className="text-[10px] text-[#7A6E62] truncate">
+                            {product.description}
+                          </p>
+                          <p className="text-xs font-semibold text-[#8C5D0D] mt-0.5">
+                            Rs. {product.price.toLocaleString('en-IN')}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center">
+                          {qty === 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => addGiftItem(product.id)}
+                              className="px-2.5 py-1 text-xs font-semibold text-[#8C5D0D] border border-[#B37418] hover:bg-[#B37418] hover:text-white rounded-lg transition-colors flex items-center gap-1"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Add</span>
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-1.5 bg-white border border-[#B37418] rounded-lg px-1.5 py-0.5 shadow-xs">
+                              <button
+                                type="button"
+                                onClick={() => removeGiftItem(product.id)}
+                                className="w-5 h-5 flex items-center justify-center text-[#8C5D0D] hover:bg-[#FAF5ED] rounded cursor-pointer"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="text-xs font-bold text-[#1F1914] w-4 text-center">
+                                {qty}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => addGiftItem(product.id)}
+                                className="w-5 h-5 flex items-center justify-center text-[#8C5D0D] hover:bg-[#FAF5ED] rounded cursor-pointer"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Fulfillment / Delivery Mode Selection if gifts selected */}
+                {calculateGiftsTotal() > 0 && (
+                  <div className="p-3 bg-[#FAF5ED] rounded-xl border border-[#B37418]/50 space-y-2 mt-2">
+                    <p className="text-xs font-bold text-[#1F1914] flex items-center gap-1.5">
+                      <Truck className="w-3.5 h-3.5 text-[#B37418]" />
+                      Gift Order Fulfillment Method
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <label
+                        className={`p-2.5 rounded-lg border flex items-start gap-2.5 cursor-pointer text-xs transition-all ${
+                          giftDeliveryMode === 'with_pandit'
+                            ? 'border-[#B37418] bg-white ring-1 ring-[#B37418]'
+                            : 'border-[#E3D6C3] bg-white/70'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="giftDeliveryMode"
+                          checked={giftDeliveryMode === 'with_pandit'}
+                          onChange={() => setGiftDeliveryMode('with_pandit')}
+                          className="accent-[#B37418] mt-0.5"
+                        />
+                        <div>
+                          <strong className="block text-[#1F1914]">Hand-delivered by Pandit</strong>
+                          <span className="text-[10px] text-[#7A6E62]">
+                            Assigned Vedic Acharya carries the consecrated gift items directly to your ceremony. (Recommended)
+                          </span>
+                        </div>
+                      </label>
+
+                      <label
+                        className={`p-2.5 rounded-lg border flex items-start gap-2.5 cursor-pointer text-xs transition-all ${
+                          giftDeliveryMode === 'courier'
+                            ? 'border-[#B37418] bg-white ring-1 ring-[#B37418]'
+                            : 'border-[#E3D6C3] bg-white/70'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="giftDeliveryMode"
+                          checked={giftDeliveryMode === 'courier'}
+                          onChange={() => setGiftDeliveryMode('courier')}
+                          className="accent-[#B37418] mt-0.5"
+                        />
+                        <div>
+                          <strong className="block text-[#1F1914]">Direct Courier Delivery</strong>
+                          <span className="text-[10px] text-[#7A6E62]">
+                            Carefully packed and dispatched via speed post to your home address.
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setStep(3)}
-                  className="px-5 py-2.5 border border-[#D5C2A4] rounded-xl text-xs uppercase font-semibold"
+                  className="px-5 py-2.5 border border-[#D5C2A4] rounded-xl text-xs uppercase font-semibold cursor-pointer"
                 >
                   Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(5)}
-                  className="flex-1 py-2.5 bg-[#B37418] hover:bg-[#8C5D0D] text-white text-xs uppercase tracking-wider font-semibold rounded-xl shadow-sacred"
+                  className="flex-1 py-2.5 bg-[#B37418] hover:bg-[#8C5D0D] text-white text-xs uppercase tracking-wider font-semibold rounded-xl shadow-sacred cursor-pointer"
                 >
                   Next: Review and Confirm
                 </button>
@@ -1090,8 +1301,8 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                 <div className="flex justify-between pb-2 border-b border-[#E5D7C3]">
                   <span className="text-[#7A6E62]">Selected Package:</span>
                   <strong className="text-[#1F1914]">
-                    {selectedPkg.name}
-                    {selectedPackageId === 'sampoorna' && upgradeToHomeHoma && ' + At-Home Homa Upgrade'}
+                    {selectedPkg.name} ({selectedPkg.priceFormatted})
+                    {selectedPackageId === 'sampoorna' && upgradeToHomeHoma && ' + At-Home Homa Upgrade (+Rs. 4,999)'}
                   </strong>
                 </div>
 
@@ -1117,7 +1328,46 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                   </div>
                 )}
 
-                <div className="pt-2 flex justify-between items-center text-sm">
+                {calculateGiftsTotal() > 0 && (
+                  <div className="pt-1 pb-2 border-b border-[#E5D7C3]">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[#7A6E62] font-medium">Sacred Gifts &amp; Keepsakes:</span>
+                      <strong className="text-[#8C5D0D]">
+                        Rs. {calculateGiftsTotal().toLocaleString('en-IN')}
+                      </strong>
+                    </div>
+                    <ul className="list-disc list-inside text-xs text-[#1F1914] space-y-0.5">
+                      {Object.entries(selectedGifts)
+                        .filter(([_, qty]) => qty > 0)
+                        .map(([pId, qty]) => {
+                          const item = HAVIKAR_PRODUCTS.find(p => p.id === pId);
+                          return (
+                            <li key={pId}>
+                              {item?.name || pId} &times; {qty} (Rs. {((item?.price || 0) * qty).toLocaleString('en-IN')})
+                            </li>
+                          );
+                        })}
+                    </ul>
+                    <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[#6E4F18] bg-[#F4EADA] p-2 rounded-lg">
+                      <Truck className="w-3.5 h-3.5 flex-shrink-0 text-[#B37418]" />
+                      <span>
+                        <strong>Fulfillment Mode:</strong>{' '}
+                        {giftDeliveryMode === 'with_pandit' 
+                          ? 'Hand-delivered by assigned Pandit at ceremony' 
+                          : 'Direct courier delivery to home address'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2 flex justify-between items-center text-sm border-b border-[#E5D7C3] pb-2">
+                  <span className="font-serif font-bold text-base text-[#1F1914]">Total Amount:</span>
+                  <strong className="font-serif text-lg font-bold text-[#8C5D0D]">
+                    Rs. {grandTotal.toLocaleString('en-IN')}
+                  </strong>
+                </div>
+
+                <div className="pt-1 flex justify-between items-center text-sm">
                   <span className="font-serif font-bold text-[#1F1914]">Reservation Status:</span>
                   <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Payment via Razorpay</span>
                 </div>

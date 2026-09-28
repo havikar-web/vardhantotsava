@@ -18,6 +18,8 @@ import {
   ExternalLink,
   X,
   Save,
+  Gift,
+  Truck,
 } from 'lucide-react';
 import { BookingPlan, getAllBookings, saveBooking } from '../lib/store';
 import { fetchBookingsFromNeon } from '../lib/db';
@@ -585,6 +587,56 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
                             )}
                           </div>
                         </div>
+
+                        {/* Sacred Gifts to Hand-Deliver or Shipped via Courier */}
+                        {b.giftItems && b.giftItems.length > 0 && (
+                          <div className="bg-[#FAF5ED] border border-[#B37418]/40 rounded-xl p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-[#8C5D0D] text-[10.5px] uppercase tracking-wider flex items-center gap-1.5">
+                                <Gift className="w-3.5 h-3.5 text-[#B37418]" />
+                                Sacred Gifts &amp; Keepsakes ({b.giftDeliveryMode === 'with_pandit' ? 'Hand-Deliver with Pandit' : 'Direct Courier'})
+                              </span>
+                              {b.giftTotal ? (
+                                <span className="text-[11px] font-semibold text-[#8C5D0D]">
+                                  Total: Rs. {b.giftTotal.toLocaleString('en-IN')}
+                                </span>
+                              ) : null}
+                            </div>
+
+                            {b.giftDeliveryMode === 'with_pandit' ? (
+                              <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-amber-950 text-xs space-y-1">
+                                <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                                  <Truck className="w-3.5 h-3.5 text-[#B37418]" />
+                                  <span>Instructions for Assigned Pandit:</span>
+                                </div>
+                                <p className="text-[11px] text-amber-900/90">
+                                  Please carry and hand-deliver these sacred gift items directly to the host family at their residence:
+                                </p>
+                                <ul className="list-disc list-inside mt-1 space-y-0.5 font-medium text-xs text-amber-950">
+                                  {b.giftItems.map((item, idx) => (
+                                    <li key={idx}>
+                                      {item.name} &times; {item.quantity}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs space-y-1">
+                                <p className="font-semibold text-slate-700 flex items-center gap-1.5">
+                                  <Truck className="w-3.5 h-3.5 text-slate-500" />
+                                  <span>Dispatched via Direct Courier to Address:</span>
+                                </p>
+                                <ul className="list-disc list-inside text-[11px] text-slate-600">
+                                  {b.giftItems.map((item, idx) => (
+                                    <li key={idx}>
+                                      {item.name} &times; {item.quantity}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Assign / Reassign button */}
                         {b.status !== 'completed' && (

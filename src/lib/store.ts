@@ -87,6 +87,10 @@ export interface BookingPlan {
   assignedPanditId?: string;
   assignedPanditName?: string;
   assignedPanditPhone?: string;
+  giftOrderId?: string;
+  giftDeliveryMode?: 'with_pandit' | 'courier';
+  giftItems?: GiftOrderItem[];
+  giftTotal?: number;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
 }
@@ -408,6 +412,8 @@ export interface GiftOrder {
   paymentId: string;
   razorpayOrderId?: string;
   status: 'draft' | 'paid' | 'shipped' | 'delivered';
+  deliveryMode?: 'with_pandit' | 'courier';
+  bookingId?: string;
   createdAt: string;
 }
 

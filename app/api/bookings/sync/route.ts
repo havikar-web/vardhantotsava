@@ -46,13 +46,15 @@ export async function POST(request: Request) {
         gotra, nakshatra, pada, celebration_date, time_slot,
         venue_address, pincode, package_id, package_name, addons,
         total_price, status, maps_link, razorpay_order_id, razorpay_payment_id,
-        assigned_acharya_id, assigned_acharya_name, assigned_acharya_phone
+        assigned_acharya_id, assigned_acharya_name, assigned_acharya_phone,
+        gift_order_id, gift_delivery_mode, gift_items, gift_total
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7,
         $8, $9, $10, $11, $12,
         $13, $14, $15, $16, $17,
         $18, $19, $20, $21, $22,
-        $23, $24, $25
+        $23, $24, $25,
+        $26, $27, $28::jsonb, $29
       )
       ON CONFLICT (id) DO UPDATE SET
         user_id = COALESCE(EXCLUDED.user_id, bookings.user_id),
@@ -69,7 +71,11 @@ export async function POST(request: Request) {
         razorpay_payment_id = COALESCE(EXCLUDED.razorpay_payment_id, bookings.razorpay_payment_id),
         assigned_acharya_id = COALESCE(EXCLUDED.assigned_acharya_id, bookings.assigned_acharya_id),
         assigned_acharya_name = COALESCE(EXCLUDED.assigned_acharya_name, bookings.assigned_acharya_name),
-        assigned_acharya_phone = COALESCE(EXCLUDED.assigned_acharya_phone, bookings.assigned_acharya_phone)
+        assigned_acharya_phone = COALESCE(EXCLUDED.assigned_acharya_phone, bookings.assigned_acharya_phone),
+        gift_order_id = COALESCE(EXCLUDED.gift_order_id, bookings.gift_order_id),
+        gift_delivery_mode = COALESCE(EXCLUDED.gift_delivery_mode, bookings.gift_delivery_mode),
+        gift_items = COALESCE(EXCLUDED.gift_items, bookings.gift_items),
+        gift_total = COALESCE(EXCLUDED.gift_total, bookings.gift_total)
       RETURNING *`,
       [
         booking.id,
@@ -96,7 +102,11 @@ export async function POST(request: Request) {
         booking.razorpayPaymentId || null,
         booking.assignedPanditId || booking.assignedAcharyaId || null,
         booking.assignedPanditName || booking.assignedAcharyaName || null,
-        booking.assignedPanditPhone || booking.assignedAcharyaPhone || null
+        booking.assignedPanditPhone || booking.assignedAcharyaPhone || null,
+        booking.giftOrderId || null,
+        booking.giftDeliveryMode || null,
+        JSON.stringify(booking.giftItems || []),
+        booking.giftTotal || 0
       ]
     );
 

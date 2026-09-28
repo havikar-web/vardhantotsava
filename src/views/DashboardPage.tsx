@@ -9,7 +9,9 @@ import {
   Check, 
   ShieldCheck, 
   Compass, 
-  FileText 
+  FileText,
+  Gift,
+  Truck
 } from 'lucide-react';
 import { getSavedBooking, getAllBookings, BookingPlan, getUserProfile } from '../lib/store';
 import { fetchBookingsFromNeon } from '../lib/db';
@@ -358,6 +360,64 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
                 </div>
               </div>
             </div>
+
+            {/* Sacred Gifts & Keepsakes Order Card */}
+            {booking.giftItems && booking.giftItems.length > 0 && (
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-gold/15 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Gift className="w-5 h-5 text-gold-dark" />
+                    <div>
+                      <h3 className="font-serif text-lg font-bold text-charcoal">
+                        Sacred Gifts &amp; Keepsakes Order
+                      </h3>
+                      <span className="text-[11px] text-charcoal/60">
+                        {booking.giftOrderId ? `Order ID: ${booking.giftOrderId}` : 'Consecrated items for your ceremony'}
+                      </span>
+                    </div>
+                  </div>
+                  {booking.giftTotal ? (
+                    <span className="font-serif text-base font-bold text-gold-dark">
+                      Rs. {booking.giftTotal.toLocaleString('en-IN')}
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-charcoal/60 uppercase tracking-wider text-[10px] font-semibold block">
+                    Selected Items
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {booking.giftItems.map((item, idx) => (
+                      <div key={idx} className="p-3 bg-[#FAF8F5] rounded-xl border border-gold/20 flex items-center justify-between">
+                        <span className="font-medium text-xs text-charcoal">
+                          {item.name}
+                        </span>
+                        <span className="font-bold text-xs text-gold-dark">
+                          &times; {item.quantity}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-[#FAF5ED] rounded-xl border border-gold/30 flex items-start gap-2.5">
+                  <Truck className="w-4 h-4 text-gold-dark shrink-0 mt-0.5" />
+                  <div className="text-xs">
+                    <strong className="block text-charcoal">
+                      Fulfillment Method: {booking.giftDeliveryMode === 'with_pandit' 
+                        ? 'Hand-delivered by Assigned Pandit' 
+                        : 'Direct Courier Delivery'}
+                    </strong>
+                    <p className="text-[11px] text-charcoal/70 mt-0.5">
+                      {booking.giftDeliveryMode === 'with_pandit'
+                        ? 'The assigned Acharya will personally bring these consecrated items to your residence on the day of the ceremony.'
+                        : `Dispatched to your registered residence address (${booking.address}, PIN ${booking.pincode}) via speed post.`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
           </div>
 

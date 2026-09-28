@@ -578,12 +578,23 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
                     </div>
 
                     <div className="pt-2 border-t border-gold/15 flex flex-wrap items-center justify-between gap-2 text-xs">
-                      <div className="flex items-center gap-1.5 text-charcoal/60">
-                        <span>Add-ons:</span>
-                        {b.addons && b.addons.length > 0 ? (
-                          <span className="font-semibold text-charcoal">{b.addons.join(', ')}</span>
-                        ) : (
-                          <span className="italic">Standard package inclusions</span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-charcoal/60">
+                          <span>Add-ons:</span>
+                          {b.addons && b.addons.length > 0 ? (
+                            <span className="font-semibold text-charcoal">{b.addons.join(', ')}</span>
+                          ) : (
+                            <span className="italic">Standard package inclusions</span>
+                          )}
+                        </div>
+                        {b.giftItems && b.giftItems.length > 0 && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            <Gift className="w-3 h-3 text-[#B37418]" />
+                            <span>
+                              <strong>Gifts ({b.giftDeliveryMode === 'with_pandit' ? 'Hand-Carry with Pandit' : 'Courier'}):</strong>{' '}
+                              {b.giftItems.map(i => `${i.name} (${i.quantity})`).join(', ')}
+                            </span>
+                          </div>
                         )}
                       </div>
 
@@ -638,6 +649,8 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
                         </h3>
                         <span className="text-[11px] text-charcoal/60">
                           Placed by {order.customerName} ({order.customerPhone}) · {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {order.bookingId && ` · Linked Booking: ${order.bookingId}`}
+                          {order.deliveryMode && ` · Mode: ${order.deliveryMode === 'with_pandit' ? 'Hand-delivered by Pandit' : 'Direct Courier'}`}
                         </span>
                       </div>
                     </div>

@@ -45,18 +45,20 @@ export async function POST(request: Request) {
         id, user_id, customer_name, customer_phone, customer_email,
         recipient_name, gift_message, delivery_address, city, pincode,
         items, box_packaging, box_price, total_amount, razorpay_payment_id,
-        razorpay_order_id, status
+        razorpay_order_id, status, delivery_mode, booking_id
       ) VALUES (
         $1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11::jsonb, $12, $13, $14, $15,
-        $16, $17
+        $16, $17, $18, $19
       )
       ON CONFLICT (id) DO UPDATE SET
         user_id = COALESCE(EXCLUDED.user_id, gift_orders.user_id),
         status = EXCLUDED.status,
         razorpay_payment_id = COALESCE(EXCLUDED.razorpay_payment_id, gift_orders.razorpay_payment_id),
-        razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, gift_orders.razorpay_order_id)
+        razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, gift_orders.razorpay_order_id),
+        delivery_mode = COALESCE(EXCLUDED.delivery_mode, gift_orders.delivery_mode),
+        booking_id = COALESCE(EXCLUDED.booking_id, gift_orders.booking_id)
       RETURNING *`,
       [
         order.id,
@@ -75,7 +77,9 @@ export async function POST(request: Request) {
         Number(order.totalAmount || 0),
         order.paymentId || 'pending_payment',
         order.razorpayOrderId || null,
-        order.status || 'paid'
+        order.status || 'paid',
+        order.deliveryMode || 'with_pandit',
+        order.bookingId || null
       ]
     );
 

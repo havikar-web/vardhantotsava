@@ -157,6 +157,10 @@ export async function fetchBookingsFromNeon(identifier?: { phone?: string; userI
         assignedPanditId: b.assigned_acharya_id || undefined,
         assignedPanditName: b.assigned_acharya_name || undefined,
         assignedPanditPhone: b.assigned_acharya_phone || undefined,
+        giftOrderId: b.gift_order_id || undefined,
+        giftDeliveryMode: b.gift_delivery_mode || undefined,
+        giftItems: b.gift_items || undefined,
+        giftTotal: b.gift_total || 0,
         razorpayOrderId: b.razorpay_order_id || undefined,
         razorpayPaymentId: b.razorpay_payment_id || undefined
       }));
@@ -218,6 +222,8 @@ export async function fetchGiftOrdersFromNeon(identifier?: { phone?: string; use
         paymentId: o.razorpay_payment_id || '',
         razorpayOrderId: o.razorpay_order_id || undefined,
         status: (o.status as any) || 'paid',
+        deliveryMode: o.delivery_mode || 'with_pandit',
+        bookingId: o.booking_id || undefined,
         createdAt: o.created_at || new Date().toISOString()
       }));
     }

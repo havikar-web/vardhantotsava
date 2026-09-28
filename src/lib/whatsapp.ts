@@ -150,7 +150,15 @@ export function sendAcharyaOrderDispatchMessage(booking: BookingPlan, acharya: A
   const targetPhone = customPhone || acharya.phone || '+91 98450 88002';
   const venue = formatVenueWithMaps(booking);
   const sankalpaDetails = `Gotra: ${booking.gotra || 'Kashyapa'}, Nakshatra: ${booking.nakshatra || 'Chitra'}, Pada: ${booking.pada || 1}`;
-  const specialInstructions = 'Arrive 30 mins prior with sacred patras and samagri. Celebrant family will prepare fruits and deepa mane.';
+  let specialInstructions = 'Arrive 30 mins prior with sacred patras and samagri. Celebrant family will prepare fruits and deepa mane.';
+  if (booking.giftItems && booking.giftItems.length > 0) {
+    if (booking.giftDeliveryMode === 'with_pandit') {
+      const itemsStr = booking.giftItems.map(g => `${g.quantity}x ${g.name}`).join(', ');
+      specialInstructions = `Carry & hand-deliver sacred gifts (${itemsStr}). Arrive 30 mins prior with sacred patras.`;
+    } else {
+      specialInstructions = 'Sacred gifts dispatched via courier. Arrive 30 mins prior with sacred patras and samagri.';
+    }
+  }
 
   const msg: WhatsAppMessage = {
     id: `WA-ACHARYA-ORDER-${Date.now()}`,
@@ -296,13 +304,17 @@ export function sendAcharyaAlertMessage(booking: BookingPlan): WhatsAppMessage {
   };
   saveWhatsAppMessage(msg);
 
+  const packageWithGifts = booking.giftItems && booking.giftItems.length > 0
+    ? `${booking.packageName} + ${booking.giftItems.length} Sacred Gifts (${booking.giftDeliveryMode === 'with_pandit' ? 'Hand-deliver with Pandit' : 'Courier'})`
+    : booking.packageName;
+
   const params = [
     bold('Vedamurthy Sri Narayan Bhat'),
     bold(booking.id),
     bold(booking.name),
     bold(booking.celebrationDate),
     bold(`${booking.timeSlot} IST`),
-    bold(booking.packageName),
+    bold(packageWithGifts),
     venue
   ];
 
