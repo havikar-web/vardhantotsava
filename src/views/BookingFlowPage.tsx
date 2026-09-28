@@ -1,6 +1,5 @@
 import { requestDemoOtp, verifyDemoOtp, isDemoPhoneVerified, normalizeIndianPhone, nextBirthday, localDate, addressError, earliestCeremonyDate } from '../lib/flowValidation';
 import { ManualVedicFields, emptyVedic } from '../components/ManualVedicFields';
-import { BirthplaceInput } from '../components/BirthplaceInput';
 import React, { useState, useEffect } from 'react';
 import { MapPin, Check, ArrowRight, Shield, CreditCard, CheckCircle2, Lock, Box, Flame, Smartphone, Building2 } from 'lucide-react';
 import { PACKAGES, PackageDetail, HAVIKAR_PRODUCTS, VEDIC_TIME_WINDOWS } from '../lib/content';
@@ -30,8 +29,6 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
   const celebrationFor = stageLabels[searchParams.get('stage') || ''];
   const urlName = searchParams.get('name') || '';
   const urlDob = searchParams.get('dob') || '';
-  const urlTime = searchParams.get('time') || '';
-  const urlPlace = searchParams.get('place') || '';
 
   // Celebrant Vedic Details (100% manual selection, no auto-guess)
   const [nakshatra, setNakshatra] = useState(searchParams.get('nakshatra') || '');
@@ -46,8 +43,6 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
   const [relationship, setRelationship] = useState('Self (Myself)');
   const [name, setName] = useState(urlName);
   const [dob, setDob] = useState(urlDob);
-  const [birthTime, setBirthTime] = useState(urlTime);
-  const [birthPlace, setBirthPlace] = useState(urlPlace);
 
   const [celebrationDate, setCelebrationDate] = useState(() => {
     if (urlDob) {
@@ -254,8 +249,6 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       occasion,
       relationship,
       dob,
-      birthTime,
-      birthPlace,
       nakshatra: effectiveNakshatra,
       gotra: effectiveGotra,
       pada: pada && pada !== '0' ? Number(pada) : undefined,
@@ -323,8 +316,6 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
             setStep(1);
             setName('');
             setDob('');
-            setBirthTime('');
-            setBirthPlace('');
             setGotra('');
             setCustomGotra('');
             setNakshatra('');
@@ -443,33 +434,17 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs uppercase font-semibold text-[#1F1914] mb-1" htmlFor="bookingflowpage-field-4">
-                    {occasion.includes('Anniversary') ? "Anniversary / Marriage Date *" : "Date of Birth *"}
-                  </label>
-                  <input id="bookingflowpage-field-4" 
-                    type="date" 
-                    max={localDate()} value={dob} 
-                    onChange={(e) => setDob(e.target.value)} 
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5C2A4] bg-[#FAF8F5] text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase font-semibold text-[#1F1914] mb-1" htmlFor="bookingflowpage-field-5">Birth Time (Optional)</label>
-                  <input id="bookingflowpage-field-5" 
-                    type="time" 
-                    value={birthTime} 
-                    onChange={(e) => setBirthTime(e.target.value)} 
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5C2A4] bg-[#FAF8F5] text-sm"
-                  />
-                </div>
-              </div>
-
               <div>
-                <label className="block text-xs uppercase font-semibold text-[#1F1914] mb-1">Birth City / Town</label>
-                <BirthplaceInput value={birthPlace} onChange={setBirthPlace} />
+                <label className="block text-xs uppercase font-semibold text-[#1F1914] mb-1" htmlFor="bookingflowpage-field-4">
+                  {occasion.includes('Anniversary') ? "Anniversary / Marriage Date *" : "Date of Birth *"}
+                </label>
+                <input id="bookingflowpage-field-4" 
+                  type="date" 
+                  max={localDate()} value={dob} 
+                  onChange={(e) => setDob(e.target.value)} 
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5C2A4] bg-[#FAF8F5] text-sm"
+                />
               </div>
 
               {/* Vedic Astrological Details - Manual Selection */}

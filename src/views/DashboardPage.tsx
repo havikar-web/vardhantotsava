@@ -82,7 +82,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
             Venue: {booking.address}, Bengaluru - {booking.pincode}
           </p>
           <p className="text-sm text-charcoal/70">
-            No celebration has been reserved yet. An Acharya, availability, and birth details still need confirmation.
+            No celebration has been reserved yet. An Acharya, availability, and ceremony details still need confirmation.
           </p>
           <button 
             onClick={() => navigate('/book?name=' + encodeURIComponent(booking.name) + '&dob=' + booking.dob + '&package=' + booking.packageId)} 
@@ -101,7 +101,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
 
   const stages = [
     { title: 'Booking Confirmed', desc: 'Reserved in Bengaluru system', completed: true },
-    { title: 'Birth Details Review', desc: 'Awaiting coordinator verification', completed: false },
+    { title: 'Sankalpa Details Review', desc: 'Awaiting coordinator verification', completed: false },
     { 
       title: 'Acharya Assigned', 
       desc: assignedAcharya ? assignedAcharya.name : 'In review with Main Acharya', 

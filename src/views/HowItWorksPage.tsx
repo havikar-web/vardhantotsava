@@ -31,11 +31,11 @@ export const HowItWorksPage: React.FC<HowProps> = ({ navigate }) => {
           <div className="md:col-span-4 text-center md:text-left">
             <span className="font-serif text-6xl font-bold text-gold-dark/40">01</span>
             <h3 className="font-serif text-2xl font-bold text-charcoal mt-1">Book & Vedic Calculation</h3>
-            <p className="text-xs text-charcoal/60 mt-1">Provide birth details & address</p>
+            <p className="text-xs text-charcoal/60 mt-1">Provide celebrant details & address</p>
           </div>
           <div className="md:col-span-8 text-xs sm:text-sm text-charcoal/80 space-y-2 leading-relaxed">
             <p>
-              Enter the celebrant's name, birth date, time, and Bengaluru address. Our astronomical engine calculates their 
+              Enter the celebrant's name, date of birth, and Bengaluru address. Our astronomical engine calculates their 
               Janma Nakshatra and Rashi, recommending the optimal Vedic date. You can choose either the Vedic star date or your Gregorian birthday.
             </p>
           </div>

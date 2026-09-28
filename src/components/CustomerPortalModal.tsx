@@ -1,6 +1,5 @@
 import { requestDemoOtp, verifyDemoOtp, normalizeIndianPhone, clearDemoVerification } from '../lib/flowValidation';
 import { ManualVedicFields, emptyVedic } from './ManualVedicFields';
-import { BirthplaceInput } from './BirthplaceInput';
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
@@ -89,9 +88,6 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
   const [newFamilyName, setNewFamilyName] = useState('');
   const [newFamilyRelation, setNewFamilyRelation] = useState('Spouse');
   const [newFamilyDob, setNewFamilyDob] = useState('');
-  const [newFamilyTime, setNewFamilyTime] = useState('');
-  const [newFamilyNoExactTime, setNewFamilyNoExactTime] = useState(false);
-  const [newFamilyPlace, setNewFamilyPlace] = useState('');
   const [manualMode,setManualMode]=useState(false);
   const [manual,setManual]=useState(emptyVedic);
 
@@ -237,8 +233,8 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
     const vedic = calculateVedicDetails(
       newFamilyName,
       newFamilyDob,
-      newFamilyNoExactTime ? '10:00' : (newFamilyTime || '10:00'),
-      newFamilyPlace || 'Bengaluru'
+      '10:00',
+      'Bengaluru'
     );
 
     const member: FamilyMember = {
@@ -246,9 +242,6 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
       name: newFamilyName.trim(),
       relationship: newFamilyRelation,
       dob: newFamilyDob,
-      birthTime: newFamilyNoExactTime ? undefined : newFamilyTime,
-      noExactTime: newFamilyNoExactTime,
-      birthPlace: newFamilyPlace,
       nakshatra: manualMode ? manual.nakshatra.trim() : vedic.nakshatra,
       gotra: manualMode ? manual.gotra.trim() : undefined,
       pada: manualMode && manual.pada ? Number(manual.pada) : undefined,
@@ -260,9 +253,6 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
     setShowAddFamily(false);
     setNewFamilyName('');
     setNewFamilyDob('');
-    setNewFamilyTime('');
-    setNewFamilyPlace('');
-    setNewFamilyNoExactTime(false);
     setManualMode(false);
     setManual(emptyVedic);
   };
@@ -976,11 +966,10 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                                       <span className="font-bold text-[#1F1914]">Celebrant: {cb.name}</span>
                                       <span className="text-[10px] text-emerald-700 font-semibold">Details verified</span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-[#5C5147]">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] text-[#5C5147]">
                                       <div>DOB: <strong>{cb.dob}</strong></div>
                                       <div>Gotra: <strong>{cb.gotra || 'Kashyapa'}</strong></div>
                                       <div>Nakshatra: <strong>{cb.nakshatra || 'Chitra'}</strong></div>
-                                      <div>Place: <strong>{cb.birthPlace || 'Bengaluru'}</strong></div>
                                     </div>
                                   </div>
 
@@ -1122,7 +1111,6 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                           <div className="space-y-1 text-xs text-[#5C5147] border-t border-[#E3D6C3]/50 pt-2">
                             <p>DOB: <strong>{member.dob}</strong></p>
                             <p>Nakshatra: <strong>{member.nakshatra || 'Calculated at booking'}</strong></p>
-                            <p>Place: <strong>{member.birthPlace}</strong></p>
                             {member.gotra && <p>Gotra: <strong>{member.gotra}</strong></p>}
                             {member.pada && <p>Pada: <strong>{member.pada}</strong></p>}
                           </div>
@@ -1217,30 +1205,6 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                           </div>
 
                           <div>
-                            <div className="flex justify-between items-center mb-1">
-                              <label className="text-[11px] font-medium text-[#5C5147]">Time of Birth</label>
-                              <label className="text-[10px] text-[#7A6E62] flex items-center gap-1 cursor-pointer">
-                                <input 
-                                  type="checkbox"
-                                  checked={newFamilyNoExactTime}
-                                  onChange={(e) => setNewFamilyNoExactTime(e.target.checked)}
-                                />
-                                <span>I don't know exact time</span>
-                              </label>
-                            </div>
-                            {!newFamilyNoExactTime && (
-                              <input 
-                                type="time"
-                                value={newFamilyTime}
-                                onChange={(e) => setNewFamilyTime(e.target.value)}
-                                className="w-full px-3 py-2 rounded-xl border border-[#E3D6C3] bg-[#FAF8F5] focus:outline-none focus:border-[#B37418]"
-                              />
-                            )}
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] font-medium text-[#5C5147] mb-1">Place of Birth</label>
-                            <BirthplaceInput value={newFamilyPlace} onChange={setNewFamilyPlace} required className="w-full px-3 py-2 rounded-xl border border-[#E3D6C3] bg-[#FAF8F5] focus:outline-none focus:border-[#B37418]" />
                             <ManualVedicFields enabled={manualMode} onToggle={setManualMode} value={manual} onChange={setManual} />
                           </div>
 

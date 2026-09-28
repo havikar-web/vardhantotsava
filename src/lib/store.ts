@@ -35,7 +35,7 @@ export interface FamilyMember {
   dob: string;
   birthTime?: string;
   noExactTime?: boolean;
-  birthPlace: string;
+  birthPlace?: string;
   gotra?: string;
   pada?: number;
   vedicSource?: 'manual' | 'calculated';
@@ -61,7 +61,7 @@ export interface BookingPlan {
   relationship?: string;
   dob: string;
   birthTime?: string;
-  birthPlace: string;
+  birthPlace?: string;
   gotra?: string;
   pada?: number;
   vedicSource?: 'manual' | 'calculated';
