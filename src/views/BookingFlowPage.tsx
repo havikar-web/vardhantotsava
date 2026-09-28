@@ -99,6 +99,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
         if (!address && addr.address) setAddress(addr.address);
         if (!landmark && addr.landmark) setLandmark(addr.landmark);
         if (!pincode && addr.pincode) setPincode(addr.pincode);
+        if (!mapsLink && addr.mapsLink) setMapsLink(addr.mapsLink);
       }
       if (isDemoPhoneVerified(profile.phone)) {
         setIsPhoneVerified(true);
@@ -208,6 +209,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
           if (!address && addr.address) setAddress(addr.address);
           if (!landmark && addr.landmark) setLandmark(addr.landmark);
           if (!pincode && addr.pincode) setPincode(addr.pincode);
+          if (!mapsLink && addr.mapsLink) setMapsLink(addr.mapsLink);
         }
       }
 
@@ -228,7 +230,8 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
               address: address.trim(),
               landmark: landmark.trim() || undefined,
               pincode: pincode.trim(),
-              city: 'Bengaluru'
+              city: 'Bengaluru',
+              mapsLink: mapsLink.trim() || undefined
             }] : []),
         notifications: existing?.notifications || { whatsapp: true, email: true, reminders: true, marketing: false }
       };
@@ -242,6 +245,10 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
   const processSuccessfulPayment = (paymentId: string) => {
     const effectiveGotra = gotra === 'Other' ? customGotra.trim() : gotra;
     const effectiveNakshatra = nakshatra.trim() || 'Will verify with Acharya';
+
+    const formattedMaps = mapsLink.trim().startsWith('http') 
+      ? mapsLink.trim() 
+      : `https://${mapsLink.trim()}`;
 
     const newPlan: BookingPlan = {
       id: `MK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -257,7 +264,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       celebrationDate,
       timeSlot,
       address,
-      mapsLink: mapsLink.trim() || undefined,
+      mapsLink: formattedMaps,
       apartment: '',
       landmark,
       pincode,
@@ -297,6 +304,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
 
     if(!isDemoPhoneVerified(phone)){setIsPhoneVerified(false);setStep(3);setOtpError('Preview verification expired. Request another code.');return;}
     if(celebrationDate<earliestCeremonyDate()){setStep(2);setOtpError('Please allow at least two days to arrange your ceremony.');return;}
+    if(!mapsLink || !mapsLink.trim()){setStep(3);setOtpError('Google Maps location link is compulsory for the Acharya to navigate to your venue.');return;}
     processSuccessfulPayment('demo_no_payment');
   };
 
@@ -781,17 +789,25 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
 
               <div>
                 <label className="block text-xs uppercase font-semibold text-[#1F1914] mb-1" htmlFor="bookingflowpage-field-14">
-                  Google Maps Location Link (or GPS Pin)
+                  Google Maps Location Link (Compulsory) *
                 </label>
                 <input id="bookingflowpage-field-14" 
                   type="url" 
+                  required
                   value={mapsLink} 
-                  onChange={(e) => setMapsLink(e.target.value)} 
-                  placeholder="https://maps.app.goo.gl/... or paste Google Maps pin"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5C2A4] bg-[#FAF8F5] text-sm"
+                  onChange={(e) => {
+                    setMapsLink(e.target.value);
+                    if (otpError) setOtpError('');
+                  }} 
+                  placeholder="https://maps.app.goo.gl/... (Required for Acharya navigation)"
+                  className={`w-full px-3.5 py-2.5 rounded-xl border bg-[#FAF8F5] text-sm focus:outline-none focus:border-[#B37418] ${
+                    otpError && (otpError.includes('Google Maps') || otpError.includes('Maps'))
+                      ? 'border-red-500 bg-red-50/40 ring-1 ring-red-400'
+                      : 'border-[#D5C2A4]'
+                  }`}
                 />
-                <p className="text-[11px] text-[#5C5147] mt-1">
-                  Shared directly with the assigned Acharya to ensure seamless navigation to your home on the morning of the ceremony.
+                <p className="text-[11px] text-[#8C5D0D] font-medium mt-1">
+                  Compulsory: Shared directly with the assigned Acharya and the WhatsApp alert to ensure on-time arrival.
                 </p>
               </div>
 
@@ -818,8 +834,9 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                   type="button"
                   disabled={!isPhoneVerified}
                   onClick={() => {
-                    if (addressError(address,pincode,email)) {
-                      setOtpError(addressError(address,pincode,email));
+                    const err = addressError(address, pincode, email, mapsLink);
+                    if (err) {
+                      setOtpError(err);
                       return;
                     }
                     setStep(4);
@@ -1010,6 +1027,18 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                 <div className="flex justify-between pb-2 border-b border-[#E5D7C3]">
                   <span className="text-[#7A6E62]">Home Address:</span>
                   <strong className="text-[#1F1914]">{address}, PIN {pincode}</strong>
+                </div>
+
+                <div className="flex justify-between pb-2 border-b border-[#E5D7C3]">
+                  <span className="text-[#7A6E62]">Google Maps Pin:</span>
+                  <a 
+                    href={mapsLink.trim().startsWith('http') ? mapsLink.trim() : `https://${mapsLink.trim()}`}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-[#B37418] hover:underline font-semibold text-right truncate max-w-[200px] sm:max-w-xs block"
+                  >
+                    {mapsLink}
+                  </a>
                 </div>
 
                 <div className="flex justify-between pb-2 border-b border-[#E5D7C3]">

@@ -96,6 +96,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
   const [newAddrLabel, setNewAddrLabel] = useState('Home');
   const [newAddrText, setNewAddrText] = useState('');
   const [newAddrPincode, setNewAddrPincode] = useState('');
+  const [newAddrMapsLink, setNewAddrMapsLink] = useState('');
 
   // Refresh data on open
   useEffect(() => {
@@ -260,7 +261,10 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
   // --- ADDRESS HANDLERS ---
   const handleSaveAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !newAddrText.trim()) return;
+    if (!user || !newAddrText.trim() || !newAddrMapsLink.trim()) return;
+    const formattedMaps = newAddrMapsLink.trim().startsWith('http') 
+      ? newAddrMapsLink.trim() 
+      : `https://${newAddrMapsLink.trim()}`;
     const updated = {
       ...user,
       addresses: [
@@ -270,7 +274,8 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
           label: newAddrLabel,
           address: newAddrText.trim(),
           pincode: newAddrPincode.trim(),
-          city: 'Bengaluru'
+          city: 'Bengaluru',
+          mapsLink: formattedMaps
         }
       ]
     };
@@ -279,6 +284,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
     setShowAddAddress(false);
     setNewAddrText('');
     setNewAddrPincode('');
+    setNewAddrMapsLink('');
   };
 
   return (
@@ -1374,6 +1380,16 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                           <div key={addr.id} className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E3D6C3] text-xs">
                             <span className="font-bold text-[#9E6B2D] block">{addr.label}</span>
                             <p className="text-[#5C5147]">{addr.address}, Bengaluru - {addr.pincode}</p>
+                            {addr.mapsLink && (
+                              <a 
+                                href={addr.mapsLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-[11px] text-[#B37418] hover:underline font-semibold block mt-1"
+                              >
+                                Maps: {addr.mapsLink}
+                              </a>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1425,6 +1441,20 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                               placeholder="560041"
                               className="w-full px-3 py-2 rounded-xl border border-[#E3D6C3] bg-[#FAF8F5]"
                             />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-medium text-[#5C5147] mb-1">Google Maps Location Link (Compulsory) *</label>
+                            <input 
+                              type="url" 
+                              value={newAddrMapsLink} 
+                              onChange={(e) => setNewAddrMapsLink(e.target.value)} 
+                              placeholder="https://maps.app.goo.gl/... (Required for Acharya navigation)" 
+                              required 
+                              className="w-full px-3 py-2 rounded-xl border border-[#E3D6C3] bg-[#FAF8F5]" 
+                            />
+                            <p className="text-[10px] text-[#8C5D0D] mt-1">
+                              Compulsory for the Acharya to navigate to your home.
+                            </p>
                           </div>
                           <button
                             type="submit"

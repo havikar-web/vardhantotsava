@@ -26,6 +26,7 @@ export interface SavedAddress {
   landmark?: string;
   pincode: string;
   city: string;
+  mapsLink?: string;
 }
 
 export interface FamilyMember {
