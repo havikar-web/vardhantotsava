@@ -51,6 +51,7 @@ import { ACHARYA_SCHOLARS } from '../lib/content';
 import { calculateVedicDetails } from '../lib/panchanga';
 import { BrandLogo } from './BrandLogo';
 import { sendOtpMessage, sendWelcomeCatalogMessage } from '../lib/whatsapp';
+import { fetchUserProfileFromNeon, saveUserProfileToNeon } from '../lib/db';
 
 interface CustomerPortalProps {
   isOpen: boolean;
@@ -128,16 +129,15 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
       sendOtpMessage(phoneNumber, result.code);
     }
   };
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = verifyDemoOtp(phoneNumber, otpCode);
     setAuthError(result.error || '');
     if (!result.ok) return;
 
-    // Check if user has already registered previously or has booking history
+    // 1. Check if user already exists in local registry
     const existing = findUserProfileByPhone(phoneNumber);
     if (existing && existing.name && existing.name.trim()) {
-      // User details already exist — log in immediately without asking for details again!
       saveUserProfile(existing);
       setUser(existing);
       setAuthStep('phone');
@@ -146,7 +146,22 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
       return;
     }
 
-    // Only for brand new first-time users: ask for profile details
+    // 2. Query Neon PostgreSQL database backend for existing registered profile
+    try {
+      const neonUser = await fetchUserProfileFromNeon(phoneNumber);
+      if (neonUser && neonUser.name && neonUser.name.trim()) {
+        saveUserProfile(neonUser);
+        setUser(neonUser);
+        setAuthStep('phone');
+        setOtpCode('');
+        setAuthError('');
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend user profile check error:', err);
+    }
+
+    // Only for brand new first-time users who have never created a profile: ask for details
     setAuthStep('register');
   };
 
@@ -157,7 +172,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
       id: 'usr_' + Date.now(),
       name: regName.trim(),
       phone: '+' + normalizeIndianPhone(phoneNumber),
-      isVerified: false,
+      isVerified: true,
       demoVerified: true,
       email: regEmail.trim() || undefined,
       language: regLanguage,
@@ -171,6 +186,8 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
     };
     saveUserProfile(newUser);
     setUser(newUser);
+    // Persist profile to Neon PostgreSQL backend
+    saveUserProfileToNeon(newUser).catch(err => console.warn('Failed to save user to Neon:', err));
     // Send welcome catalog message via Meta Cloud API
     sendWelcomeCatalogMessage(newUser.phone, newUser.name);
   };

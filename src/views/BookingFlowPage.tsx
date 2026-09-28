@@ -8,7 +8,7 @@ import { NAKSHATRAS, RASHIS } from '../lib/panchanga';
 import { saveBooking, BookingPlan, getUserProfile, saveUserProfile, UserProfile, findUserProfileByPhone } from '../lib/store';
 import { AkshataCelebration } from '../components/AkshataCelebration';
 import { sendOtpMessage, sendWelcomeCatalogMessage, sendBookingConfirmedMessage, sendAcharyaAlertMessage } from '../lib/whatsapp';
-import { syncBookingToNeon } from '../lib/db';
+import { syncBookingToNeon, fetchUserProfileFromNeon, saveUserProfileToNeon } from '../lib/db';
 
 const VEDIC_GOTRAS = [
   'Kashyapa', 'Bharadwaja', 'Vashistha', 'Vishwamitra', 'Gautama', 
@@ -173,14 +173,23 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
     sendOtpMessage(phone, result.code);
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     const verification = verifyDemoOtp(phone, otpCode);
     if (verification.ok) {
       setIsPhoneVerified(true);
       setOtpError('');
       
-      // Look up existing profile from persistent registry or active store
-      const existing = findUserProfileByPhone(phone);
+      // Look up existing profile from persistent registry, active store, or Neon backend
+      let existing = findUserProfileByPhone(phone);
+      if (!existing || !existing.name) {
+        try {
+          const neonUser = await fetchUserProfileFromNeon(phone);
+          if (neonUser) existing = neonUser;
+        } catch (e) {
+          console.warn('Backend user lookup error:', e);
+        }
+      }
+
       if (existing) {
         if (!name && existing.name) setName(existing.name);
         if (!email && existing.email) setEmail(existing.email);
@@ -192,13 +201,13 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
         }
       }
 
-      // Save / update verified user profile in store and persistent registry
+      // Save / update verified user profile in store, persistent registry, and Neon backend
       const verifiedProfile: UserProfile = {
         id: existing?.id || `usr-${Date.now()}`,
         name: name || existing?.name || 'Vedic Celebrant',
         phone: phone.trim(),
         email: email.trim() || existing?.email,
-        isVerified: false,
+        isVerified: true,
         demoVerified: true,
         language: existing?.language || 'English',
         addresses: existing?.addresses && existing.addresses.length > 0
@@ -214,9 +223,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
         notifications: existing?.notifications || { whatsapp: true, email: true, reminders: true, marketing: false }
       };
       saveUserProfile(verifiedProfile);
-
-      // Dispatch Welcome & Products Catalog WhatsApp message only if brand new celebrant
-      // Promotional welcome is sent only by the live registration service with consent.
+      saveUserProfileToNeon(verifiedProfile).catch(e => console.warn('Neon save error:', e));
     } else {
       setOtpError(verification.error || 'Incorrect demo code.');
     }
