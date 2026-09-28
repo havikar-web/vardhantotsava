@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.server.example
+server/data/
+*.sqlite*
+node_modules/
+dist/
+/*.png

@@ -1,0 +1,2394 @@
+[
+  {
+    "name": "hav_otp1",
+    "category": "AUTHENTICATION",
+    "language": "en_US",
+    "status": "AWAITING_USER_TEMPLATE",
+    "purpose": "OTP requested. Exact approved template text, language and parameters to be supplied by the user; do not create or send a guessed payload.",
+    "body": "Pending: user will supply the existing hav_otp1 template.",
+    "variableKeys": [],
+    "sampleVariables": [],
+    "variables": []
+  },
+  {
+    "name": "mantrakshata_welcome_catalog",
+    "category": "MARKETING",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After first registration and real phone verification, with marketing opt-in for this promotional catalogue welcome.",
+    "body": "Namaskara {{1}}, welcome to Mantrakshata. Your mobile number has been verified. In Havikar tradition, every birthday is celebrated with Vedic blessings, consecrated Sandalwood bracelets, and sacred fire. Tap the button below to explore our authentic offerings and sacred keepsakes.",
+    "variableKeys": [
+      "customer_name"
+    ],
+    "sampleVariables": [
+      "Sample customer name"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_welcome_catalog",
+      "language": "en_US",
+      "category": "MARKETING",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, welcome to Mantrakshata. Your mobile number has been verified. In Havikar tradition, every birthday is celebrated with Vedic blessings, consecrated Sandalwood bracelets, and sacred fire. Tap the button below to explore our authentic offerings and sacred keepsakes.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name"
+              ]
+            ]
+          }
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "URL",
+              "text": "Explore Offerings",
+              "url": "https://www.mantrakshata.com/"
+            }
+          ]
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "type": "URL",
+        "text": "Explore Offerings",
+        "url": "https://www.mantrakshata.com/"
+      }
+    ]
+  },
+  {
+    "name": "mantrakshata_booking_confirmed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "To customer after booking, availability and required payment are confirmed.",
+    "body": "Shubhamastu {{1}}! Your Vardhantotsava celebration booking #{{2}} for {{3}} (Gotra: {{4}}, Nakshatra: {{5}}) is confirmed for {{6}} during {{7}}. Selected Package: {{8}}. Our Chief Vedic Coordinator is assigning an initiated Acharya. View details: {{9}}\nThank You",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "celebrant_name",
+      "gotra",
+      "nakshatra",
+      "ceremony_date",
+      "ceremony_time",
+      "package_name",
+      "customer_booking_url"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample celebrant name",
+      "Sample gotra",
+      "Sample nakshatra",
+      "Sample ceremony date",
+      "Sample ceremony time",
+      "Sample package name",
+      "https://www.mantrakshata.com/dashboard?bookingId=MK-SAMPLE-001"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{4}}",
+        "name": "gotra",
+        "description": "gotra",
+        "sample": "Sample gotra"
+      },
+      {
+        "position": "{{5}}",
+        "name": "nakshatra",
+        "description": "nakshatra",
+        "sample": "Sample nakshatra"
+      },
+      {
+        "position": "{{6}}",
+        "name": "ceremony_date",
+        "description": "ceremony date",
+        "sample": "Sample ceremony date"
+      },
+      {
+        "position": "{{7}}",
+        "name": "ceremony_time",
+        "description": "ceremony time",
+        "sample": "Sample ceremony time"
+      },
+      {
+        "position": "{{8}}",
+        "name": "package_name",
+        "description": "package name",
+        "sample": "Sample package name"
+      },
+      {
+        "position": "{{9}}",
+        "name": "customer_booking_url",
+        "description": "customer booking url",
+        "sample": "https://www.mantrakshata.com/dashboard?bookingId=MK-SAMPLE-001"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_booking_confirmed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Shubhamastu {{1}}! Your Vardhantotsava celebration booking #{{2}} for {{3}} (Gotra: {{4}}, Nakshatra: {{5}}) is confirmed for {{6}} during {{7}}. Selected Package: {{8}}. Our Chief Vedic Coordinator is assigning an initiated Acharya. View details: {{9}}\nThank You",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample celebrant name",
+                "Sample gotra",
+                "Sample nakshatra",
+                "Sample ceremony date",
+                "Sample ceremony time",
+                "Sample package name",
+                "https://www.mantrakshata.com/dashboard?bookingId=MK-SAMPLE-001"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_main_acharya_assignment",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "To MAIN Acharya after confirmed booking; assignment URL must identify this booking and require staff login.",
+    "body": "Namaskara Acharya {{1}}, please assign a Pandit for this confirmed Vardhantotsava.\n\nBooking ID: {{2}}\nCelebrant: {{3}}\nDate: {{4}}\nTime: {{5}} IST\nRitual / package: {{6}}\nVenue: {{7}}\n\nTap Assign Pandit below. Enter the Pandit's name, WhatsApp number and expected arrival time, then confirm the assignment.\n\n— Mantrakshata Coordination",
+    "variableKeys": [
+      "main_acharya_name",
+      "booking_id",
+      "celebrant_name",
+      "ceremony_date",
+      "ceremony_time",
+      "package_name",
+      "venue"
+    ],
+    "sampleVariables": [
+      "Sample main acharya name",
+      "Sample booking id",
+      "Sample celebrant name",
+      "Sample ceremony date",
+      "Sample ceremony time",
+      "Sample package name",
+      "Sample venue"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "main_acharya_name",
+        "description": "main acharya name",
+        "sample": "Sample main acharya name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{4}}",
+        "name": "ceremony_date",
+        "description": "ceremony date",
+        "sample": "Sample ceremony date"
+      },
+      {
+        "position": "{{5}}",
+        "name": "ceremony_time",
+        "description": "ceremony time",
+        "sample": "Sample ceremony time"
+      },
+      {
+        "position": "{{6}}",
+        "name": "package_name",
+        "description": "package name",
+        "sample": "Sample package name"
+      },
+      {
+        "position": "{{7}}",
+        "name": "venue",
+        "description": "venue",
+        "sample": "Sample venue"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_main_acharya_assignment",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara Acharya {{1}}, please assign a Pandit for this confirmed Vardhantotsava.\n\nBooking ID: {{2}}\nCelebrant: {{3}}\nDate: {{4}}\nTime: {{5}} IST\nRitual / package: {{6}}\nVenue: {{7}}\n\nTap Assign Pandit below. Enter the Pandit's name, WhatsApp number and expected arrival time, then confirm the assignment.\n\n— Mantrakshata Coordination",
+          "example": {
+            "body_text": [
+              [
+                "Sample main acharya name",
+                "Sample booking id",
+                "Sample celebrant name",
+                "Sample ceremony date",
+                "Sample ceremony time",
+                "Sample package name",
+                "Sample venue"
+              ]
+            ]
+          }
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "URL",
+              "text": "Assign Pandit",
+              "url": "https://www.mantrakshata.com/acharya/assign?bookingId={{1}}",
+              "example": [
+                "https://www.mantrakshata.com/acharya/assign?bookingId=MK-SAMPLE-001"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "type": "URL",
+        "text": "Assign Pandit",
+        "url": "https://www.mantrakshata.com/acharya/assign?bookingId={{1}}"
+      }
+    ],
+    "buttonVariableKeys": [
+      "booking_id"
+    ],
+    "buttonSampleVariables": [
+      "MK-SAMPLE-001"
+    ],
+    "sendButtonComponentExample": {
+      "type": "button",
+      "sub_type": "url",
+      "index": "0",
+      "parameters": [
+        {
+          "type": "text",
+          "text": "MK-SAMPLE-001"
+        }
+      ]
+    }
+  },
+  {
+    "name": "mantrakshata_customer_pandit_details",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "To customer after Main Acharya saves assignment to this booking; only latest assignment version.",
+    "body": "Namaskara {{1}}, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: {{2}}\nPandit: {{3}}\nContact: {{4}}\nDate: {{5}}\nCeremony time: {{6}} IST\nExpected arrival: {{7}} IST\n\nPlease keep your phone available for coordination. Reply here if you need help.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "pandit_name",
+      "pandit_phone",
+      "ceremony_date",
+      "ceremony_time",
+      "arrival_time"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample pandit name",
+      "Sample pandit phone",
+      "Sample ceremony date",
+      "Sample ceremony time",
+      "Sample arrival time"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "pandit_name",
+        "description": "pandit name",
+        "sample": "Sample pandit name"
+      },
+      {
+        "position": "{{4}}",
+        "name": "pandit_phone",
+        "description": "pandit phone",
+        "sample": "Sample pandit phone"
+      },
+      {
+        "position": "{{5}}",
+        "name": "ceremony_date",
+        "description": "ceremony date",
+        "sample": "Sample ceremony date"
+      },
+      {
+        "position": "{{6}}",
+        "name": "ceremony_time",
+        "description": "ceremony time",
+        "sample": "Sample ceremony time"
+      },
+      {
+        "position": "{{7}}",
+        "name": "arrival_time",
+        "description": "arrival time",
+        "sample": "Sample arrival time"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_customer_pandit_details",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: {{2}}\nPandit: {{3}}\nContact: {{4}}\nDate: {{5}}\nCeremony time: {{6}} IST\nExpected arrival: {{7}} IST\n\nPlease keep your phone available for coordination. Reply here if you need help.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample pandit name",
+                "Sample pandit phone",
+                "Sample ceremony date",
+                "Sample ceremony time",
+                "Sample arrival time"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_pandit_booking_details",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "To assigned Pandit after Main Acharya saves assignment; same event as customer Pandit details.",
+    "body": "Namaskara Pandit {{1}}, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: {{2}}\nCelebrant: {{3}}\nCustomer contact: {{4}}\nDate: {{5}}\nCeremony time: {{6}} IST\nArrival time: {{7}} IST\nVenue: {{8}}\nRitual / package: {{9}}\nSankalpa details: {{10}}\nSpecial instructions: {{11}}\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.",
+    "variableKeys": [
+      "pandit_name",
+      "booking_id",
+      "celebrant_name",
+      "customer_phone",
+      "ceremony_date",
+      "ceremony_time",
+      "arrival_time",
+      "venue",
+      "package_name",
+      "sankalpa_details",
+      "special_instructions"
+    ],
+    "sampleVariables": [
+      "Sample pandit name",
+      "Sample booking id",
+      "Sample celebrant name",
+      "Sample customer phone",
+      "Sample ceremony date",
+      "Sample ceremony time",
+      "Sample arrival time",
+      "Sample venue",
+      "Sample package name",
+      "Sample sankalpa details",
+      "Sample special instructions"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "pandit_name",
+        "description": "pandit name",
+        "sample": "Sample pandit name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{4}}",
+        "name": "customer_phone",
+        "description": "customer phone",
+        "sample": "Sample customer phone"
+      },
+      {
+        "position": "{{5}}",
+        "name": "ceremony_date",
+        "description": "ceremony date",
+        "sample": "Sample ceremony date"
+      },
+      {
+        "position": "{{6}}",
+        "name": "ceremony_time",
+        "description": "ceremony time",
+        "sample": "Sample ceremony time"
+      },
+      {
+        "position": "{{7}}",
+        "name": "arrival_time",
+        "description": "arrival time",
+        "sample": "Sample arrival time"
+      },
+      {
+        "position": "{{8}}",
+        "name": "venue",
+        "description": "venue",
+        "sample": "Sample venue"
+      },
+      {
+        "position": "{{9}}",
+        "name": "package_name",
+        "description": "package name",
+        "sample": "Sample package name"
+      },
+      {
+        "position": "{{10}}",
+        "name": "sankalpa_details",
+        "description": "sankalpa details",
+        "sample": "Sample sankalpa details"
+      },
+      {
+        "position": "{{11}}",
+        "name": "special_instructions",
+        "description": "special instructions",
+        "sample": "Sample special instructions"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_pandit_booking_details",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara Pandit {{1}}, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: {{2}}\nCelebrant: {{3}}\nCustomer contact: {{4}}\nDate: {{5}}\nCeremony time: {{6}} IST\nArrival time: {{7}} IST\nVenue: {{8}}\nRitual / package: {{9}}\nSankalpa details: {{10}}\nSpecial instructions: {{11}}\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.",
+          "example": {
+            "body_text": [
+              [
+                "Sample pandit name",
+                "Sample booking id",
+                "Sample celebrant name",
+                "Sample customer phone",
+                "Sample ceremony date",
+                "Sample ceremony time",
+                "Sample arrival time",
+                "Sample venue",
+                "Sample package name",
+                "Sample sankalpa details",
+                "Sample special instructions"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_reminder_1day",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "To customer 24 hours before confirmed ceremony start. Cancel and recompute when rescheduled or cancelled.",
+    "body": "Namaskara {{1}}, a reminder that {{2}}'s Vardhantotsava is scheduled for {{3}} at {{4}} IST.\n\nBooking ID: {{5}}\nVenue: {{6}}\nPreparation checklist: {{7}}\n\nPlease keep the space ready and inform us of any changes. We look forward to celebrating with your family.",
+    "variableKeys": [
+      "customer_name",
+      "celebrant_name",
+      "ceremony_date",
+      "ceremony_time",
+      "booking_id",
+      "venue",
+      "preparation_checklist"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample celebrant name",
+      "Sample ceremony date",
+      "Sample ceremony time",
+      "Sample booking id",
+      "Sample venue",
+      "Sample preparation checklist"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "ceremony_date",
+        "description": "ceremony date",
+        "sample": "Sample ceremony date"
+      },
+      {
+        "position": "{{4}}",
+        "name": "ceremony_time",
+        "description": "ceremony time",
+        "sample": "Sample ceremony time"
+      },
+      {
+        "position": "{{5}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{6}}",
+        "name": "venue",
+        "description": "venue",
+        "sample": "Sample venue"
+      },
+      {
+        "position": "{{7}}",
+        "name": "preparation_checklist",
+        "description": "preparation checklist",
+        "sample": "Sample preparation checklist"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_reminder_1day",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, a reminder that {{2}}'s Vardhantotsava is scheduled for {{3}} at {{4}} IST.\n\nBooking ID: {{5}}\nVenue: {{6}}\nPreparation checklist: {{7}}\n\nPlease keep the space ready and inform us of any changes. We look forward to celebrating with your family.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample celebrant name",
+                "Sample ceremony date",
+                "Sample ceremony time",
+                "Sample booking id",
+                "Sample venue",
+                "Sample preparation checklist"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_reminder_2hours",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "To customer 2 hours before confirmed ceremony start. Does not assert Pandit departure or arrival.",
+    "body": "Namaskara {{1}}, {{2}}'s Vardhantotsava begins in 2 hours, at {{3}} IST.\n\nBooking ID: {{4}}\nVenue: {{5}}\n\nPlease have the family and preparation items ready, and keep your phone available for coordination. Reply here if you need assistance.",
+    "variableKeys": [
+      "customer_name",
+      "celebrant_name",
+      "ceremony_time",
+      "booking_id",
+      "venue"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample celebrant name",
+      "Sample ceremony time",
+      "Sample booking id",
+      "Sample venue"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "ceremony_time",
+        "description": "ceremony time",
+        "sample": "Sample ceremony time"
+      },
+      {
+        "position": "{{4}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{5}}",
+        "name": "venue",
+        "description": "venue",
+        "sample": "Sample venue"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_reminder_2hours",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, {{2}}'s Vardhantotsava begins in 2 hours, at {{3}} IST.\n\nBooking ID: {{4}}\nVenue: {{5}}\n\nPlease have the family and preparation items ready, and keep your phone available for coordination. Reply here if you need assistance.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample celebrant name",
+                "Sample ceremony time",
+                "Sample booking id",
+                "Sample venue"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_next_day_followup",
+    "category": "MARKETING",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Assumption: next-day thank-you and feedback. Send at 10:00 Asia/Kolkata on the day after the ceremony, only when marked completed; use appropriate consent for approved category.",
+    "body": "Namaskara {{1}}, thank you for celebrating {{2}}'s Vardhantotsava with Mantrakshata. We hope the ceremony brought joy and blessings to your family.\n\nBooking ID: {{3}}\nHow was your experience? Please reply with your feedback or any support you need.\n\nReply STOP to stop feedback messages.",
+    "variableKeys": [
+      "customer_name",
+      "celebrant_name",
+      "booking_id"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample celebrant name",
+      "Sample booking id"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_next_day_followup",
+      "language": "en_US",
+      "category": "MARKETING",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, thank you for celebrating {{2}}'s Vardhantotsava with Mantrakshata. We hope the ceremony brought joy and blessings to your family.\n\nBooking ID: {{3}}\nHow was your experience? Please reply with your feedback or any support you need.\n\nReply STOP to stop feedback messages.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample celebrant name",
+                "Sample booking id"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_enquiry_received",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "When a customer requests information",
+    "body": "Namaskara {{1}}, we have received your enquiry about {{2}}. Your reference is {{3}}. Our Mantrakshata coordinator will respond during {{4}}.",
+    "variableKeys": [
+      "customer_name",
+      "service",
+      "enquiry_id",
+      "support_hours"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample service",
+      "Sample enquiry id",
+      "Sample support hours"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "service",
+        "description": "service",
+        "sample": "Sample service"
+      },
+      {
+        "position": "{{3}}",
+        "name": "enquiry_id",
+        "description": "enquiry id",
+        "sample": "Sample enquiry id"
+      },
+      {
+        "position": "{{4}}",
+        "name": "support_hours",
+        "description": "support hours",
+        "sample": "Sample support hours"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_enquiry_received",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, we have received your enquiry about {{2}}. Your reference is {{3}}. Our Mantrakshata coordinator will respond during {{4}}.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample service",
+                "Sample enquiry id",
+                "Sample support hours"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_birth_details_required",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "When a requested booking lacks birth details",
+    "body": "Namaskara {{1}}, please complete the birth details for {{2}} (request {{3}}): {{4}}. If Nakshatra, Rashi or Gotra is unknown, select “Needs coordinator confirmation”.",
+    "variableKeys": [
+      "customer_name",
+      "celebrant_name",
+      "booking_id",
+      "missing_fields"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample celebrant name",
+      "Sample booking id",
+      "Sample missing fields"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{4}}",
+        "name": "missing_fields",
+        "description": "missing fields",
+        "sample": "Sample missing fields"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_birth_details_required",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, please complete the birth details for {{2}} (request {{3}}): {{4}}. If Nakshatra, Rashi or Gotra is unknown, select “Needs coordinator confirmation”.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample celebrant name",
+                "Sample booking id",
+                "Sample missing fields"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_booking_request_received",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After a real booking request is persisted",
+    "body": "Namaskara {{1}}, we received request {{2}} for {{3}} on {{4}}, {{5}}. Package: {{6}}. This is a request acknowledgement; your date and Acharya are not confirmed yet.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "celebrant_name",
+      "requested_date",
+      "time_slot",
+      "package_name"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample celebrant name",
+      "Sample requested date",
+      "Sample time slot",
+      "Sample package name"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{4}}",
+        "name": "requested_date",
+        "description": "requested date",
+        "sample": "Sample requested date"
+      },
+      {
+        "position": "{{5}}",
+        "name": "time_slot",
+        "description": "time slot",
+        "sample": "Sample time slot"
+      },
+      {
+        "position": "{{6}}",
+        "name": "package_name",
+        "description": "package name",
+        "sample": "Sample package name"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_booking_request_received",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, we received request {{2}} for {{3}} on {{4}}, {{5}}. Package: {{6}}. This is a request acknowledgement; your date and Acharya are not confirmed yet.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample celebrant name",
+                "Sample requested date",
+                "Sample time slot",
+                "Sample package name"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_payment_pending",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "For an existing unpaid booking with a server-issued payment link",
+    "body": "Namaskara {{1}}, payment of INR {{2}} is pending for booking {{3}}. Use the secure payment link provided by our coordinator. If you have already paid, reply with your reference. Do not share your PIN or OTP.",
+    "variableKeys": [
+      "customer_name",
+      "amount",
+      "booking_id"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample amount",
+      "Sample booking id"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "amount",
+        "description": "amount",
+        "sample": "Sample amount"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_payment_pending",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, payment of INR {{2}} is pending for booking {{3}}. Use the secure payment link provided by our coordinator. If you have already paid, reply with your reference. Do not share your PIN or OTP.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample amount",
+                "Sample booking id"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_payment_failed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After provider failure event; do not send for pending payments",
+    "body": "Namaskara {{1}}, payment for booking {{2}} was not completed. Reference: {{3}}. You may retry through your booking page. If your bank shows a debit, reply here so we can check its status.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "attempt_reference"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample attempt reference"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "attempt_reference",
+        "description": "attempt reference",
+        "sample": "Sample attempt reference"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_payment_failed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, payment for booking {{2}} was not completed. Reference: {{3}}. You may retry through your booking page. If your bank shows a debit, reply here so we can check its status.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample attempt reference"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_payment_received",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only after payment signature, amount and capture verification",
+    "body": "Namaskara {{1}}, we received INR {{2}} for booking {{3}}. Payment reference: {{4}}. Ceremony scheduling will be confirmed separately.",
+    "variableKeys": [
+      "customer_name",
+      "amount",
+      "booking_id",
+      "payment_reference"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample amount",
+      "Sample booking id",
+      "Sample payment reference"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "amount",
+        "description": "amount",
+        "sample": "Sample amount"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{4}}",
+        "name": "payment_reference",
+        "description": "payment reference",
+        "sample": "Sample payment reference"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_payment_received",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, we received INR {{2}} for booking {{3}}. Payment reference: {{4}}. Ceremony scheduling will be confirmed separately.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample amount",
+                "Sample booking id",
+                "Sample payment reference"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_preparation_checklist",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After confirmation; checklist reviewed for the selected ceremony",
+    "body": "Namaskara {{1}}, here is the preparation checklist for booking {{2}} on {{3}}: {{4}}. Your coordinator will confirm the materials we provide. Please tell us about access, seating or safety requirements in advance.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "date",
+      "checklist"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample date",
+      "Sample checklist"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "date",
+        "description": "date",
+        "sample": "Sample date"
+      },
+      {
+        "position": "{{4}}",
+        "name": "checklist",
+        "description": "checklist",
+        "sample": "Sample checklist"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_preparation_checklist",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, here is the preparation checklist for booking {{2}} on {{3}}: {{4}}. Your coordinator will confirm the materials we provide. Please tell us about access, seating or safety requirements in advance.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample date",
+                "Sample checklist"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_assignment_changed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After a confirmed assignment changes",
+    "body": "Namaskara {{1}}, the Acharya for booking {{2}} has changed to {{3}}. The ceremony remains scheduled for {{4}}, {{5}} IST. Your coordinator will help with any questions.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "acharya_name",
+      "date",
+      "time_slot"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample acharya name",
+      "Sample date",
+      "Sample time slot"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "acharya_name",
+        "description": "acharya name",
+        "sample": "Sample acharya name"
+      },
+      {
+        "position": "{{4}}",
+        "name": "date",
+        "description": "date",
+        "sample": "Sample date"
+      },
+      {
+        "position": "{{5}}",
+        "name": "time_slot",
+        "description": "time slot",
+        "sample": "Sample time slot"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_assignment_changed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, the Acharya for booking {{2}} has changed to {{3}}. The ceremony remains scheduled for {{4}}, {{5}} IST. Your coordinator will help with any questions.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample acharya name",
+                "Sample date",
+                "Sample time slot"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_acharya_on_the_way",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only after scholar marks departure",
+    "body": "Namaskara {{1}}, Acharya {{2}} is on the way for booking {{3}}. Estimated arrival: {{4}} IST. Please keep your phone available for directions.",
+    "variableKeys": [
+      "customer_name",
+      "acharya_name",
+      "booking_id",
+      "arrival_time"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample acharya name",
+      "Sample booking id",
+      "Sample arrival time"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "acharya_name",
+        "description": "acharya name",
+        "sample": "Sample acharya name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{4}}",
+        "name": "arrival_time",
+        "description": "arrival time",
+        "sample": "Sample arrival time"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_acharya_on_the_way",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, Acharya {{2}} is on the way for booking {{3}}. Estimated arrival: {{4}} IST. Please keep your phone available for directions.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample acharya name",
+                "Sample booking id",
+                "Sample arrival time"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_livestream_ready",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only if streaming is included and a real access link exists",
+    "body": "Namaskara {{1}}, the private family livestream for {{2}} is ready. Booking: {{3}}. It starts at {{4}} IST. Please share the access link only with invited family members.",
+    "variableKeys": [
+      "customer_name",
+      "celebrant_name",
+      "booking_id",
+      "stream_time"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample celebrant name",
+      "Sample booking id",
+      "Sample stream time"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{4}}",
+        "name": "stream_time",
+        "description": "stream time",
+        "sample": "Sample stream time"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_livestream_ready",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, the private family livestream for {{2}} is ready. Booking: {{3}}. It starts at {{4}} IST. Please share the access link only with invited family members.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample celebrant name",
+                "Sample booking id",
+                "Sample stream time"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_reschedule_confirmed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After coordinator commits an agreed schedule change",
+    "body": "Namaskara {{1}}, booking {{2}} has been rescheduled from {{3}} to {{4}}, {{5}} IST. Venue: {{6}}. Reply if these details do not match your request.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "old_date",
+      "new_date",
+      "time_slot",
+      "venue"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample old date",
+      "Sample new date",
+      "Sample time slot",
+      "Sample venue"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "old_date",
+        "description": "old date",
+        "sample": "Sample old date"
+      },
+      {
+        "position": "{{4}}",
+        "name": "new_date",
+        "description": "new date",
+        "sample": "Sample new date"
+      },
+      {
+        "position": "{{5}}",
+        "name": "time_slot",
+        "description": "time slot",
+        "sample": "Sample time slot"
+      },
+      {
+        "position": "{{6}}",
+        "name": "venue",
+        "description": "venue",
+        "sample": "Sample venue"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_reschedule_confirmed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, booking {{2}} has been rescheduled from {{3}} to {{4}}, {{5}} IST. Venue: {{6}}. Reply if these details do not match your request.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample old date",
+                "Sample new date",
+                "Sample time slot",
+                "Sample venue"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_cancellation_received",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After cancellation request is recorded",
+    "body": "Namaskara {{1}}, we received your cancellation request for booking {{2}}. Our coordinator will review the applicable cancellation terms and confirm the outcome. Reference: {{3}}.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "request_reference"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample request reference"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "request_reference",
+        "description": "request reference",
+        "sample": "Sample request reference"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_cancellation_received",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, we received your cancellation request for booking {{2}}. Our coordinator will review the applicable cancellation terms and confirm the outcome. Reference: {{3}}.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample request reference"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_cancellation_confirmed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only after booking is canceled",
+    "body": "Namaskara {{1}}, booking {{2}} scheduled for {{3}} has been cancelled. Refund status: {{4}}. Any eligible refund will be updated separately.",
+    "variableKeys": [
+      "customer_name",
+      "booking_id",
+      "date",
+      "refund_status"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample booking id",
+      "Sample date",
+      "Sample refund status"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "date",
+        "description": "date",
+        "sample": "Sample date"
+      },
+      {
+        "position": "{{4}}",
+        "name": "refund_status",
+        "description": "refund status",
+        "sample": "Sample refund status"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_cancellation_confirmed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, booking {{2}} scheduled for {{3}} has been cancelled. Refund status: {{4}}. Any eligible refund will be updated separately.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample booking id",
+                "Sample date",
+                "Sample refund status"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_refund_initiated",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only after provider creates a refund",
+    "body": "Namaskara {{1}}, a refund of INR {{2}} has been initiated for booking {{3}}. Refund reference: {{4}}. Expected bank processing time: {{5}}, subject to the payment provider and your bank.",
+    "variableKeys": [
+      "customer_name",
+      "amount",
+      "booking_id",
+      "refund_reference",
+      "processing_window"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample amount",
+      "Sample booking id",
+      "Sample refund reference",
+      "Sample processing window"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "amount",
+        "description": "amount",
+        "sample": "Sample amount"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{4}}",
+        "name": "refund_reference",
+        "description": "refund reference",
+        "sample": "Sample refund reference"
+      },
+      {
+        "position": "{{5}}",
+        "name": "processing_window",
+        "description": "processing window",
+        "sample": "Sample processing window"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_refund_initiated",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, a refund of INR {{2}} has been initiated for booking {{3}}. Refund reference: {{4}}. Expected bank processing time: {{5}}, subject to the payment provider and your bank.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample amount",
+                "Sample booking id",
+                "Sample refund reference",
+                "Sample processing window"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_refund_completed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only after refund processed webhook",
+    "body": "Namaskara {{1}}, the payment provider has processed your refund of INR {{2}} for booking {{3}}. Reference: {{4}}. Your bank statement may take time to update.",
+    "variableKeys": [
+      "customer_name",
+      "amount",
+      "booking_id",
+      "refund_reference"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample amount",
+      "Sample booking id",
+      "Sample refund reference"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "amount",
+        "description": "amount",
+        "sample": "Sample amount"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      },
+      {
+        "position": "{{4}}",
+        "name": "refund_reference",
+        "description": "refund reference",
+        "sample": "Sample refund reference"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_refund_completed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, the payment provider has processed your refund of INR {{2}} for booking {{3}}. Reference: {{4}}. Your bank statement may take time to update.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample amount",
+                "Sample booking id",
+                "Sample refund reference"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_ceremony_completed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After coordinator marks actual ceremony complete",
+    "body": "Shubhamastu {{1}}. Thank you for celebrating {{2}}’s Vardhantotsava with Mantrakshata. Booking {{3}} is marked complete. We hope your family enjoyed the ceremony. Reply here if you need help with any remaining arrangements.",
+    "variableKeys": [
+      "customer_name",
+      "celebrant_name",
+      "booking_id"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample celebrant name",
+      "Sample booking id"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "booking_id",
+        "description": "booking id",
+        "sample": "Sample booking id"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_ceremony_completed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Shubhamastu {{1}}. Thank you for celebrating {{2}}’s Vardhantotsava with Mantrakshata. Booking {{3}} is marked complete. We hope your family enjoyed the ceremony. Reply here if you need help with any remaining arrangements.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample celebrant name",
+                "Sample booking id"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_gift_request_received",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After gift request is saved; not a payment confirmation",
+    "body": "Namaskara {{1}}, we received your gift request {{2}} for {{3}}. Selection: {{4}}. Total quoted: INR {{5}}. Payment, delivery details and the gift date still require confirmation.",
+    "variableKeys": [
+      "sender_name",
+      "gift_id",
+      "recipient_name",
+      "gift_name",
+      "amount"
+    ],
+    "sampleVariables": [
+      "Sample sender name",
+      "Sample gift id",
+      "Sample recipient name",
+      "Sample gift name",
+      "Sample amount"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "sender_name",
+        "description": "sender name",
+        "sample": "Sample sender name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "gift_id",
+        "description": "gift id",
+        "sample": "Sample gift id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "recipient_name",
+        "description": "recipient name",
+        "sample": "Sample recipient name"
+      },
+      {
+        "position": "{{4}}",
+        "name": "gift_name",
+        "description": "gift name",
+        "sample": "Sample gift name"
+      },
+      {
+        "position": "{{5}}",
+        "name": "amount",
+        "description": "amount",
+        "sample": "Sample amount"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_gift_request_received",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, we received your gift request {{2}} for {{3}}. Selection: {{4}}. Total quoted: INR {{5}}. Payment, delivery details and the gift date still require confirmation.",
+          "example": {
+            "body_text": [
+              [
+                "Sample sender name",
+                "Sample gift id",
+                "Sample recipient name",
+                "Sample gift name",
+                "Sample amount"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_gift_order_confirmed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After payment verified and stock/delivery accepted",
+    "body": "Namaskara {{1}}, your gift order {{2}} is confirmed. Items: {{3}}. Amount received: INR {{4}}. Delivery city: {{5}}. We will share tracking when the order ships.",
+    "variableKeys": [
+      "customer_name",
+      "order_id",
+      "item_summary",
+      "amount",
+      "city"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample order id",
+      "Sample item summary",
+      "Sample amount",
+      "Sample city"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "order_id",
+        "description": "order id",
+        "sample": "Sample order id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "item_summary",
+        "description": "item summary",
+        "sample": "Sample item summary"
+      },
+      {
+        "position": "{{4}}",
+        "name": "amount",
+        "description": "amount",
+        "sample": "Sample amount"
+      },
+      {
+        "position": "{{5}}",
+        "name": "city",
+        "description": "city",
+        "sample": "Sample city"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_gift_order_confirmed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, your gift order {{2}} is confirmed. Items: {{3}}. Amount received: INR {{4}}. Delivery city: {{5}}. We will share tracking when the order ships.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample order id",
+                "Sample item summary",
+                "Sample amount",
+                "Sample city"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_gift_recipient_notice",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only when recipient has opted in and sender permits disclosure",
+    "body": "Namaskara {{1}}, {{2}} has arranged a Mantrakshata gift for you. Reference: {{3}}. Please reply to coordinate the delivery or celebration details.",
+    "variableKeys": [
+      "recipient_name",
+      "sender_name",
+      "gift_id"
+    ],
+    "sampleVariables": [
+      "Sample recipient name",
+      "Sample sender name",
+      "Sample gift id"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "recipient_name",
+        "description": "recipient name",
+        "sample": "Sample recipient name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "sender_name",
+        "description": "sender name",
+        "sample": "Sample sender name"
+      },
+      {
+        "position": "{{3}}",
+        "name": "gift_id",
+        "description": "gift id",
+        "sample": "Sample gift id"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_gift_recipient_notice",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, {{2}} has arranged a Mantrakshata gift for you. Reference: {{3}}. Please reply to coordinate the delivery or celebration details.",
+          "example": {
+            "body_text": [
+              [
+                "Sample recipient name",
+                "Sample sender name",
+                "Sample gift id"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_order_shipped",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After actual carrier handoff and tracking recorded",
+    "body": "Namaskara {{1}}, order {{2}} has shipped via {{3}}. Tracking reference: {{4}}. Estimated delivery: {{5}}. Use the tracking link for current carrier updates.",
+    "variableKeys": [
+      "customer_name",
+      "order_id",
+      "carrier",
+      "tracking_reference",
+      "estimated_delivery"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample order id",
+      "Sample carrier",
+      "Sample tracking reference",
+      "Sample estimated delivery"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "order_id",
+        "description": "order id",
+        "sample": "Sample order id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "carrier",
+        "description": "carrier",
+        "sample": "Sample carrier"
+      },
+      {
+        "position": "{{4}}",
+        "name": "tracking_reference",
+        "description": "tracking reference",
+        "sample": "Sample tracking reference"
+      },
+      {
+        "position": "{{5}}",
+        "name": "estimated_delivery",
+        "description": "estimated delivery",
+        "sample": "Sample estimated delivery"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_order_shipped",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, order {{2}} has shipped via {{3}}. Tracking reference: {{4}}. Estimated delivery: {{5}}. Use the tracking link for current carrier updates.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample order id",
+                "Sample carrier",
+                "Sample tracking reference",
+                "Sample estimated delivery"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_delivery_attempt_failed",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "After carrier confirms failed attempt",
+    "body": "Namaskara {{1}}, delivery for order {{2}} could not be completed on {{3}}. Carrier note: {{4}}. Please reply to confirm the delivery address and a suitable contact time.",
+    "variableKeys": [
+      "customer_name",
+      "order_id",
+      "attempt_date",
+      "carrier_note"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample order id",
+      "Sample attempt date",
+      "Sample carrier note"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "order_id",
+        "description": "order id",
+        "sample": "Sample order id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "attempt_date",
+        "description": "attempt date",
+        "sample": "Sample attempt date"
+      },
+      {
+        "position": "{{4}}",
+        "name": "carrier_note",
+        "description": "carrier note",
+        "sample": "Sample carrier note"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_delivery_attempt_failed",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, delivery for order {{2}} could not be completed on {{3}}. Carrier note: {{4}}. Please reply to confirm the delivery address and a suitable contact time.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample order id",
+                "Sample attempt date",
+                "Sample carrier note"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_order_delivered",
+    "category": "UTILITY",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Only after carrier delivered event",
+    "body": "Namaskara {{1}}, the carrier marked order {{2}} delivered on {{3}}. If you have not received it, reply here so we can investigate.",
+    "variableKeys": [
+      "customer_name",
+      "order_id",
+      "delivery_date"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample order id",
+      "Sample delivery date"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "order_id",
+        "description": "order id",
+        "sample": "Sample order id"
+      },
+      {
+        "position": "{{3}}",
+        "name": "delivery_date",
+        "description": "delivery date",
+        "sample": "Sample delivery date"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_order_delivered",
+      "language": "en_US",
+      "category": "UTILITY",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, the carrier marked order {{2}} delivered on {{3}}. If you have not received it, reply here so we can investigate.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample order id",
+                "Sample delivery date"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_annual_birthday_reminder",
+    "category": "MARKETING",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Before next birthday, with separate marketing/reminder consent",
+    "body": "Namaskara {{1}}, {{2}}’s birthday is approaching. Would you like help planning another Vardhantotsava? Reply YES to speak with a coordinator or STOP to stop promotional reminders.",
+    "variableKeys": [
+      "customer_name",
+      "celebrant_name"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample celebrant name"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "celebrant_name",
+        "description": "celebrant name",
+        "sample": "Sample celebrant name"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_annual_birthday_reminder",
+      "language": "en_US",
+      "category": "MARKETING",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, {{2}}’s birthday is approaching. Would you like help planning another Vardhantotsava? Reply YES to speak with a coordinator or STOP to stop promotional reminders.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample celebrant name"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_booking_resume",
+    "category": "MARKETING",
+    "language": "en_US",
+    "status": "DRAFT_NOT_SUBMITTED",
+    "purpose": "Once for abandoned booking, only with marketing consent",
+    "body": "Namaskara {{1}}, you started planning a Mantrakshata celebration. If you would like help completing request {{2}}, reply here. Reply STOP to stop promotional reminders.",
+    "variableKeys": [
+      "customer_name",
+      "request_id"
+    ],
+    "sampleVariables": [
+      "Sample customer name",
+      "Sample request id"
+    ],
+    "variables": [
+      {
+        "position": "{{1}}",
+        "name": "customer_name",
+        "description": "customer name",
+        "sample": "Sample customer name"
+      },
+      {
+        "position": "{{2}}",
+        "name": "request_id",
+        "description": "request id",
+        "sample": "Sample request id"
+      }
+    ],
+    "creationPayload": {
+      "name": "mantrakshata_booking_resume",
+      "language": "en_US",
+      "category": "MARKETING",
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Namaskara {{1}}, you started planning a Mantrakshata celebration. If you would like help completing request {{2}}, reply here. Reply STOP to stop promotional reminders.",
+          "example": {
+            "body_text": [
+              [
+                "Sample customer name",
+                "Sample request id"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "buttons": []
+  }
+]

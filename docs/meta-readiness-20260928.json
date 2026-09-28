@@ -1,0 +1,83 @@
+[
+  {
+    "name": "mantrakshata_reminder_2hours",
+    "status": "PENDING",
+    "language": "en",
+    "bodyVariables": 5,
+    "buttons": [
+      {
+        "type": "PHONE_NUMBER",
+        "dynamic": false
+      }
+    ]
+  },
+  {
+    "name": "mantrakshata_reminder_1day",
+    "status": "PENDING",
+    "language": "en",
+    "bodyVariables": 7,
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_pandit_booking_details",
+    "status": "APPROVED",
+    "language": "en",
+    "bodyVariables": 11,
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_customer_pandit_details",
+    "status": "PENDING",
+    "language": "en",
+    "bodyVariables": 7,
+    "buttons": []
+  },
+  {
+    "name": "mantrakshata_main_acharya_assignment",
+    "status": "APPROVED",
+    "language": "en",
+    "bodyVariables": 7,
+    "buttons": [
+      {
+        "type": "URL",
+        "dynamic": true
+      }
+    ]
+  },
+  {
+    "name": "mantrakshata_booking_confirmed",
+    "status": "APPROVED",
+    "language": "en",
+    "bodyVariables": 9,
+    "buttons": [
+      {
+        "type": "URL",
+        "dynamic": false
+      }
+    ]
+  },
+  {
+    "name": "mantrakshata_welcome_catalog",
+    "status": "APPROVED",
+    "language": "en",
+    "bodyVariables": 1,
+    "buttons": [
+      {
+        "type": "URL",
+        "dynamic": false
+      }
+    ]
+  },
+  {
+    "name": "hav_otp1",
+    "status": "APPROVED",
+    "language": "en_US",
+    "bodyVariables": 4,
+    "buttons": [
+      {
+        "type": "URL",
+        "dynamic": true
+      }
+    ]
+  }
+]
