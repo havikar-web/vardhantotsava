@@ -21,7 +21,12 @@ import {
   ArrowRight,
   TrendingUp,
   Sliders,
-  DollarSign
+  DollarSign,
+  BarChart3,
+  Activity,
+  UserCheck,
+  Send,
+  RefreshCw
 } from 'lucide-react';
 import { 
   getAllBookings, 
@@ -36,20 +41,50 @@ import {
   getWhatsAppMessages, 
   sendCompletionThankYouMessage, 
   sendAcharyaAssignedMessage,
-  sendAcharyaOrderDispatchMessage 
+  sendAcharyaOrderDispatchMessage,
+  sendTestAlertToAdminAndAcharya
 } from '../lib/whatsapp';
 import { checkNeonConnection, fetchBookingsFromNeon, fetchGiftOrdersFromNeon, syncBookingToNeon } from '../lib/db';
+import { SystemSettings, getSystemSettings, updateSystemSettings, fetchSystemSettings } from '../lib/settings';
 import { WhatsAppTesterTab } from '../components/admin/WhatsAppTesterTab';
 import { CredentialsTab } from '../components/admin/CredentialsTab';
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  language?: string;
+  isVerified: boolean;
+  createdAt: string;
+  bookingsCount: number;
+  totalSpent: number;
+}
 
 interface Props {
   navigate: (path: string) => void;
 }
 
+export type AdminTab = 'analytics' | 'bookings' | 'gifts' | 'users' | 'settings' | 'acharyas' | 'tester' | 'credentials' | 'database';
+
 export const AdminDashboardPage: React.FC<Props> = ({ navigate }) => {
-  const [activeTab, setActiveTab] = useState<'bookings' | 'gifts' | 'acharyas' | 'tester' | 'credentials' | 'database'>('bookings');
+  const [activeTab, setActiveTab] = useState<AdminTab>('analytics');
   const [bookings, setBookings] = useState<BookingPlan[]>(() => getAllBookings());
   const [giftOrders, setGiftOrders] = useState<GiftOrder[]>(() => getGiftOrders());
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+
+  const [systemSettings, setSystemSettings] = useState<SystemSettings>(() => getSystemSettings());
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSavedMessage, setSettingsSavedMessage] = useState<string | null>(null);
+  const [testingAlert, setTestingAlert] = useState(false);
+  const [testAlertResult, setTestAlertResult] = useState<{
+    ok: boolean;
+    phones: string[];
+    results: { phone: string; ok: boolean; messageId?: string; error?: string }[];
+  } | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'draft' | 'completed'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -62,6 +97,29 @@ export const AdminDashboardPage: React.FC<Props> = ({ navigate }) => {
     tested: false,
     ok: false,
   });
+
+  const loadUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const res = await fetch('/api/users/profile?all=true');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.users)) {
+          setUsers(data.users);
+        }
+      }
+    } catch (err) {
+      console.warn('Error loading users:', err);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchSystemSettings().then(setSystemSettings).catch(console.warn);
+    loadUsers();
+    handleSyncWithNeon();
+  }, []);
 
   const handleSyncWithNeon = async () => {
     setSyncingNeon(true);
@@ -94,6 +152,38 @@ export const AdminDashboardPage: React.FC<Props> = ({ navigate }) => {
       version: res.version,
       error: res.error,
     });
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsSaving(true);
+    try {
+      const updated = await updateSystemSettings(systemSettings);
+      setSystemSettings(updated);
+      setSettingsSavedMessage('System settings saved and active across all WhatsApp automations!');
+      setTimeout(() => setSettingsSavedMessage(null), 4000);
+    } catch (err: any) {
+      setSettingsSavedMessage('Failed to save settings: ' + (err?.message || 'Error'));
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const handleTestSendAlert = async () => {
+    setTestingAlert(true);
+    setTestAlertResult(null);
+    try {
+      const res = await sendTestAlertToAdminAndAcharya();
+      setTestAlertResult(res);
+    } catch (err: any) {
+      setTestAlertResult({
+        ok: false,
+        phones: [systemSettings.mainAcharyaPhone, systemSettings.adminPhone],
+        results: [{ phone: 'all', ok: false, error: err?.message || 'Test failed' }]
+      });
+    } finally {
+      setTestingAlert(false);
+    }
   };
 
   // Quick stats calculation
@@ -368,13 +458,23 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b border-gold/20 pb-2 text-xs font-semibold overflow-x-auto">
           <button
+            onClick={() => setActiveTab('analytics')}
+            className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              activeTab === 'analytics' ? 'bg-[#B37418] text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal bg-white/60'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Analytics &amp; Performance</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('bookings')}
             className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'bookings' ? 'bg-[#B37418] text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal bg-white/60'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Vardhantotsava Bookings ({bookings.length})</span>
+            <span>Bookings ({bookings.length})</span>
           </button>
 
           <button
@@ -384,7 +484,37 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
             }`}
           >
             <Gift className="w-3.5 h-3.5" />
-            <span>Havikar Gifts Store Orders ({giftOrders.length})</span>
+            <span>Gifts Store Orders ({giftOrders.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              activeTab === 'users' ? 'bg-[#B37418] text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal bg-white/60'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Users &amp; Hosts ({users.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              activeTab === 'settings' ? 'bg-[#B37418] text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal bg-white/60'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Acharya &amp; Admin Settings</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('acharyas')}
+            className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              activeTab === 'acharyas' ? 'bg-[#B37418] text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal bg-white/60'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Acharya Roster ({ACHARYA_SCHOLARS.length})</span>
           </button>
 
           <button
@@ -404,17 +534,7 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Credentials & Cloud APIs</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('acharyas')}
-            className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === 'acharyas' ? 'bg-[#B37418] text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal bg-white/60'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>Acharya Roster ({ACHARYA_SCHOLARS.length})</span>
+            <span>Credentials &amp; APIs</span>
           </button>
 
           <button
@@ -427,6 +547,204 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
             <span>Database Architecture</span>
           </button>
         </div>
+
+        {/* TAB 0: ANALYTICS & PERFORMANCE */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6 text-left">
+            {/* Analytics Top Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-1">
+                <div className="flex items-center justify-between text-charcoal/60">
+                  <span className="text-[11px] uppercase font-semibold">Total Gross Volume</span>
+                  <DollarSign className="w-4 h-4 text-emerald-600" />
+                </div>
+                <p className="text-2xl font-bold font-serif text-charcoal">
+                  Rs. {totalRevenue.toLocaleString('en-IN')}
+                </p>
+                <span className="text-[10px] text-charcoal/60 block">
+                  Ceremonies: Rs. {totalCeremonyRevenue.toLocaleString('en-IN')} | Gifts: Rs. {totalGiftRevenue.toLocaleString('en-IN')}
+                </span>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-1">
+                <div className="flex items-center justify-between text-charcoal/60">
+                  <span className="text-[11px] uppercase font-semibold">Confirmed Bookings</span>
+                  <Calendar className="w-4 h-4 text-[#B37418]" />
+                </div>
+                <p className="text-2xl font-bold font-serif text-charcoal">
+                  {bookings.filter(b => b.status === 'confirmed').length}
+                </p>
+                <span className="text-[10px] text-charcoal/60 block">
+                  Total: {bookings.length} ({bookings.filter(b => b.status === 'completed').length} completed)
+                </span>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-1">
+                <div className="flex items-center justify-between text-charcoal/60">
+                  <span className="text-[11px] uppercase font-semibold">Pandit Assignment Rate</span>
+                  <UserCheck className="w-4 h-4 text-emerald-600" />
+                </div>
+                <p className="text-2xl font-bold font-serif text-charcoal">
+                  {bookings.length > 0 ? Math.round(((bookings.length - pendingAssignments) / bookings.length) * 100) : 100}%
+                </p>
+                <span className="text-[10px] text-charcoal/60 block">
+                  {bookings.length - pendingAssignments} assigned | {pendingAssignments} awaiting
+                </span>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-1">
+                <div className="flex items-center justify-between text-charcoal/60">
+                  <span className="text-[11px] uppercase font-semibold">Registered Host Families</span>
+                  <Users className="w-4 h-4 text-purple-600" />
+                </div>
+                <p className="text-2xl font-bold font-serif text-charcoal">
+                  {users.length}
+                </p>
+                <span className="text-[10px] text-charcoal/60 block">
+                  {users.filter(u => u.isVerified).length} verified mobile accounts
+                </span>
+              </div>
+            </div>
+
+            {/* Package Popularity & Revenue Breakdown */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-gold/15 pb-3">
+                  <h3 className="font-serif text-base font-bold text-charcoal flex items-center gap-2">
+                    <Package className="w-4 h-4 text-gold-dark" />
+                    Vardhantotsava Package Distribution
+                  </h3>
+                  <span className="text-[10px] uppercase font-bold text-charcoal/50">{bookings.length} Bookings</span>
+                </div>
+
+                <div className="space-y-3">
+                  {[
+                    { id: 'parampara', name: 'Parampara Vardhantotsava (At-Home Homa)', price: 18999, color: 'bg-amber-600' },
+                    { id: 'sampoorna', name: 'Sampoorna Vardhantotsava (Virtual Homa)', price: 11999, color: 'bg-[#B37418]' },
+                    { id: 'aarambha', name: 'Aarambha Vardhantotsava (Standard)', price: 7999, color: 'bg-amber-800' }
+                  ].map(pkg => {
+                    const count = bookings.filter(b => b.packageId === pkg.id || b.packageName?.toLowerCase().includes(pkg.id)).length;
+                    const pct = bookings.length > 0 ? Math.round((count / bookings.length) * 100) : 0;
+                    const pkgRev = bookings
+                      .filter(b => b.packageId === pkg.id || b.packageName?.toLowerCase().includes(pkg.id))
+                      .reduce((s, b) => s + (b.totalPrice || 0), 0);
+                    return (
+                      <div key={pkg.id} className="space-y-1.5">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-charcoal">{pkg.name}</span>
+                          <span className="text-[#8C5D0D]">{count} bookings ({pct}%) · Rs. {pkgRev.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="w-full bg-[#FAF5ED] h-2.5 rounded-full overflow-hidden border border-gold/20">
+                          <div className={`h-full ${pkg.color} rounded-full transition-all`} style={{ width: `${pct}%` }}></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Gift Fulfillment & Time Slots */}
+              <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-gold/15 pb-3">
+                  <h3 className="font-serif text-base font-bold text-charcoal flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-gold-dark" />
+                    Sacred Gift Fulfillment &amp; Auspicious Muhurtas
+                  </h3>
+                  <span className="text-[10px] uppercase font-bold text-charcoal/50">Fulfillment Insights</span>
+                </div>
+
+                <div className="space-y-4 text-xs">
+                  <div>
+                    <span className="text-charcoal/60 uppercase text-[10px] font-bold block mb-2">Gift Delivery Preferences</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(() => {
+                        const withPanditCount = bookings.filter(b => b.giftDeliveryMode === 'with_pandit').length + giftOrders.filter(g => g.deliveryMode === 'with_pandit').length;
+                        const courierCount = bookings.filter(b => b.giftDeliveryMode === 'courier').length + giftOrders.filter(g => g.deliveryMode === 'courier').length;
+                        return (
+                          <>
+                            <div className="p-3 bg-[#FAF8F5] rounded-xl border border-gold/20 space-y-1">
+                              <span className="text-[11px] font-semibold text-charcoal block">Hand-Delivered by Pandit</span>
+                              <p className="text-xl font-bold font-serif text-[#B37418]">{withPanditCount}</p>
+                              <span className="text-[10px] text-charcoal/50">Pandit carries to residence</span>
+                            </div>
+                            <div className="p-3 bg-[#FAF8F5] rounded-xl border border-gold/20 space-y-1">
+                              <span className="text-[11px] font-semibold text-charcoal block">Direct Courier Post</span>
+                              <p className="text-xl font-bold font-serif text-purple-700">{courierCount}</p>
+                              <span className="text-[10px] text-charcoal/50">Dispatched via speed post</span>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gold/15">
+                    <span className="text-charcoal/60 uppercase text-[10px] font-bold block mb-2">Preferred Ceremony Muhurta Slots</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                      {[
+                        { slot: 'Prathakala (06:30 - 08:30)', label: 'Morning 06:30' },
+                        { slot: 'Prathakala (08:30 - 10:30)', label: 'Morning 08:30' },
+                        { slot: 'Madhyahna (10:30 - 12:30)', label: 'Noon 10:30' },
+                        { slot: 'Sayamkala (05:00 - 07:00)', label: 'Evening 05:00' }
+                      ].map(s => {
+                        const cnt = bookings.filter(b => b.timeSlot?.includes(s.label.split(' ')[1]) || b.timeSlot?.includes(s.slot)).length;
+                        return (
+                          <div key={s.slot} className="p-2 bg-[#FAF5ED] rounded-lg border border-gold/20">
+                            <span className="text-[10px] font-bold text-charcoal block">{s.label}</span>
+                            <strong className="text-sm text-[#8C5D0D] block">{cnt}</strong>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity Stream */}
+            <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-3">
+              <div className="flex items-center justify-between border-b border-gold/15 pb-2">
+                <h3 className="font-serif text-base font-bold text-charcoal flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-gold-dark" />
+                  Recent Ceremony &amp; Order Activity
+                </h3>
+                <button
+                  onClick={handleSyncWithNeon}
+                  className="text-xs text-gold-dark font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  Refresh Activity
+                </button>
+              </div>
+
+              <div className="divide-y divide-gold/10">
+                {bookings.slice(0, 5).map(b => (
+                  <div key={b.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-cream border border-gold/30 text-gold-dark">
+                        {b.id}
+                      </span>
+                      <div>
+                        <p className="font-semibold text-charcoal">{b.name}'s Vardhantotsava</p>
+                        <span className="text-[11px] text-charcoal/60">
+                          {b.celebrationDate} at {b.timeSlot} · Gotra: {b.gotra || 'Kashyapa'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-semibold text-charcoal block">Rs. {b.totalPrice?.toLocaleString('en-IN')}</span>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                        b.status === 'completed' ? 'bg-blue-100 text-blue-800' : b.assignedPanditId ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {b.status === 'completed' ? 'Completed' : b.assignedPanditId ? 'Pandit Assigned' : 'Awaiting Assignment'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: CEREMONY BOOKINGS */}
         {activeTab === 'bookings' && (
@@ -903,6 +1221,263 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
               <pre className="p-4 bg-[#1F1914] text-[#E5D5C0] font-mono text-xs rounded-xl overflow-x-auto leading-relaxed max-h-96">
                 {POSTGRES_SCHEMA_SQL}
               </pre>
+            </div>
+          </div>
+        )}
+        {/* TAB: REGISTERED USERS DIRECTORY */}
+        {activeTab === 'users' && (
+          <div className="space-y-4 text-left">
+            <div className="bg-white p-4 rounded-2xl border border-gold/30 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-charcoal/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  placeholder="Search by name, phone or email..."
+                  className="w-full pl-9 pr-3 py-2 bg-[#FAF8F5] border border-gold/30 rounded-xl text-xs text-charcoal focus:outline-none focus:border-gold"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-charcoal/60 font-semibold">Total Registered: {users.length}</span>
+                <button
+                  onClick={loadUsers}
+                  disabled={usersLoading}
+                  className="px-3 py-1.5 bg-[#FAF5ED] hover:bg-[#F4EADA] border border-[#D5C2A4] rounded-lg text-xs font-semibold text-[#8C5D0D] flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${usersLoading ? 'animate-spin' : ''}`} />
+                  <span>{usersLoading ? 'Loading...' : 'Refresh Users'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Users Cards / List */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {users
+                .filter(u => 
+                  !userSearchQuery.trim() ||
+                  u.name.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                  u.phone.includes(userSearchQuery) ||
+                  (u.email && u.email.toLowerCase().includes(userSearchQuery.toLowerCase()))
+                )
+                .map(u => {
+                  const cleanPhone = u.phone.replace(/\D/g, '');
+                  const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                  return (
+                    <div key={u.id} className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-3">
+                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-gold/15">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-cream border border-gold/30 flex items-center justify-center font-serif font-bold text-gold-dark text-base">
+                            {u.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-sm text-charcoal flex items-center gap-1.5">
+                              {u.name}
+                              {u.isVerified && (
+                                <span title="Verified phone account">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                </span>
+                              )}
+                            </h4>
+                            <span className="text-[11px] text-charcoal/60 font-mono">
+                              {u.phone}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          Active
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 text-xs text-charcoal/80">
+                        <div className="flex justify-between">
+                          <span className="text-charcoal/60">Language:</span>
+                          <span className="font-medium text-charcoal">{u.language || 'English'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-charcoal/60">Email:</span>
+                          <span className="font-medium text-charcoal truncate max-w-[150px]">{u.email || 'None'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-charcoal/60">Ceremonies Booked:</span>
+                          <strong className="text-gold-dark">{u.bookingsCount}</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-charcoal/60">Total Spent:</span>
+                          <strong className="text-charcoal">Rs. {u.totalSpent.toLocaleString('en-IN')}</strong>
+                        </div>
+                        {u.createdAt && (
+                          <div className="flex justify-between text-[11px] pt-1 text-charcoal/50 border-t border-gold/10">
+                            <span>Registered:</span>
+                            <span>{new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-2 flex items-center gap-2">
+                        <a
+                          href={`https://wa.me/${waPhone}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 py-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                        >
+                          <Phone className="w-3 h-3 text-emerald-700" />
+                          <span>WhatsApp Chat</span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(u.phone.replace(/\D/g, '').slice(-10));
+                            setActiveTab('bookings');
+                          }}
+                          className="py-1.5 px-3 bg-[#FAF5ED] hover:bg-[#F4EADA] text-gold-dark border border-gold/30 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                        >
+                          View Bookings
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            {users.length === 0 && !usersLoading && (
+              <div className="p-8 text-center bg-white rounded-2xl border border-gold/30 text-charcoal/60 text-xs">
+                No users found. Registered users will appear here automatically.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB: MAIN ACHARYA & ADMIN SETTINGS */}
+        {activeTab === 'settings' && (
+          <div className="space-y-6 text-left max-w-3xl">
+            <div className="bg-white p-6 rounded-2xl border border-gold/30 shadow-xs space-y-4">
+              <div className="border-b border-gold/15 pb-3">
+                <h3 className="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
+                  <Sliders className="w-5 h-5 text-gold-dark" />
+                  Main Acharya &amp; Admin Configuration
+                </h3>
+                <p className="text-xs text-charcoal/70 mt-1">
+                  Configure the official Main Acharya and Admin WhatsApp credentials. Whenever a ceremony is booked or assigned, the identical notification is dispatched to BOTH numbers simultaneously.
+                </p>
+              </div>
+
+              {settingsSavedMessage && (
+                <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-950 font-medium flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>{settingsSavedMessage}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveSettings} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80">
+                    Main Acharya Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={systemSettings.mainAcharyaName}
+                    onChange={(e) => setSystemSettings({ ...systemSettings, mainAcharyaName: e.target.value })}
+                    placeholder="e.g. Vedamurthy Sri Narayan Bhat"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-gold/30 rounded-xl text-xs text-charcoal font-semibold focus:outline-none focus:border-gold"
+                  />
+                  <span className="text-[11px] text-charcoal/50 block">
+                    Used as the salutation variable in Meta Cloud WhatsApp templates (e.g. Namaskara Acharya *[Name]*).
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80">
+                      Main Acharya WhatsApp Phone
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={systemSettings.mainAcharyaPhone}
+                      onChange={(e) => setSystemSettings({ ...systemSettings, mainAcharyaPhone: e.target.value })}
+                      placeholder="e.g. 919902045009"
+                      className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-gold/30 rounded-xl text-xs text-charcoal font-mono font-semibold focus:outline-none focus:border-gold"
+                    />
+                    <span className="text-[11px] text-charcoal/50 block">
+                      Direct line for Acharya assignment alerts with one-tap link.
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80">
+                      Admin Coordination WhatsApp Phone
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={systemSettings.adminPhone}
+                      onChange={(e) => setSystemSettings({ ...systemSettings, adminPhone: e.target.value })}
+                      placeholder="e.g. 919902045009"
+                      className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-gold/30 rounded-xl text-xs text-charcoal font-mono font-semibold focus:outline-none focus:border-gold"
+                    />
+                    <span className="text-[11px] text-charcoal/50 block">
+                      Administrative mirror to receive real-time parallel alerts.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-[#FAF5ED] rounded-xl border border-gold/30 space-y-1">
+                  <strong className="text-xs text-gold-dark flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Dual Parallel Dispatch Protocol Active
+                  </strong>
+                  <p className="text-[11px] text-charcoal/70 leading-relaxed">
+                    All ceremony alerts (new booking, pandit assignment request, dispatch order) are automatically sent to both the configured Main Acharya line and the Admin line using Meta template <code className="bg-sand/30 px-1 py-0.5 rounded font-mono text-[10.5px]">mantrakshata_main_acharya_assignment</code>.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={settingsSaving}
+                    className="px-5 py-2.5 bg-[#B37418] hover:bg-[#8C5D0D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sacred transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{settingsSaving ? 'Saving...' : 'Save System Settings'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={testingAlert}
+                    onClick={handleTestSendAlert}
+                    className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <Send className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>{testingAlert ? 'Dispatching Test...' : 'Send Test WhatsApp to Both'}</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Test Alert Dispatch Result */}
+              {testAlertResult && (
+                <div className={`p-4 rounded-xl border text-xs space-y-2 mt-4 ${
+                  testAlertResult.ok ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950'
+                }`}>
+                  <div className="flex items-center justify-between font-bold">
+                    <span>Dual Dispatch Test Results:</span>
+                    <span className={testAlertResult.ok ? 'text-emerald-700' : 'text-amber-800'}>
+                      {testAlertResult.ok ? 'All Deliveries Succeeded' : 'Partial / Failed Delivery'}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {testAlertResult.results.map((r, i) => (
+                      <div key={i} className="flex items-center justify-between font-mono text-[11px] bg-white/70 p-2 rounded border border-gold/20">
+                        <span>Phone: +{r.phone}</span>
+                        <span className={r.ok ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
+                          {r.ok ? `Sent (ID: ${r.messageId ? r.messageId.slice(0, 15) : 'OK'}...)` : `Error: ${r.error}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

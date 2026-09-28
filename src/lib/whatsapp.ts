@@ -8,6 +8,7 @@ import { lifecycleTemplates } from './whatsappTemplates';
 import { BookingPlan, getSavedBooking, getAllBookings, saveBooking } from './store';
 import { ACHARYA_SCHOLARS, AcharyaScholar } from './content';
 import { logWhatsAppToNeon, syncBookingToNeon } from './db';
+import { getSystemSettings } from './settings';
 
 export type WhatsAppMessageType =
   | 'otp'
@@ -279,23 +280,34 @@ export function sendBookingConfirmedMessage(booking: BookingPlan): WhatsAppMessa
 }
 
 /**
- * 4. Alert to Main Acharya to Assign Pandit
+ * 4. Alert to Main Acharya & Admin to Assign Pandit
+ * Dispatches the identical notification to BOTH the Admin Phone and the Main Acharya Phone.
  */
 export function sendAcharyaAlertMessage(booking: BookingPlan): WhatsAppMessage {
   const venue = formatVenueWithMaps(booking);
   const dynamicLink = `/acharya/assign?bookingId=${booking.id}`;
-  const creds = getWhatsAppCredentials();
-  const primaryAdminPhone = creds.adminPhones?.[0] || '919902045009';
+  const settings = getSystemSettings();
+  const mainAcharyaName = settings.mainAcharyaName || 'Vedamurthy Sri Narayan Bhat';
+  const mainAcharyaPhone = settings.mainAcharyaPhone || '919902045009';
+  const adminPhone = settings.adminPhone || '919902045009';
+
+  const cleanMainPhone = mainAcharyaPhone.replace(/\D/g, '');
+  const cleanAdminPhone = adminPhone.replace(/\D/g, '');
+  const standardizedMainPhone = cleanMainPhone.length === 10 ? '91' + cleanMainPhone : cleanMainPhone;
+  const standardizedAdminPhone = cleanAdminPhone.length === 10 ? '91' + cleanAdminPhone : cleanAdminPhone;
+
+  // Distinct list of recipient phones (Admin and Main Acharya)
+  const targetPhones = Array.from(new Set([standardizedMainPhone, standardizedAdminPhone])).filter(Boolean);
 
   const msg: WhatsAppMessage = {
     id: `WA-ALERT-${Date.now()}`,
     bookingId: booking.id,
-    recipientPhone: primaryAdminPhone,
-    recipientName: 'Vedamurthy Sri Narayan Bhat (Main Acharya)',
+    recipientPhone: targetPhones.join(', '),
+    recipientName: `${mainAcharyaName} & Admin`,
     recipientRole: 'acharya',
     type: 'acharya_alert',
     title: 'Assign Pandit for Confirmed Vardhantotsava',
-    body: `Namaskara Acharya *Vedamurthy Sri Narayan Bhat*, please assign a Pandit for this confirmed Vardhantotsava.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nDate: *${booking.celebrationDate}*\nTime: *${booking.timeSlot} IST*\nRitual / package: *${booking.packageName}*\nVenue: ${venue}\n\nTap Assign Pandit below. Enter the Pandit's name, WhatsApp number and expected arrival time, then confirm the assignment.\n\n— Mantrakshata Coordination`,
+    body: `Namaskara Acharya *${mainAcharyaName}*, please assign a Pandit for this confirmed Vardhantotsava.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nDate: *${booking.celebrationDate}*\nTime: *${booking.timeSlot} IST*\nRitual / package: *${booking.packageName}*\nVenue: ${venue}\n\nTap Assign Pandit below. Enter the Pandit's name, WhatsApp number and expected arrival time, then confirm the assignment.\n\n— Mantrakshata Coordination`,
     dynamicLink,
     actionRequired: true,
     actionCompleted: false,
@@ -309,7 +321,7 @@ export function sendAcharyaAlertMessage(booking: BookingPlan): WhatsAppMessage {
     : booking.packageName;
 
   const params = [
-    bold('Vedamurthy Sri Narayan Bhat'),
+    bold(mainAcharyaName),
     bold(booking.id),
     bold(booking.name),
     bold(booking.celebrationDate),
@@ -318,17 +330,71 @@ export function sendAcharyaAlertMessage(booking: BookingPlan): WhatsAppMessage {
     venue
   ];
 
-  const targetPhones = creds.adminPhones && creds.adminPhones.length > 0 ? creds.adminPhones : [primaryAdminPhone];
   targetPhones.forEach((phone) => {
     dispatchMetaCloudTemplate(phone, 'mantrakshata_main_acharya_assignment', params, booking.id)
       .then((res) => {
         if (res.ok) updateWhatsAppMessageStatus(msg.id, 'sent');
-        else console.warn(`Acharya alert dispatch to ${phone} failed:`, res.error);
+        else console.warn(`Acharya/Admin alert dispatch to ${phone} failed:`, res.error);
       })
-      .catch((err) => console.warn('Acharya alert dispatch error:', err));
+      .catch((err) => console.warn('Acharya/Admin alert dispatch error:', err));
   });
 
   return msg;
+}
+
+/**
+ * Send test WhatsApp alert to BOTH Admin Phone and Main Acharya Phone
+ */
+export async function sendTestAlertToAdminAndAcharya(): Promise<{
+  ok: boolean;
+  phones: string[];
+  results: { phone: string; ok: boolean; messageId?: string; error?: string }[];
+}> {
+  const settings = getSystemSettings();
+  const mainAcharyaName = settings.mainAcharyaName || 'Vedamurthy Sri Narayan Bhat';
+  const cleanMain = settings.mainAcharyaPhone.replace(/\D/g, '');
+  const cleanAdmin = settings.adminPhone.replace(/\D/g, '');
+  const phoneMain = cleanMain.length === 10 ? '91' + cleanMain : cleanMain;
+  const phoneAdmin = cleanAdmin.length === 10 ? '91' + cleanAdmin : cleanAdmin;
+
+  const targetPhones = Array.from(new Set([phoneMain, phoneAdmin])).filter(Boolean);
+  const testId = `TEST-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const params = [
+    bold(mainAcharyaName),
+    bold(testId),
+    bold('Vedic Host Test'),
+    bold('Tomorrow'),
+    bold('07:30 AM IST'),
+    bold('Sampoorna Vardhantotsava (System Test)'),
+    'Mantrakshata Kshetra, Bengaluru (https://maps.google.com)'
+  ];
+
+  const results: { phone: string; ok: boolean; messageId?: string; error?: string }[] = [];
+
+  for (const phone of targetPhones) {
+    try {
+      const res = await dispatchMetaCloudTemplate(phone, 'mantrakshata_main_acharya_assignment', params, testId);
+      results.push({
+        phone,
+        ok: res.ok,
+        messageId: res.messageId,
+        error: res.error
+      });
+    } catch (e: any) {
+      results.push({
+        phone,
+        ok: false,
+        error: e?.message || 'Dispatch error'
+      });
+    }
+  }
+
+  return {
+    ok: results.every(r => r.ok),
+    phones: targetPhones,
+    results
+  };
 }
 
 /**

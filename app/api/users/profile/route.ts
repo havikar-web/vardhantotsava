@@ -24,12 +24,44 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const phone = searchParams.get('phone');
-    if (!phone) {
-      return NextResponse.json({ ok: false, error: 'Phone parameter required' }, { status: 400 });
+    const sql = getDb();
+
+    // If no phone or ?all=true, return all registered users with summary metrics
+    if (!phone || searchParams.get('all') === 'true') {
+      const allUsers = await sql.query(`
+        SELECT 
+          u.id, 
+          u.name, 
+          u.phone, 
+          u.email, 
+          u.preferred_language, 
+          u.is_verified, 
+          u.created_at,
+          COUNT(b.id)::int as bookings_count,
+          COALESCE(SUM(b.total_price), 0)::int as total_spent
+        FROM users u
+        LEFT JOIN bookings b ON b.user_id = u.id OR b.user_phone = u.phone
+        GROUP BY u.id, u.name, u.phone, u.email, u.preferred_language, u.is_verified, u.created_at
+        ORDER BY u.created_at DESC;
+      `);
+
+      return NextResponse.json({
+        ok: true,
+        users: (allUsers || []).map((u: any) => ({
+          id: u.id,
+          name: u.name,
+          phone: u.phone,
+          email: u.email || undefined,
+          language: u.preferred_language || 'English',
+          isVerified: Boolean(u.is_verified),
+          createdAt: u.created_at,
+          bookingsCount: Number(u.bookings_count) || 0,
+          totalSpent: Number(u.total_spent) || 0
+        }))
+      });
     }
 
     const variants = normalizePhoneVariants(phone);
-    const sql = getDb();
 
     const rows = await sql.query(
       `SELECT id, name, phone, email, preferred_language, is_verified, created_at
