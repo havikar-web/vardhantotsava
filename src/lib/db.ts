@@ -110,20 +110,62 @@ export async function syncBookingToNeon(booking: BookingPlan): Promise<boolean> 
   }
 }
 
+export function mapDbRowToBooking(b: any): BookingPlan {
+  return {
+    id: b.id,
+    userId: b.user_id || undefined,
+    name: b.celebrant_name,
+    dob: b.dob ? String(b.dob).slice(0, 10) : '',
+    birthTime: b.birth_time || undefined,
+    birthPlace: b.birth_place || undefined,
+    gotra: b.gotra || 'Kashyapa',
+    nakshatra: b.nakshatra || 'Chitra',
+    pada: b.pada || 1,
+    celebrationDate: b.celebration_date,
+    timeSlot: b.time_slot,
+    address: b.venue_address,
+    pincode: b.pincode,
+    packageId: b.package_id,
+    packageName: b.package_name,
+    addons: b.addons || [],
+    totalPrice: b.total_price || 0,
+    status: b.status || 'confirmed',
+    bookedAt: b.created_at || new Date().toISOString(),
+    phone: b.user_phone,
+    email: b.user_email || b.email || '',
+    mapsLink: b.maps_link || undefined,
+    assignedPanditId: b.assigned_acharya_id || undefined,
+    assignedPanditName: b.assigned_acharya_name || undefined,
+    assignedPanditPhone: b.assigned_acharya_phone || undefined,
+    giftOrderId: b.gift_order_id || undefined,
+    giftDeliveryMode: b.gift_delivery_mode || undefined,
+    giftItems: b.gift_items || undefined,
+    giftTotal: b.gift_total || 0,
+    razorpayOrderId: b.razorpay_order_id || undefined,
+    razorpayPaymentId: b.razorpay_payment_id || undefined
+  };
+}
+
 /**
- * Fetch bookings from Neon PostgreSQL (by userId, phone, or both)
+ * Fetch bookings from Neon PostgreSQL (by userId, phone, booking ID, or all)
  */
-export async function fetchBookingsFromNeon(identifier?: { phone?: string; userId?: string } | string): Promise<BookingPlan[]> {
+export async function fetchBookingsFromNeon(
+  identifier?: { phone?: string; userId?: string; id?: string; bookingId?: string } | string
+): Promise<BookingPlan[]> {
   try {
     let query = '';
     if (typeof identifier === 'string') {
-      if (identifier.includes('-') && identifier.length === 36) {
-        query = `?userId=${encodeURIComponent(identifier)}`;
+      const clean = identifier.trim();
+      if (clean.includes('-') && clean.length === 36) {
+        query = `?userId=${encodeURIComponent(clean)}`;
+      } else if (clean.startsWith('MK-') || clean.startsWith('TEST-') || (!/^\+?\d{10,15}$/.test(clean) && clean.includes('-'))) {
+        query = `?id=${encodeURIComponent(clean)}`;
       } else {
-        query = `?phone=${encodeURIComponent(identifier)}`;
+        query = `?phone=${encodeURIComponent(clean)}`;
       }
     } else if (identifier) {
       const parts = [];
+      if (identifier.id || identifier.bookingId) parts.push(`id=${encodeURIComponent(identifier.id || identifier.bookingId || '')}`);
       if (identifier.userId) parts.push(`userId=${encodeURIComponent(identifier.userId)}`);
       if (identifier.phone) parts.push(`phone=${encodeURIComponent(identifier.phone)}`);
       query = parts.length > 0 ? `?${parts.join('&')}` : '';
@@ -131,44 +173,41 @@ export async function fetchBookingsFromNeon(identifier?: { phone?: string; userI
     const res = await fetch(`/api/bookings/sync${query}`);
     if (!res.ok) return [];
     const data = await res.json();
-    if (data.ok && Array.isArray(data.bookings)) {
-      return data.bookings.map((b: any) => ({
-        id: b.id,
-        userId: b.user_id || undefined,
-        name: b.celebrant_name,
-        dob: b.dob ? String(b.dob).slice(0, 10) : '',
-        birthTime: b.birth_time || undefined,
-        birthPlace: b.birth_place || undefined,
-        gotra: b.gotra || 'Kashyapa',
-        nakshatra: b.nakshatra || 'Chitra',
-        pada: b.pada || 1,
-        celebrationDate: b.celebration_date,
-        timeSlot: b.time_slot,
-        address: b.venue_address,
-        pincode: b.pincode,
-        packageId: b.package_id,
-        packageName: b.package_name,
-        addons: b.addons || [],
-        totalPrice: b.total_price || 0,
-        status: b.status || 'confirmed',
-        bookedAt: b.created_at || new Date().toISOString(),
-        phone: b.user_phone,
-        mapsLink: b.maps_link || undefined,
-        assignedPanditId: b.assigned_acharya_id || undefined,
-        assignedPanditName: b.assigned_acharya_name || undefined,
-        assignedPanditPhone: b.assigned_acharya_phone || undefined,
-        giftOrderId: b.gift_order_id || undefined,
-        giftDeliveryMode: b.gift_delivery_mode || undefined,
-        giftItems: b.gift_items || undefined,
-        giftTotal: b.gift_total || 0,
-        razorpayOrderId: b.razorpay_order_id || undefined,
-        razorpayPaymentId: b.razorpay_payment_id || undefined
-      }));
+    if (data.ok) {
+      if (Array.isArray(data.bookings)) {
+        return data.bookings.map(mapDbRowToBooking);
+      }
+      if (data.booking) {
+        return [mapDbRowToBooking(data.booking)];
+      }
     }
   } catch (err) {
     console.warn('Neon fetch bookings warning:', err);
   }
   return [];
+}
+
+/**
+ * Directly fetch single booking by ID from Neon Cloud database
+ */
+export async function fetchBookingByIdFromNeon(bookingId: string): Promise<BookingPlan | null> {
+  if (!bookingId) return null;
+  try {
+    const res = await fetch(`/api/bookings/sync?id=${encodeURIComponent(bookingId.trim())}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.ok) {
+      if (data.booking) {
+        return mapDbRowToBooking(data.booking);
+      }
+      if (Array.isArray(data.bookings) && data.bookings.length > 0) {
+        return mapDbRowToBooking(data.bookings[0]);
+      }
+    }
+  } catch (err) {
+    console.warn('Neon fetch booking by ID warning:', err);
+  }
+  return null;
 }
 
 export async function syncGiftOrderToNeon(order: GiftOrder): Promise<boolean> {

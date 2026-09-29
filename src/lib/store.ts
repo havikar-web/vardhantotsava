@@ -77,12 +77,12 @@ export interface BookingPlan {
   landmark?: string;
   pincode: string;
   phone: string;
-  email: string;
+  email?: string;
   packageId: string;
   packageName: string;
   addons: string[];
   totalPrice: number;
-  status: 'confirmed' | 'draft' | 'completed';
+  status: 'confirmed' | 'draft' | 'completed' | 'assigned';
   bookedAt: string;
   assignedPanditId?: string;
   assignedPanditName?: string;

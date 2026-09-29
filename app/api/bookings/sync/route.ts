@@ -58,14 +58,14 @@ export async function POST(request: Request) {
       )
       ON CONFLICT (id) DO UPDATE SET
         user_id = COALESCE(EXCLUDED.user_id, bookings.user_id),
-        celebrant_name = EXCLUDED.celebrant_name,
-        user_phone = EXCLUDED.user_phone,
-        celebration_date = EXCLUDED.celebration_date,
-        time_slot = EXCLUDED.time_slot,
-        venue_address = EXCLUDED.venue_address,
-        pincode = EXCLUDED.pincode,
-        package_name = EXCLUDED.package_name,
-        status = EXCLUDED.status,
+        celebrant_name = CASE WHEN EXCLUDED.celebrant_name IS NOT NULL AND EXCLUDED.celebrant_name != '' AND EXCLUDED.celebrant_name != 'Celebrant' THEN EXCLUDED.celebrant_name ELSE bookings.celebrant_name END,
+        user_phone = CASE WHEN EXCLUDED.user_phone IS NOT NULL AND EXCLUDED.user_phone != '' AND EXCLUDED.user_phone != '+91' THEN EXCLUDED.user_phone ELSE bookings.user_phone END,
+        celebration_date = CASE WHEN EXCLUDED.celebration_date IS NOT NULL AND EXCLUDED.celebration_date != '' THEN EXCLUDED.celebration_date ELSE bookings.celebration_date END,
+        time_slot = CASE WHEN EXCLUDED.time_slot IS NOT NULL AND EXCLUDED.time_slot != '' THEN EXCLUDED.time_slot ELSE bookings.time_slot END,
+        venue_address = CASE WHEN EXCLUDED.venue_address IS NOT NULL AND EXCLUDED.venue_address != '' THEN EXCLUDED.venue_address ELSE bookings.venue_address END,
+        pincode = CASE WHEN EXCLUDED.pincode IS NOT NULL AND EXCLUDED.pincode != '' THEN EXCLUDED.pincode ELSE bookings.pincode END,
+        package_name = CASE WHEN EXCLUDED.package_name IS NOT NULL AND EXCLUDED.package_name != '' THEN EXCLUDED.package_name ELSE bookings.package_name END,
+        status = COALESCE(EXCLUDED.status, bookings.status),
         maps_link = COALESCE(EXCLUDED.maps_link, bookings.maps_link),
         razorpay_order_id = COALESCE(EXCLUDED.razorpay_order_id, bookings.razorpay_order_id),
         razorpay_payment_id = COALESCE(EXCLUDED.razorpay_payment_id, bookings.razorpay_payment_id),
@@ -120,9 +120,18 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id') || searchParams.get('bookingId');
     const userId = searchParams.get('userId');
     const phone = searchParams.get('phone');
     const sql = getDb();
+
+    if (id) {
+      const rows = await sql.query(
+        `SELECT * FROM bookings WHERE id = $1 LIMIT 1`,
+        [id.trim()]
+      );
+      return NextResponse.json({ ok: true, bookings: rows, booking: rows[0] || null });
+    }
 
     if (userId && phone) {
       const variants = getPhoneVariants(phone);

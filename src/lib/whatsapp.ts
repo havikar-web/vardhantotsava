@@ -7,7 +7,7 @@ import { lifecycleTemplates } from './whatsappTemplates';
 
 import { BookingPlan, getSavedBooking, getAllBookings, saveBooking } from './store';
 import { ACHARYA_SCHOLARS, AcharyaScholar } from './content';
-import { logWhatsAppToNeon, syncBookingToNeon } from './db';
+import { logWhatsAppToNeon, syncBookingToNeon, fetchBookingByIdFromNeon } from './db';
 import { getSystemSettings } from './settings';
 
 export type WhatsAppMessageType =
@@ -147,8 +147,14 @@ export function formatVenueWithMaps(booking: BookingPlan): string {
 /**
  * Dispatch Official Booking Assignment Order Directly to the Assigned Pandit
  */
-export function sendAcharyaOrderDispatchMessage(booking: BookingPlan, acharya: AcharyaScholar, customPhone?: string): WhatsAppMessage {
+export function sendAcharyaOrderDispatchMessage(
+  booking: BookingPlan,
+  acharya: AcharyaScholar | { name: string; phone: string; [key: string]: any },
+  customPhone?: string,
+  arrivalTime?: string
+): WhatsAppMessage {
   const targetPhone = customPhone || acharya.phone || '+91 98450 88002';
+  const arrival = arrivalTime || '07:00 AM IST';
   const venue = formatVenueWithMaps(booking);
   const sankalpaDetails = `Gotra: ${booking.gotra || 'Kashyapa'}, Nakshatra: ${booking.nakshatra || 'Chitra'}, Pada: ${booking.pada || 1}`;
   let specialInstructions = 'Arrive 30 mins prior with sacred patras and samagri. Celebrant family will prepare fruits and deepa mane.';
@@ -169,7 +175,7 @@ export function sendAcharyaOrderDispatchMessage(booking: BookingPlan, acharya: A
     recipientRole: 'acharya',
     type: 'acharya_order',
     title: 'Pandit Booking Details & Schedule',
-    body: `Namaskara Pandit *${acharya.name}*, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nCustomer contact: *${booking.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nArrival time: *07:00 AM IST*\nVenue: ${venue}\nRitual / package: *${booking.packageName}*\nSankalpa details: *${sankalpaDetails}*\nSpecial instructions: *${specialInstructions}*\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.`,
+    body: `Namaskara Pandit *${acharya.name}*, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nCustomer contact: *${booking.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nArrival time: *${arrival}*\nVenue: ${venue}\nRitual / package: *${booking.packageName}*\nSankalpa details: *${sankalpaDetails}*\nSpecial instructions: *${specialInstructions}*\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.`,
     dynamicLink: `/portal?id=${booking.id}`,
     actionRequired: true,
     actionCompleted: false,
@@ -185,7 +191,7 @@ export function sendAcharyaOrderDispatchMessage(booking: BookingPlan, acharya: A
     bold(booking.phone),
     bold(booking.celebrationDate),
     bold(`${booking.timeSlot} IST`),
-    bold('07:00 AM IST'),
+    bold(arrival),
     venue,
     bold(booking.packageName),
     bold(sankalpaDetails),
@@ -400,7 +406,12 @@ export async function sendTestAlertToAdminAndAcharya(): Promise<{
 /**
  * 5. Customer Notification with Pandit Details
  */
-export function sendAcharyaAssignedMessage(booking: BookingPlan, acharya: AcharyaScholar): WhatsAppMessage {
+export function sendAcharyaAssignedMessage(
+  booking: BookingPlan,
+  acharya: AcharyaScholar | { name: string; phone: string; [key: string]: any },
+  arrivalTime?: string
+): WhatsAppMessage {
+  const arrival = arrivalTime || '07:00 AM IST';
   const msg: WhatsAppMessage = {
     id: `WA-ASSIGNED-${Date.now()}`,
     bookingId: booking.id,
@@ -409,7 +420,7 @@ export function sendAcharyaAssignedMessage(booking: BookingPlan, acharya: Achary
     recipientRole: 'customer',
     type: 'acharya_assigned',
     title: 'Pandit Assigned Details',
-    body: `Namaskara *${booking.name}*, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: *${booking.id}*\nPandit: *${acharya.name}*\nContact: *${acharya.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nExpected arrival: *07:00 AM IST*\n\nPlease keep your phone available for coordination. Reply here if you need help.`,
+    body: `Namaskara *${booking.name}*, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: *${booking.id}*\nPandit: *${acharya.name}*\nContact: *${acharya.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nExpected arrival: *${arrival}*\n\nPlease keep your phone available for coordination. Reply here if you need help.`,
     sentAt: new Date().toISOString(),
     status: 'draft',
     dynamicLink: `/portal?id=${booking.id}`
@@ -423,7 +434,7 @@ export function sendAcharyaAssignedMessage(booking: BookingPlan, acharya: Achary
     bold(acharya.phone),
     bold(booking.celebrationDate),
     bold(`${booking.timeSlot} IST`),
-    bold('07:00 AM IST')
+    bold(arrival)
   ];
 
   dispatchMetaCloudTemplate(booking.phone, 'mantrakshata_customer_pandit_details', params)
@@ -577,38 +588,92 @@ export function sendCompletionThankYouMessage(booking: BookingPlan): WhatsAppMes
 
 /**
  * Execute the Dynamic Link Action when Main Acharya taps "Accept & Assign"
+ * Resolves booking from local store or Neon Cloud DB, updates assigned Pandit details,
+ * persists to Neon DB backend, and dispatches Meta Cloud WhatsApp templates.
  */
-export function executeAcharyaAssignment(bookingId: string, acharyaId = 'acharya-1', customPhone?: string): boolean {
-  const booking = getAllBookings().find(item => item.id === bookingId);
-  if (!booking) return false;
+export async function executeAcharyaAssignment(
+  bookingId: string,
+  panditOrAcharyaId: string | { name: string; phone: string; arrivalTime?: string },
+  customPhone?: string,
+  arrivalTime?: string,
+  existingBooking?: BookingPlan
+): Promise<{ ok: boolean; booking?: BookingPlan; error?: string }> {
+  let booking: BookingPlan | null | undefined = existingBooking || getAllBookings().find(item => item.id === bookingId);
+  if (!booking) {
+    booking = await fetchBookingByIdFromNeon(bookingId);
+  }
+  if (!booking) {
+    return { ok: false, error: 'Booking not found in database or local storage' };
+  }
 
-  const acharya = ACHARYA_SCHOLARS.find((a) => a.id === acharyaId);
-  if (!acharya) return false;
+  let panditName = '';
+  let panditPhone = '';
+  let finalArrivalTime = arrivalTime || '07:00 AM IST';
+
+  if (typeof panditOrAcharyaId === 'object' && panditOrAcharyaId !== null) {
+    panditName = panditOrAcharyaId.name;
+    panditPhone = panditOrAcharyaId.phone;
+    if (panditOrAcharyaId.arrivalTime) finalArrivalTime = panditOrAcharyaId.arrivalTime;
+  } else {
+    const match = ACHARYA_SCHOLARS.find((a) => a.id === panditOrAcharyaId);
+    if (match) {
+      panditName = match.name;
+      panditPhone = customPhone || match.phone;
+    } else {
+      panditName = panditOrAcharyaId || 'Assigned Pandit';
+      panditPhone = customPhone || '';
+    }
+  }
+
+  if (!panditName.trim()) {
+    return { ok: false, error: 'Pandit name is required' };
+  }
+  if (!panditPhone.trim()) {
+    return { ok: false, error: 'Pandit phone number is required' };
+  }
+
+  const panditId = 'p_' + panditName.toLowerCase().replace(/\s+/g, '_');
 
   // 1. Update Booking state
   const updatedBooking: BookingPlan = {
     ...booking,
-    assignedPanditId: acharya.id,
-    status: booking.status
+    assignedPanditId: panditId,
+    assignedPanditName: panditName.trim(),
+    assignedPanditPhone: panditPhone.trim(),
+    status: 'assigned'
   };
   saveBooking(updatedBooking);
-  syncBookingToNeon(updatedBooking).catch((e) => console.warn('Neon sync error:', e));
+  await syncBookingToNeon(updatedBooking).catch((e) => console.warn('Neon sync error:', e));
 
-  // 2. Mark the alert message action as completed
-  const messages = getWhatsAppMessages();
-  const alertMsg = messages.find(m => m.bookingId === bookingId && m.type === 'acharya_alert');
-  if (alertMsg) {
-    alertMsg.actionCompleted = true;
-    localStorage.setItem(STORAGE_WHATSAPP_KEY, JSON.stringify(messages));
-  }
+  // 2. Mark the alert message action as completed in local storage
+  try {
+    const messages = getWhatsAppMessages();
+    const alertMsg = messages.find(m => m.bookingId === bookingId && m.type === 'acharya_alert');
+    if (alertMsg) {
+      alertMsg.actionCompleted = true;
+      localStorage.setItem(STORAGE_WHATSAPP_KEY, JSON.stringify(messages));
+    }
+  } catch {}
 
-  // 3. Dispatch official ceremony assignment order directly to the assigned Acharya's phone!
-  sendAcharyaOrderDispatchMessage(updatedBooking, acharya, customPhone);
+  const panditObj: AcharyaScholar = {
+    id: panditId,
+    name: panditName.trim(),
+    title: 'Assigned Vedic Pandit',
+    institution: 'Vedic Acharya Parishad',
+    vedicTradition: 'Rigveda / Yajurveda Prayoga',
+    experienceYears: 12,
+    languages: ['Kannada', 'Sanskrit'],
+    area: 'Bengaluru',
+    phone: panditPhone.trim(),
+  };
 
-  // 4. Dispatch the update message to the customer with Acharya details
-  sendAcharyaAssignedMessage(updatedBooking, acharya);
+  // 3. Dispatch official ceremony assignment order directly to the assigned Pandit's phone!
+  sendAcharyaOrderDispatchMessage(updatedBooking, panditObj, panditPhone.trim(), finalArrivalTime);
 
-  return true;
+  // 4. Dispatch the update message to the customer with Pandit details
+  sendAcharyaAssignedMessage(updatedBooking, panditObj, finalArrivalTime);
+
+  return { ok: true, booking: updatedBooking };
 }
 
 /**
