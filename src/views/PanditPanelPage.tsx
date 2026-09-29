@@ -207,10 +207,16 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
     };
 
     // 1. Send mantrakshata_pandit_booking_details to assigned Pandit's phone
-    sendAcharyaOrderDispatchMessage(updated, panditObj, assignPhone.trim());
+    const panditDispatch = await sendAcharyaOrderDispatchMessage(updated, panditObj, assignPhone.trim());
 
     // 2. Send mantrakshata_customer_pandit_details to host Customer's phone
-    sendAcharyaAssignedMessage(updated, panditObj);
+    const customerDispatch = await sendAcharyaAssignedMessage(updated, panditObj);
+
+    if (!panditDispatch.ok) {
+      console.warn('Pandit WhatsApp dispatch failed:', panditDispatch.error);
+      setAssignError(`Pandit WhatsApp message failed: ${panditDispatch.error || 'Provider rejected message'}`);
+      return;
+    }
 
     setBookings(prev => prev.map(b => b.id === assigningId ? updated : b));
     setAssigningId(null);

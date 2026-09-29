@@ -12,7 +12,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: 'Recipient phone and templateName are required' }, { status: 400 });
     }
 
-    const cleanTo = String(to).replace(/\D/g, '');
+    let cleanTo = String(to).replace(/\D/g, '');
+    if (cleanTo.startsWith('0') && cleanTo.length === 11) {
+      cleanTo = cleanTo.slice(1);
+    }
     const formattedTo = cleanTo.length === 10 ? '91' + cleanTo : cleanTo;
 
     const token = process.env.WHATSAPP_TOKEN || DEFAULT_TOKEN;
@@ -48,8 +51,8 @@ export async function POST(request: Request) {
     } else {
       if (parameters.length > 0) {
         const formattedParams = parameters.map((p: any) => {
-          const str = String(p ?? '').trim();
-          if (!str) return '';
+          let str = String(p ?? '').replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+          if (!str) str = 'Mantrakshata';
           if (str.startsWith('*') && str.endsWith('*') && str.length >= 2) return str;
           if (/^https?:\/\//i.test(str) || str.includes('http://') || str.includes('https://') || str.includes('*')) return str;
           return `*${str}*`;
@@ -66,7 +69,7 @@ export async function POST(request: Request) {
           sub_type: 'url',
           index: '0',
           parameters: [
-            { type: 'text', text: String(buttonParam) }
+            { type: 'text', text: String(buttonParam).replace(/[\r\n\t]+/g, '').trim() }
           ]
         });
       }
@@ -96,7 +99,8 @@ export async function POST(request: Request) {
 
     if (!res.ok) {
       console.warn('Meta WhatsApp API error:', data);
-      return NextResponse.json({ ok: false, error: data.error?.message || 'Meta API rejected request', raw: data }, { status: res.status });
+      const errorMsg = data.error?.message || data.error?.error_data?.details || 'Meta API rejected request';
+      return NextResponse.json({ ok: false, error: errorMsg, raw: data }, { status: 400 });
     }
 
     return NextResponse.json({

@@ -134,12 +134,12 @@ export function formatVenueWithMaps(booking: BookingPlan): string {
   if (booking.pincode) {
     parts.push(`Bengaluru - ${booking.pincode}`);
   }
-  const cleanAddress = parts.filter(Boolean).join(', ');
-  const boldAddress = cleanAddress ? `*${cleanAddress}*` : '';
+  const cleanAddress = parts.filter(Boolean).join(', ').replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  const boldAddress = cleanAddress ? `*${cleanAddress}*` : '*Bengaluru*';
 
   if (booking.mapsLink && booking.mapsLink.trim()) {
-    const cleanMaps = booking.mapsLink.trim();
-    return boldAddress ? `${boldAddress} | Maps: ${cleanMaps}` : `Maps: ${cleanMaps}`;
+    const cleanMaps = booking.mapsLink.replace(/[\r\n\t]+/g, '').trim();
+    return `${boldAddress} | Maps: ${cleanMaps}`;
   }
   return boldAddress;
 }
@@ -147,16 +147,26 @@ export function formatVenueWithMaps(booking: BookingPlan): string {
 /**
  * Dispatch Official Booking Assignment Order Directly to the Assigned Pandit
  */
-export function sendAcharyaOrderDispatchMessage(
+export async function sendAcharyaOrderDispatchMessage(
   booking: BookingPlan,
   acharya: AcharyaScholar | { name: string; phone: string; [key: string]: any },
   customPhone?: string,
   arrivalTime?: string
-): WhatsAppMessage {
+): Promise<{ ok: boolean; messageId?: string; error?: string; message: WhatsAppMessage }> {
   const targetPhone = customPhone || acharya.phone || '+91 98450 88002';
-  const arrival = arrivalTime || '07:00 AM IST';
+  const cleanTimeSlot = (booking.timeSlot || '07:30 AM - 09:00 AM')
+    .replace(/\s*IST\s*/gi, '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim();
+  const cleanArrival = (arrivalTime || '07:00 AM')
+    .replace(/\s*IST\s*/gi, '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim() || '07:00 AM';
   const venue = formatVenueWithMaps(booking);
-  const sankalpaDetails = `Gotra: ${booking.gotra || 'Kashyapa'}, Nakshatra: ${booking.nakshatra || 'Chitra'}, Pada: ${booking.pada || 1}`;
+  let sankalpaDetails = `Gotra: ${booking.gotra || 'Kashyapa'}, Nakshatra: ${booking.nakshatra || 'Chitra'}, Pada: ${booking.pada || 1}`
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   let specialInstructions = 'Arrive 30 mins prior with sacred patras and samagri. Celebrant family will prepare fruits and deepa mane.';
   if (booking.giftItems && booking.giftItems.length > 0) {
     if (booking.giftDeliveryMode === 'with_pandit') {
@@ -166,6 +176,7 @@ export function sendAcharyaOrderDispatchMessage(
       specialInstructions = 'Sacred gifts dispatched via courier. Arrive 30 mins prior with sacred patras and samagri.';
     }
   }
+  specialInstructions = specialInstructions.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
 
   const msg: WhatsAppMessage = {
     id: `WA-ACHARYA-ORDER-${Date.now()}`,
@@ -175,7 +186,7 @@ export function sendAcharyaOrderDispatchMessage(
     recipientRole: 'acharya',
     type: 'acharya_order',
     title: 'Pandit Booking Details & Schedule',
-    body: `Namaskara Pandit *${acharya.name}*, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nCustomer contact: *${booking.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nArrival time: *${arrival}*\nVenue: ${venue}\nRitual / package: *${booking.packageName}*\nSankalpa details: *${sankalpaDetails}*\nSpecial instructions: *${specialInstructions}*\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.`,
+    body: `Namaskara Pandit *${acharya.name}*, Main Acharya has assigned this Vardhantotsava to you.\n\nBooking ID: *${booking.id}*\nCelebrant: *${booking.name}*\nCustomer contact: *${booking.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${cleanTimeSlot} IST*\nArrival time: *${cleanArrival} IST*\nVenue: ${venue}\nRitual / package: *${booking.packageName}*\nSankalpa details: *${sankalpaDetails}*\nSpecial instructions: *${specialInstructions}*\n\nPlease review the details and contact the Main Acharya promptly if you cannot attend.`,
     dynamicLink: `/portal?id=${booking.id}`,
     actionRequired: true,
     actionCompleted: false,
@@ -185,27 +196,32 @@ export function sendAcharyaOrderDispatchMessage(
   saveWhatsAppMessage(msg);
 
   const params = [
-    bold(acharya.name),
-    bold(booking.id),
-    bold(booking.name),
-    bold(booking.phone),
-    bold(booking.celebrationDate),
-    bold(`${booking.timeSlot} IST`),
-    bold(arrival),
+    bold(acharya.name || 'Pandit'),
+    bold(booking.id || 'MK-BOOKING'),
+    bold(booking.name || 'Celebrant'),
+    bold(booking.phone || '+91 99020 45009'),
+    bold(booking.celebrationDate || 'Ceremony Date'),
+    bold(cleanTimeSlot),
+    bold(cleanArrival),
     venue,
-    bold(booking.packageName),
+    bold(booking.packageName || 'Sampoorna Vardhantotsava'),
     bold(sankalpaDetails),
     bold(specialInstructions)
   ];
 
-  dispatchMetaCloudTemplate(targetPhone, 'mantrakshata_pandit_booking_details', params)
-    .then((res) => {
-      if (res.ok) updateWhatsAppMessageStatus(msg.id, 'sent');
-      else console.warn('Pandit booking dispatch failed:', res.error);
-    })
-    .catch((err) => console.warn('Pandit booking dispatch error:', err));
-
-  return msg;
+  try {
+    const res = await dispatchMetaCloudTemplate(targetPhone, 'mantrakshata_pandit_booking_details', params);
+    if (res.ok) {
+      updateWhatsAppMessageStatus(msg.id, 'sent');
+      return { ok: true, messageId: res.messageId, message: msg };
+    } else {
+      console.warn('Pandit booking dispatch failed:', res.error);
+      return { ok: false, error: res.error || 'Meta API rejected dispatch', message: msg };
+    }
+  } catch (err: any) {
+    console.warn('Pandit booking dispatch error:', err);
+    return { ok: false, error: err?.message || 'Dispatch network error', message: msg };
+  }
 }
 
 /**
@@ -406,12 +422,20 @@ export async function sendTestAlertToAdminAndAcharya(): Promise<{
 /**
  * 5. Customer Notification with Pandit Details
  */
-export function sendAcharyaAssignedMessage(
+export async function sendAcharyaAssignedMessage(
   booking: BookingPlan,
   acharya: AcharyaScholar | { name: string; phone: string; [key: string]: any },
   arrivalTime?: string
-): WhatsAppMessage {
-  const arrival = arrivalTime || '07:00 AM IST';
+): Promise<{ ok: boolean; messageId?: string; error?: string; message: WhatsAppMessage }> {
+  const cleanTimeSlot = (booking.timeSlot || '07:30 AM - 09:00 AM')
+    .replace(/\s*IST\s*/gi, '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim();
+  const cleanArrival = (arrivalTime || '07:00 AM')
+    .replace(/\s*IST\s*/gi, '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim() || '07:00 AM';
+
   const msg: WhatsAppMessage = {
     id: `WA-ASSIGNED-${Date.now()}`,
     bookingId: booking.id,
@@ -420,7 +444,7 @@ export function sendAcharyaAssignedMessage(
     recipientRole: 'customer',
     type: 'acharya_assigned',
     title: 'Pandit Assigned Details',
-    body: `Namaskara *${booking.name}*, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: *${booking.id}*\nPandit: *${acharya.name}*\nContact: *${acharya.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${booking.timeSlot} IST*\nExpected arrival: *${arrival}*\n\nPlease keep your phone available for coordination. Reply here if you need help.`,
+    body: `Namaskara *${booking.name}*, your Pandit has been assigned for the Vardhantotsava.\n\nBooking ID: *${booking.id}*\nPandit: *${acharya.name}*\nContact: *${acharya.phone}*\nDate: *${booking.celebrationDate}*\nCeremony time: *${cleanTimeSlot} IST*\nExpected arrival: *${cleanArrival} IST*\n\nPlease keep your phone available for coordination. Reply here if you need help.`,
     sentAt: new Date().toISOString(),
     status: 'draft',
     dynamicLink: `/portal?id=${booking.id}`
@@ -428,23 +452,28 @@ export function sendAcharyaAssignedMessage(
   saveWhatsAppMessage(msg);
 
   const params = [
-    bold(booking.name),
-    bold(booking.id),
-    bold(acharya.name),
-    bold(acharya.phone),
-    bold(booking.celebrationDate),
-    bold(`${booking.timeSlot} IST`),
-    bold(arrival)
+    bold(booking.name || 'Family'),
+    bold(booking.id || 'MK-BOOKING'),
+    bold(acharya.name || 'Pandit'),
+    bold(acharya.phone || '+91 99020 45009'),
+    bold(booking.celebrationDate || 'Ceremony Date'),
+    bold(cleanTimeSlot),
+    bold(cleanArrival)
   ];
 
-  dispatchMetaCloudTemplate(booking.phone, 'mantrakshata_customer_pandit_details', params)
-    .then((res) => {
-      if (res.ok) updateWhatsAppMessageStatus(msg.id, 'sent');
-      else console.warn('Customer Pandit details dispatch failed:', res.error);
-    })
-    .catch((err) => console.warn('Customer Pandit details dispatch error:', err));
-
-  return msg;
+  try {
+    const res = await dispatchMetaCloudTemplate(booking.phone, 'mantrakshata_customer_pandit_details', params);
+    if (res.ok) {
+      updateWhatsAppMessageStatus(msg.id, 'sent');
+      return { ok: true, messageId: res.messageId, message: msg };
+    } else {
+      console.warn('Customer Pandit details dispatch failed:', res.error);
+      return { ok: false, error: res.error || 'Meta API rejected dispatch', message: msg };
+    }
+  } catch (err: any) {
+    console.warn('Customer Pandit details dispatch error:', err);
+    return { ok: false, error: err?.message || 'Dispatch network error', message: msg };
+  }
 }
 
 /**
@@ -668,10 +697,19 @@ export async function executeAcharyaAssignment(
   };
 
   // 3. Dispatch official ceremony assignment order directly to the assigned Pandit's phone!
-  sendAcharyaOrderDispatchMessage(updatedBooking, panditObj, panditPhone.trim(), finalArrivalTime);
+  const panditDispatch = await sendAcharyaOrderDispatchMessage(updatedBooking, panditObj, panditPhone.trim(), finalArrivalTime);
 
   // 4. Dispatch the update message to the customer with Pandit details
-  sendAcharyaAssignedMessage(updatedBooking, panditObj, finalArrivalTime);
+  const customerDispatch = await sendAcharyaAssignedMessage(updatedBooking, panditObj, finalArrivalTime);
+
+  if (!panditDispatch.ok) {
+    console.warn('Pandit WhatsApp dispatch failed:', panditDispatch.error);
+    return {
+      ok: false,
+      booking: updatedBooking,
+      error: `Pandit WhatsApp dispatch failed: ${panditDispatch.error || 'Provider rejected message'}`
+    };
+  }
 
   return { ok: true, booking: updatedBooking };
 }
@@ -839,7 +877,10 @@ export async function dispatchMetaCloudTemplate(
   parameters: string[],
   button?: string
 ): Promise<{ ok: boolean; messageId?: string; error?: string; raw?: any }> {
-  const cleanTo = to.replace(/\D/g, '');
+  let cleanTo = String(to).replace(/\D/g, '');
+  if (cleanTo.startsWith('0') && cleanTo.length === 11) {
+    cleanTo = cleanTo.slice(1);
+  }
   const formattedTo = cleanTo.length === 10 ? '91' + cleanTo : cleanTo;
   const safeParameters = name === 'hav_otp1' ? parameters : parameters.map(p => bold(p));
 
@@ -855,12 +896,16 @@ export async function dispatchMetaCloudTemplate(
         buttonParam: button
       })
     });
-    if (apiRes.ok) {
-      const data = await apiRes.json();
-      if (data.ok) return { ok: true, messageId: data.messageId, raw: data };
+    const data = await apiRes.json();
+    if (apiRes.ok && data.ok) {
+      return { ok: true, messageId: data.messageId, raw: data };
+    }
+    if (data && (data.error || data.raw)) {
+      console.warn(`WhatsApp dispatch rejection for ${name}:`, data.error);
+      return { ok: false, error: data.error || 'WhatsApp provider rejected request', raw: data };
     }
   } catch (e) {
-    // Continue to direct dispatch fallback
+    console.warn('WhatsApp API proxy exception:', e);
   }
 
   // 2. Direct Meta Graph API call fallback
