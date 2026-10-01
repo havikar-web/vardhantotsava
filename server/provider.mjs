@@ -6,3 +6,9 @@ export function metaProvider(env,fetcher=fetch){let cache=[],loaded=0;
  return {send};
 }
 export async function verifyRazorpayPayment(env,id){if(!/^pay_[A-Za-z0-9]+$/.test(id)||!env.RAZORPAY_KEY_ID||!env.RAZORPAY_KEY_SECRET)throw new Error('Payment verification not configured');const res=await fetch('https://api.razorpay.com/v1/payments/'+id,{headers:{Authorization:'Basic '+Buffer.from(env.RAZORPAY_KEY_ID+':'+env.RAZORPAY_KEY_SECRET).toString('base64')},signal:AbortSignal.timeout(15000)});if(!res.ok)throw new Error('Could not verify payment');return res.json();}
+
+export function razorpayProvider(env,fetcher=fetch){
+ async function request(path,body){if(!env.RAZORPAY_KEY_ID||!env.RAZORPAY_KEY_SECRET)throw new Error('Payment configuration missing');let res;try{res=await fetcher('https://api.razorpay.com/v1/'+path,{method:body?'POST':'GET',headers:{Authorization:'Basic '+Buffer.from(env.RAZORPAY_KEY_ID+':'+env.RAZORPAY_KEY_SECRET).toString('base64'),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(15000)});}catch{throw Object.assign(new Error('Unknown payment provider result'),{ambiguous:true});}if(!res.ok)throw Object.assign(new Error('Payment provider rejected request'),{ambiguous:res.status>=500});return res.json();}
+ const safe=(id,prefix)=>{if(!new RegExp('^'+prefix+'_[A-Za-z0-9]+$').test(id))throw new Error('Invalid provider identifier');return id;};
+ return {createOrder:body=>request('orders',body),order:id=>request('orders/'+safe(id,'order')),payment:id=>request('payments/'+safe(id,'pay')),orderPayments:id=>request('orders/'+safe(id,'order')+'/payments'),refund:id=>request('refunds/'+safe(id,'rfnd')),paymentRefunds:id=>request('payments/'+safe(id,'pay')+'/refunds')};
+}

@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { createHmac,timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve,extname,sep } from 'node:path';
-export function createHttp(service,{origin,secure=true,webhookSecret='',verifyToken='',dist,trustProxy=false}){
+export function createHttp(service,{origin,secure=true,webhookSecret='',verifyToken='',paymentWebhookSecret='',dist,trustProxy=false}){
  const cookieName=secure?'__Host-mantrakshata_session':'mantrakshata_session';
  return createServer(async(req,res)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('X-Frame-Options','DENY');res.setHeader('Cache-Control','no-store');if(secure)res.setHeader('Strict-Transport-Security','max-age=31536000');
  const json=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
@@ -12,6 +12,10 @@ export function createHttp(service,{origin,secure=true,webhookSecret='',verifyTo
  if(!path.startsWith('/api/')){if(!['GET','HEAD'].includes(req.method)||!dist)return json(404,{error:'Not found'});const root=resolve(dist);let file=resolve(root,'.'+decodeURIComponent(path));if(!file.startsWith(root+sep)&&file!==root)return json(404,{error:'Not found'});if(path==='/'||!extname(path))file=resolve(root,'index.html');const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.jpg':'image/jpeg','.woff2':'font/woff2','.md':'text/markdown'};try{const data=await readFile(file);res.writeHead(200,{'Content-Type':types[extname(file)]||'application/octet-stream'});return res.end(req.method==='HEAD'?undefined:data);}catch{return json(404,{error:'Not found'});}}
  const ip=trustProxy?String(req.headers['x-forwarded-for']||req.socket.remoteAddress).split(',').at(-1).trim():req.socket.remoteAddress;
  let raw=Buffer.alloc(0);if(req.method!=='GET'){for await(const chunk of req){raw=Buffer.concat([raw,chunk]);if(raw.length>65536)return json(413,{error:'Request too large'});}}
+ if(path==='/api/webhooks/razorpay'){
+ if(req.method!=='POST')return json(405,{error:'Method not allowed'});
+ const expected=createHmac('sha256',paymentWebhookSecret).update(raw).digest('hex'),actual=String(req.headers['x-razorpay-signature']||'');if(!paymentWebhookSecret||!/^[a-f0-9]{64}$/i.test(actual)||!timingSafeEqual(Buffer.from(actual,'hex'),Buffer.from(expected,'hex')))return json(403,{error:'Invalid payment signature'});
+ if(!service.commerce)return json(503,{error:'Payments unavailable'});return json(200,await service.commerce.webhook(JSON.parse(raw),String(req.headers['x-razorpay-event-id']||'')));}
  if(path==='/api/webhooks/whatsapp'){
  if(req.method==='GET'){if(verifyToken&&url.searchParams.get('hub.verify_token')===verifyToken&&url.searchParams.get('hub.mode')==='subscribe'){res.writeHead(200);return res.end(url.searchParams.get('hub.challenge'));}return json(403,{error:'Invalid verification token'});}
  const expected='sha256='+createHmac('sha256',webhookSecret).update(raw).digest('hex'),actual=String(req.headers['x-hub-signature-256']||'');if(!webhookSecret||actual.length!==expected.length||!timingSafeEqual(Buffer.from(actual),Buffer.from(expected)))return json(403,{error:'Invalid signature'});const event=JSON.parse(raw);for(const entry of event.entry||[])for(const change of entry.changes||[])for(const status of change.value?.statuses||[])service.recordDelivery(status.id,status.status);return json(200,{ok:true});}
@@ -23,6 +27,15 @@ export function createHttp(service,{origin,secure=true,webhookSecret='',verifyTo
  if(path==='/api/auth/verify'&&req.method==='POST'){const result=service.verifyOtp(input.challengeId,input.code,ip);if(token)service.logout(token);setCookie(result.token,86400);return json(200,{user:result.user});}
  if(path==='/api/auth/logout'&&req.method==='POST'){service.logout(token);setCookie('',0);return json(200,{ok:true});}
  const u=service.session(token);
+ if(path==='/api/razorpay/order'&&req.method==='POST')return json(200,await service.commerce.order(u,input));
+ if(path==='/api/razorpay/verify'&&req.method==='POST')return json(200,await service.commerce.verify(u,input));
+ if(path==='/api/gifts'&&req.method==='GET')return json(200,{gifts:service.commerce.listGifts(u)});
+ if(path==='/api/gifts'&&req.method==='POST')return json(201,{gift:service.commerce.createGift(u,input)});
+ if(path==='/api/admin/payments'&&req.method==='GET')return json(200,{payments:service.commerce.payments(u)});
+ if(path==='/api/admin/payments/reconcile'&&req.method==='POST'){service.admin(u);await service.commerce.reconcile();return json(200,{ok:true});}
+ const recovery=path.match(/^\/api\/admin\/payments\/([A-Za-z0-9-]+)\/recover$/);if(recovery&&req.method==='POST')return json(200,await service.commerce.resolveUnknown(u,recovery[1],input));
+ const approval=path.match(/^\/api\/(bookings|gifts)\/([A-Za-z0-9-]+)\/approve$/);if(approval&&req.method==='POST')return json(200,{record:service.commerce.approve(u,approval[1]==='bookings'?'booking':'gift',approval[2])});
+ const gift=path.match(/^\/api\/gifts\/([A-Za-z0-9-]+)(?:\/(fulfil))?$/);if(gift){if(req.method==='GET'&&!gift[2])return json(200,{gift:service.commerce.gift(service.commerce.ownGift(u,gift[1]))});if(req.method==='POST'&&gift[2])return json(200,{gift:service.commerce.fulfil(u,gift[1],input)});}
  if(path==='/api/session'&&req.method==='GET')return json(200,{user:u});
  if(path==='/api/profile'&&req.method==='POST')return json(200,{user:service.saveProfile(u,input)});
  if(path==='/api/bookings'&&req.method==='GET')return json(200,{bookings:service.listBookings(u)});
@@ -32,5 +45,5 @@ export function createHttp(service,{origin,secure=true,webhookSecret='',verifyTo
  const match=path.match(/^\/api\/bookings\/([A-Za-z0-9-]+)(?:\/(confirm|assign|reschedule|cancel|complete))?$/);
  if(match){if(req.method==='GET'&&!match[2])return json(200,{booking:service.unpack(service.own(u,match[1]))});if(req.method==='POST'&&match[2])return json(200,{booking:match[2]==='confirm'?await service.confirm(u,match[1],input):service.change(u,match[1],match[2],input)});}
  return json(404,{error:'Not found'});
- }catch(e){json(e.status||500,{error:e.status?e.message:'The server could not complete this request. Please try again or contact support.'});}});
+ }catch(e){json(e.status||(e instanceof SyntaxError?400:500),{error:e instanceof SyntaxError?'Invalid JSON request.':e.status?e.message:'The server could not complete this request. Please try again or contact support.'});}});
 }

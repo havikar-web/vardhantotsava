@@ -2,6 +2,8 @@
 
 Version 1.0 · 27 September 2026 · Based on local source and browser audit
 
+**Current implementation audit:** see [DEPLOYMENT-DIAGNOSTICS-2026-10-01.md](DEPLOYMENT-DIAGNOSTICS-2026-10-01.md). The implementation/evidence columns below describe the September baseline. The project now uses Next.js with a protected server; the October report records tested progress and remaining gaps.
+
 ## Product and outcome
 
 Enable a family to plan and book a Vardhantotsava, receive a confirmed schedule, have a Main Acharya assign a Pandit, and receive accurate WhatsApp updates through the day after the ceremony. Offer gifting as a related journey. The service must preserve user-entered birth details and distinguish an enquiry, an unpaid request, a confirmed booking and a completed ceremony.
@@ -24,7 +26,7 @@ Launch scope: English website and messages; Bengaluru home ceremonies; India-wid
 
 Birthplace coverage is separate from service coverage. Searching an Indian village must not imply that a home ceremony or gift delivery is available there. Search cannot guarantee every village is indexed; manual entry is mandatory.
 
-Decisions awaiting business confirmation: official WhatsApp number, exact approved hav_otp1 payload/language/buttons, package pricing and taxes, payable amount/deposit, service areas, cancellation/refund terms, actual Pandit directory and contacts, gifting delivery coverage, and whether the next-day message is feedback or another kind of reminder. Current interpretation: next-day thank-you and feedback to the customer.
+Decisions awaiting business confirmation: official WhatsApp number, exact approved hav_otp1 payload/language/buttons, package pricing and taxes, payable amount/deposit, service areas, cancellation/refund terms, actual Pandit directory and contacts, gifting delivery coverage, and whether the next-day message is feedback or another kind of reminder. Current interpretation: next-day thank-you and feedback to the customer. Subsequent business decisions: Bhatco Eventures Pvt Ltd owns the brand; hello@bhatco.com and +91 8296925577 are official contacts; full payment, Bengaluru coverage, minimum 48 hours notice and any requested time slot. Prices remain X pending approval; shipping, policies, support hours and coordinator contact remain unresolved.
 
 Out of launch scope unless explicitly approved: all-India home ceremonies, automatic astrological certification, real livestream infrastructure, annual marketing campaigns, subscriptions and native apps. Existing promotional or demo screens do not establish these capabilities.
 
@@ -51,14 +53,14 @@ Out of launch scope unless explicitly approved: all-India home ceremonies, autom
 | # | Event | Recipient | Template | Trigger rule |
 |---|---|---|---|---|
 | 1 | OTP request | Customer | hav_otp1 | Exact user-supplied approved template; never invent its parameters |
-| 2 | Registration complete | Customer | hav_registration_thanks | First account creation after server OTP verification; not every login |
-| 3 | Vardhantotsava confirmed | Customer | hav_vardhantotsava_confirmation | Availability and required payment confirmed and booking persisted |
-| 4 | Assignment needed | Main Acharya | hav_main_acharya_assignment | Confirmed booking needs a Pandit; authenticated booking-specific link |
-| 5 | Pandit assigned | Customer | hav_customer_pandit_details | Committed current assignment; real name/contact/arrival time |
-| 6 | Assignment brief | Assigned Pandit | hav_pandit_booking_details | Same committed assignment; ceremony, venue, customer and Sankalpa details |
-| 7 | One-day reminder | Customer | hav_reminder_1day | 24 hours before confirmed ceremony start |
-| 8 | Two-hour reminder | Customer | hav_reminder_2hours | 2 hours before confirmed ceremony start; does not assert Pandit departure |
-| 9 | Next-day follow-up | Customer | hav_next_day_followup | Proposed 10 AM IST next day, only after recorded ceremony completion |
+| 2 | Registration complete | Customer | mantrakshata_welcome_catalog | First account creation after server OTP verification; not every login |
+| 3 | Vardhantotsava confirmed | Customer | mantrakshata_booking_confirmed | Availability and required payment confirmed and booking persisted |
+| 4 | Assignment needed | Main Acharya | mantrakshata_main_acharya_assignment | Confirmed booking needs a Pandit; authenticated booking-specific link |
+| 5 | Pandit assigned | Customer | mantrakshata_customer_pandit_details | Committed current assignment; real name/contact/arrival time |
+| 6 | Assignment brief | Assigned Pandit | mantrakshata_pandit_booking_details | Same committed assignment; ceremony, venue, customer and Sankalpa details |
+| 7 | One-day reminder | Customer | mantrakshata_reminder_1day | 24 hours before confirmed ceremony start |
+| 8 | Two-hour reminder | Customer | mantrakshata_reminder_2hours | 2 hours before confirmed ceremony start; does not assert Pandit departure |
+| 9 | Next-day follow-up | Customer | mantrakshata_next_day_followup | Proposed 10 AM IST next day, only after recorded ceremony completion |
 
 Messages 5 and 6 are two recipients of one committed assignment event, not two independent booking transitions. Pandit reminder copies are not assumed in the requested scope. Obtain appropriate consent and template approval; the drafted follow-up category is provisional. No template draft is evidence of provider approval.
 

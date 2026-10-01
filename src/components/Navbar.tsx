@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, User } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
-import { getUserProfile, UserProfile } from '../lib/store';
+import type { UserProfile } from '../lib/store';
+import {api} from '../lib/api';
 
 interface NavbarProps {
   currentPath: string;
@@ -11,7 +12,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate, onOpenPortal }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserProfile | null>(() => getUserProfile());
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   useEffect(() => { setMobileMenuOpen(false); }, [currentPath]);
   useEffect(() => {
@@ -22,8 +23,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate, onOpenPor
 
   useEffect(() => {
     const handleProfileUpdate = () => {
-      setUser(getUserProfile());
+      void api('/session').then(r=>setUser(r.user)).catch(()=>setUser(null));
     };
+    handleProfileUpdate();
     window.addEventListener('user_profile_updated', handleProfileUpdate);
     window.addEventListener('storage', handleProfileUpdate);
     return () => {

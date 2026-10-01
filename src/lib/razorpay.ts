@@ -66,6 +66,7 @@ export async function createRazorpayOrder(params: {
   customerPhone: string;
   customerEmail?: string;
   userId?: string;
+  kind?: 'booking' | 'gift';
 }): Promise<RazorpayOrderResult> {
   try {
     const res = await fetch('/api/razorpay/order', {
@@ -104,6 +105,7 @@ export async function verifyRazorpayPayment(params: {
 }
 
 export interface LaunchRazorpayOptions {
+  kind?: 'booking' | 'gift';
   bookingId: string;
   amount: number; // in rupees
   packageName: string;
@@ -125,108 +127,17 @@ export interface LaunchRazorpayOptions {
  * 5. Calls onSuccess callback
  */
 export async function launchRazorpayCheckout(options: LaunchRazorpayOptions): Promise<void> {
-  const {
-    bookingId,
-    amount,
-    packageName,
-    customerName,
-    customerPhone,
-    customerEmail,
-    userId,
-    onSuccess,
-    onFailure,
-    onDismiss
-  } = options;
-
-  // 1. Ensure Razorpay SDK is loaded
-  const scriptLoaded = await loadRazorpayScript();
-  if (!scriptLoaded || typeof window.Razorpay === 'undefined') {
-    onFailure('Razorpay payment gateway script could not be loaded. Please check your internet connection or ad-blocker.');
-    return;
-  }
-
-  // 2. Generate Razorpay Order
-  const orderRes = await createRazorpayOrder({
-    bookingId,
-    amount,
-    packageName,
-    customerName,
-    customerPhone,
-    customerEmail,
-    userId
-  });
-
-  if (!orderRes.ok || !orderRes.orderId || !orderRes.keyId) {
-    onFailure(orderRes.error || 'Could not initiate Razorpay order. Please try again.');
-    return;
-  }
-
-  const cleanPhone = customerPhone.replace(/\D/g, '').slice(-10);
-
-  // 3. Configure Razorpay modal
-  const rzpOptions = {
-    key: orderRes.keyId,
-    amount: orderRes.amount,
-    currency: orderRes.currency || 'INR',
-    name: 'Mantrakshata',
-    description: `${packageName} — Booking #${bookingId}`,
-    order_id: orderRes.orderId,
-    image: '/assets/logo.png',
-    prefill: {
-      name: customerName,
-      contact: cleanPhone ? '+91' + cleanPhone : undefined,
-      email: customerEmail || undefined
-    },
-    theme: {
-      color: '#0C2340'
-    },
-    notes: {
-      booking_id: bookingId,
-      user_id: userId || ''
-    },
-    handler: async function (response: any) {
-      if (!response.razorpay_payment_id || !response.razorpay_order_id) {
-        onFailure('Incomplete payment response received from Razorpay.');
-        return;
-      }
-
-      // 4. Verify payment on server
-      const verifyRes = await verifyRazorpayPayment({
-        razorpay_order_id: response.razorpay_order_id,
-        razorpay_payment_id: response.razorpay_payment_id,
-        razorpay_signature: response.razorpay_signature,
-        bookingId,
-        userId
-      });
-
-      if (verifyRes.ok && verifyRes.verified) {
-        onSuccess({
-          paymentId: response.razorpay_payment_id,
-          orderId: response.razorpay_order_id,
-          signature: response.razorpay_signature
-        });
-      } else {
-        onFailure(verifyRes.error || 'Payment signature verification failed.');
-      }
-    },
-    modal: {
-      ondismiss: function () {
-        if (onDismiss) {
-          onDismiss();
-        }
-      }
-    }
-  };
-
   try {
-    const rzpInstance = new window.Razorpay(rzpOptions);
-    rzpInstance.on('payment.failed', function (resp: any) {
-      console.warn('Razorpay payment failure event:', resp.error);
-      onFailure(resp.error?.description || 'Payment was unsuccessful or cancelled.');
-    });
-    rzpInstance.open();
-  } catch (err: any) {
-    console.error('Failed to open Razorpay modal:', err);
-    onFailure(err?.message || 'Could not launch Razorpay checkout modal.');
-  }
+    const response=await fetch('/api/razorpay/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({targetId:options.bookingId,kind:options.kind||'booking'})});
+    const order=await response.json();
+    if(!response.ok||!order.orderId)throw new Error(order.error||'Could not create your payment order.');
+    if(!await loadRazorpayScript())throw new Error('Payment checkout could not load. Please try again.');
+    const checkout=new window.Razorpay({key:order.keyId,order_id:order.orderId,amount:order.amount,currency:order.currency,name:'Mantrakshata',description:options.packageName,
+      prefill:{name:options.customerName,contact:options.customerPhone,email:options.customerEmail||''},notes:{booking_id:options.kind==='gift'?'':options.bookingId,target_id:options.bookingId},
+      modal:{ondismiss:()=>options.onDismiss?.()},handler:async(result:any)=>{
+        try{const r=await fetch('/api/razorpay/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(result)});const data=await r.json();if(!r.ok||!data.verified)throw new Error(data.error||'Payment verification is pending. Check your dashboard before paying again.');if(!['confirmed','completed','paid','packed','shipped','delivered'].includes(data.status))throw new Error('Payment received but the request needs staff review. Do not pay again; contact hello@bhatco.com.');options.onSuccess({paymentId:data.paymentId,orderId:data.orderId,signature:result.razorpay_signature});}catch(e:any){options.onFailure(e.message||'Payment verification is pending. Check your dashboard before paying again.');}
+      }});
+    checkout.on('payment.failed',()=>options.onFailure('Payment was not completed. Your request is still unpaid.'));
+    checkout.open();
+  }catch(e:any){options.onFailure(e.message||'Could not start checkout.');}
 }

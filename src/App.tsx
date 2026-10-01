@@ -1,6 +1,7 @@
 'use client';
 
 import { SecurePortalPage } from './views/SecurePortalPage';
+import { SecureGiftsPage } from './views/SecureGiftsPage';
 import { TemplateLibraryPage } from './views/TemplateLibraryPage';
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
@@ -10,17 +11,8 @@ import { HomePage } from './views/HomePage';
 import { VardhantotsavaPage } from './views/VardhantotsavaPage';
 import { HowItWorksPage } from './views/HowItWorksPage';
 import { PackagesPage } from './views/PackagesPage';
-import { GiftPage } from './views/GiftPage';
-import { GiftsStorePage } from './views/GiftsStorePage';
-import { BookingFlowPage } from './views/BookingFlowPage';
-import { DashboardPage } from './views/DashboardPage';
 import { AboutPage } from './views/AboutPage';
 import { FaqPage } from './views/FaqPage';
-import { AcharyaAssignmentPage } from './views/AcharyaAssignmentPage';
-import { WhatsAppAdminPage } from './views/WhatsAppAdminPage';
-import { AdminDashboardPage } from './views/AdminDashboardPage';
-import { PanditPanelPage } from './views/PanditPanelPage';
-import { CustomerPortalModal } from './components/CustomerPortalModal';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ParticleCanvas } from './components/ParticleCanvas';
 import { SacredCursor } from './components/SacredCursor';
@@ -39,10 +31,7 @@ export function App({ initialPath }: { initialPath?: string }) {
     if (typeof window === 'undefined') return '/';
     return window.location.pathname + window.location.search;
   });
-  const [isPortalOpen, setIsPortalOpen] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.location.pathname.replace(/\/$/, '') === '/portal';
-  });
+  const [isPortalOpen, setIsPortalOpen] = useState(false);
 
   const reducedMotion = useReducedMotion();
   const [showTop, setShowTop] = useState(false);
@@ -57,10 +46,6 @@ export function App({ initialPath }: { initialPath?: string }) {
     document.title = (titles[currentPath] || 'Vardhantotsava') + ' | Mantrakshata';
   }, [currentPath]);
   const navigate = (path: string) => {
-    if (path === '/portal') {
-      setIsPortalOpen(true);
-      return;
-    }
     setIsPortalOpen(false);
     window.history.pushState({}, '', path);
     setCurrentPath(path.split('?')[0].replace(/\/$/,'') || '/');
@@ -72,12 +57,8 @@ export function App({ initialPath }: { initialPath?: string }) {
     const handlePopState = () => {
       const p = window.location.pathname.replace(/\/$/, '') || '/';
       setRouteKey(window.location.pathname+window.location.search);
-      if (p === '/portal') {
-        setIsPortalOpen(true);
-      } else {
-        setIsPortalOpen(false);
-        setCurrentPath(p);
-      }
+      setIsPortalOpen(false);
+      setCurrentPath(p);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -94,32 +75,33 @@ export function App({ initialPath }: { initialPath?: string }) {
       case '/packages':
         return <PackagesPage navigate={navigate} />;
       case '/gift':
-        return <GiftPage navigate={navigate} />;
+        return <SecureGiftsPage navigate={navigate} />;
       case '/gifts':
       case '/store':
-        return <GiftsStorePage navigate={navigate} />;
+        return <SecureGiftsPage navigate={navigate} />;
       case '/book':
-        return <BookingFlowPage navigate={navigate} />;
+        return <SecurePortalPage mode="book" navigate={navigate} />;
       case '/dashboard':
-        return <DashboardPage navigate={navigate} />;
+      case '/portal':
+        return <SecurePortalPage navigate={navigate} />;
       case '/about':
         return <AboutPage navigate={navigate} />;
       case '/faqs':
         return <FaqPage navigate={navigate} />;
       case '/acharya/assign':
       case '/assign':
-        return <AcharyaAssignmentPage navigate={navigate} />;
+        return <SecurePortalPage mode="admin" navigate={navigate} />;
       case '/admin':
       case '/admin/dashboard':
-        return <AdminDashboardPage navigate={navigate} />;
+        return <SecurePortalPage mode="admin" navigate={navigate} />;
       case '/admin/templates':
         return <TemplateLibraryPage />;
       case '/admin/whatsapp':
-        return <WhatsAppAdminPage navigate={navigate} />;
+        return <SecurePortalPage mode="admin" navigate={navigate} />;
       case '/pandit':
       case '/pandit/panel':
       case '/acharya/panel':
-        return <PanditPanelPage navigate={navigate} />;
+        return <SecurePortalPage navigate={navigate} />;
       case '/privacy':
       case '/terms':
       case '/cancellation':
@@ -134,12 +116,12 @@ export function App({ initialPath }: { initialPath?: string }) {
       <ParticleCanvas />
       <SacredCursor />
       <ScrollProgressBar />
-      <div role="note" className="bg-amber-50 text-amber-950 text-xs text-center px-4 py-2">Secure ceremony requests · Bengaluru · 48 hours’ notice. Prices are awaiting confirmation; no payment is collected by this form.</div>
+      <div role="note" className="bg-amber-50 text-amber-950 text-xs text-center px-4 py-2">Bengaluru ceremonies · 48 hours’ notice · Full payment after your availability and final quote are approved.</div>
       <a className="skip-link" href="#main-content">Skip to content</a>
-      <Navbar 
-        currentPath={currentPath} 
-        navigate={navigate} 
-        onOpenPortal={() => setIsPortalOpen(true)} 
+      <Navbar
+        currentPath={currentPath}
+        navigate={navigate}
+        onOpenPortal={() => navigate('/portal')}
       />
       <main id="main-content" className="flex-1 focus:outline-none" tabIndex={-1}>
         <div key={routeKey} className="page-enter">{renderPage()}</div>
@@ -149,11 +131,7 @@ export function App({ initialPath }: { initialPath?: string }) {
       {showTop && !isPortalOpen && <button className="back-to-top" aria-label="Back to top" onClick={() => window.scrollTo({ top:0, behavior: reducedMotion ? 'auto' : 'smooth' })}><ArrowUp size={18} /></button>}
 
       {/* Customer Portal Modal */}
-      <CustomerPortalModal 
-        isOpen={isPortalOpen} 
-        onClose={() => setIsPortalOpen(false)} 
-        navigate={navigate} 
-      />
+      {isPortalOpen && <div className="fixed inset-0 z-[100] bg-black/50 overflow-y-auto p-4" role="dialog" aria-modal="true" aria-label="Secure customer portal"><div className="max-w-4xl mx-auto bg-ivory rounded-2xl"><button className="p-4 underline" onClick={() => setIsPortalOpen(false)}>Close portal</button><SecurePortalPage navigate={navigate} /></div></div>}
     </div></MotionConfig>
   );
 }

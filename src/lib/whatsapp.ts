@@ -78,34 +78,7 @@ export function clearWhatsAppMessages(): void {
 /**
  * 1. Dispatch OTP Verification Code (Exact Meta Approved Template Format)
  */
-export function sendOtpMessage(phone: string, code = '1008'): WhatsAppMessage {
-  const msg: WhatsAppMessage = {
-    id: `WA-OTP-${Date.now()}`,
-    recipientPhone: phone,
-    recipientName: 'Customer',
-    recipientRole: 'customer',
-    type: 'otp',
-    title: 'Verification Code (OTP)',
-    body: `OTP Code: *${code}*. This is your OTP for Verification. The OTP is valid for 10 mins. Call +91 82969 25577 if you did not perform this request.`,
-    sentAt: new Date().toISOString(),
-    status: 'draft'
-  };
-  saveWhatsAppMessage(msg);
-
-  dispatchMetaCloudTemplate(
-    phone,
-    'hav_otp1',
-    [code, 'Verification', '10 mins', '918296925577'],
-    code
-  )
-    .then((res) => {
-      if (res.ok) updateWhatsAppMessageStatus(msg.id, 'sent');
-      else console.warn('OTP dispatch failed:', res.error);
-    })
-    .catch((err) => console.warn('OTP dispatch error:', err));
-
-  return msg;
-}
+export function sendOtpMessage(phone: string, code = '1008'): WhatsAppMessage {throw new Error('Use the secure WhatsApp sign-in form.');}
 
 /**
  * Wraps variable values in asterisks (*value*) so WhatsApp renders them in bold.
@@ -761,38 +734,11 @@ export interface WhatsAppCredentials {
   adminPhones: string[];
 }
 
-const DEFAULT_WA_CREDS: WhatsAppCredentials = {
-  phoneNumberId: '1337239006142926',
-  wabaId: '2192002941638802',
-  token: 'EAA3srEndgnwBSoBJqylF683YKswnIEOeYC1aGFYE2MHu8rBVGHLDhvx5MfucH3ISPm06x40A7FAiKALrkFWc7BlB9VAEvjvnPtkC8HNE6USZBLcPhaZAux4ykwZBuYlfTV8pzm3R11H0ZABhFGZB7hgkAUMRTWQtCU7ZBbeU88zgead9ch36CZCZC8ZBr6h2TYS7YtQZDZD',
-  adminPhones: ['919902045009']
-};
+const DEFAULT_WA_CREDS: WhatsAppCredentials = { token: '', phoneNumberId: '', wabaId: '', adminPhones: [] };
 
-export function getWhatsAppCredentials(): WhatsAppCredentials {
-  if (typeof window === 'undefined') return DEFAULT_WA_CREDS;
-  try {
-    const raw = localStorage.getItem('mantrakshata_whatsapp_creds');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        phoneNumberId: parsed.phoneNumberId || DEFAULT_WA_CREDS.phoneNumberId,
-        wabaId: parsed.wabaId || DEFAULT_WA_CREDS.wabaId,
-        token: parsed.token || DEFAULT_WA_CREDS.token,
-        adminPhones: parsed.adminPhones?.length ? parsed.adminPhones : DEFAULT_WA_CREDS.adminPhones,
-      };
-    }
-  } catch (e) {
-    // fallback to defaults
-  }
-  return DEFAULT_WA_CREDS;
-}
+export function getWhatsAppCredentials(): WhatsAppCredentials {return {token:'',phoneNumberId:'',wabaId:'',adminPhones:[]} as WhatsAppCredentials;}
 
-export function saveWhatsAppCredentials(creds: Partial<WhatsAppCredentials>): void {
-  if (typeof window === 'undefined') return;
-  const current = getWhatsAppCredentials();
-  const updated = { ...current, ...creds };
-  localStorage.setItem('mantrakshata_whatsapp_creds', JSON.stringify(updated));
-}
+export function saveWhatsAppCredentials(creds: Partial<WhatsAppCredentials>): void {throw new Error('WhatsApp credentials must be configured on the server.');}
 
 export interface TemplateMetaDefinition {
   name: string;
@@ -865,7 +811,7 @@ export const META_APPROVED_SCHEMAS: Record<string, TemplateMetaDefinition> = {
   mantrakshata_next_day_followup: {
     name: 'mantrakshata_next_day_followup',
     language: 'en',
-    status: 'APPROVED',
+    status: 'PENDING',
     bodyVarCount: 3,
     hasDynamicButton: false
   }
@@ -876,159 +822,8 @@ export async function dispatchMetaCloudTemplate(
   name: string,
   parameters: string[],
   button?: string
-): Promise<{ ok: boolean; messageId?: string; error?: string; raw?: any }> {
-  let cleanTo = String(to).replace(/\D/g, '');
-  if (cleanTo.startsWith('0') && cleanTo.length === 11) {
-    cleanTo = cleanTo.slice(1);
-  }
-  const formattedTo = cleanTo.length === 10 ? '91' + cleanTo : cleanTo;
-  const safeParameters = name === 'hav_otp1' ? parameters : parameters.map(p => bold(p));
+): Promise<{ ok: boolean; messageId?: string; error?: string; raw?: any }> {throw new Error('WhatsApp messages must be queued by the authenticated server workflow.');}
 
-  // 1. Try local server-side API proxy route first
-  try {
-    const apiRes = await fetch('/api/whatsapp/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: formattedTo,
-        templateName: name,
-        parameters: safeParameters,
-        buttonParam: button
-      })
-    });
-    const data = await apiRes.json();
-    if (apiRes.ok && data.ok) {
-      return { ok: true, messageId: data.messageId, raw: data };
-    }
-    if (data && (data.error || data.raw)) {
-      console.warn(`WhatsApp dispatch rejection for ${name}:`, data.error);
-      return { ok: false, error: data.error || 'WhatsApp provider rejected request', raw: data };
-    }
-  } catch (e) {
-    console.warn('WhatsApp API proxy exception:', e);
-  }
+export async function registerPhoneNumberPin(pin: string): Promise<{ ok: boolean; error?: string; raw?: any }> {throw new Error('Configure the phone registration in Meta Business Manager.');}
 
-  // 2. Direct Meta Graph API call fallback
-  try {
-    const creds = getWhatsAppCredentials();
-    const token = creds.token || DEFAULT_WA_CREDS.token;
-    const phoneId = creds.phoneNumberId || DEFAULT_WA_CREDS.phoneNumberId;
-
-    const isEnUs = name === 'hav_otp1' || name === 'samuha_confirmation' || name === 'hello_world';
-    const langCode = isEnUs ? 'en_US' : 'en';
-
-    const components: any[] = [];
-    if (name === 'hav_otp1') {
-      const code = String(parameters[0] || '123456');
-      components.push({
-        type: 'body',
-        parameters: [
-          { type: 'text', text: code },
-          { type: 'text', text: String(parameters[1] || 'Verification') },
-          { type: 'text', text: String(parameters[2] || '10 mins') },
-          { type: 'text', text: String(parameters[3] || '918296925577') }
-        ]
-      });
-      components.push({
-        type: 'button',
-        sub_type: 'url',
-        index: '0',
-        parameters: [{ type: 'text', text: code }]
-      });
-    } else {
-      if (safeParameters.length > 0) {
-        components.push({
-          type: 'body',
-          parameters: safeParameters.map(p => ({ type: 'text', text: String(p ?? '') }))
-        });
-      }
-      if (button) {
-        components.push({
-          type: 'button',
-          sub_type: 'url',
-          index: '0',
-          parameters: [{ type: 'text', text: String(button) }]
-        });
-      }
-    }
-
-    const payload = {
-      messaging_product: 'whatsapp',
-      to: formattedTo,
-      type: 'template',
-      template: {
-        name,
-        language: { code: langCode },
-        components
-      }
-    };
-
-    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      console.warn('Meta WhatsApp direct API rejection:', data);
-      return { ok: false, error: data.error?.message || 'Meta API rejected dispatch', raw: data };
-    }
-
-    return {
-      ok: true,
-      messageId: data.messages?.[0]?.id,
-      raw: data
-    };
-  } catch (err: any) {
-    console.error('Meta WhatsApp dispatch error:', err);
-    return { ok: false, error: err?.message || 'Failed to dispatch Meta message' };
-  }
-}
-
-export async function registerPhoneNumberPin(pin: string): Promise<{ ok: boolean; error?: string; raw?: any }> {
-  const creds = getWhatsAppCredentials();
-  const token = creds.token || DEFAULT_WA_CREDS.token;
-  const phoneId = creds.phoneNumberId || DEFAULT_WA_CREDS.phoneNumberId;
-  try {
-    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/register`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ messaging_product: 'whatsapp', pin })
-    });
-    const data = await res.json();
-    return { ok: res.ok, error: data.error?.message, raw: data };
-  } catch (e: any) {
-    return { ok: false, error: e?.message };
-  }
-}
-
-export async function fetchMetaPhoneNumberStatus(): Promise<any> {
-  const creds = getWhatsAppCredentials();
-  const token = creds.token || DEFAULT_WA_CREDS.token;
-  const phoneId = creds.phoneNumberId || DEFAULT_WA_CREDS.phoneNumberId;
-  try {
-    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json();
-    if (res.ok) {
-      return {
-        ok: true,
-        verifiedName: data.verified_name,
-        displayPhoneNumber: data.display_phone_number,
-        qualityRating: data.quality_rating,
-        codeVerificationStatus: data.code_verification_status
-      };
-    }
-    return { ok: false, error: data.error?.message || 'Failed to fetch status' };
-  } catch (e: any) {
-    return { ok: false, error: e?.message };
-  }
-}
+export async function fetchMetaPhoneNumberStatus(): Promise<any> {throw new Error('Provider diagnostics are server-side only.');}

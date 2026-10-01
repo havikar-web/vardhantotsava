@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
+      disallow: ['/api/', '/admin', '/acharya', '/assign', '/pandit', '/dashboard', '/portal', '/book'],
     },
-    sitemap: 'https://www.mantrakshata.com/sitemap.xml',
   };
 }

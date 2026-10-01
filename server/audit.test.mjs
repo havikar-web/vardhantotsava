@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createService} from './core.mjs';
+import {createHttp} from './http.mjs';
+import {createHmac} from 'node:crypto';
+function setup(){let at=Date.parse('2026-10-01T00:00:00Z'),sent=[],paymentBooking='';const service=createService({database:':memory:',secret:'audit'.repeat(12),now:()=>at,adminPhones:['919876543210'],prices:{basic:10000},verifyPayment:async id=>({id,status:'captured',currency:'INR',amount:10000,notes:{booking_id:paymentBooking}}),send:async(to,kind,args)=>{sent.push({to,kind,args});return {id:'audit-'+sent.length};}});return {service,sent,advance:n=>at+=n,setBooking:id=>paymentBooking=id,login:async phone=>{const r=await service.requestOtp(phone,phone);return service.verifyOtp(r.challengeId,sent.at(-1).args[0],phone);}};}
+const details={name:'Audit Celebrant',dob:'1990-01-01',ceremonyStart:'2026-10-05T09:00:00+05:30',address:'22 Audit Road Bengaluru',pincode:'560041',packageId:'basic',packageName:'Basic',birthPlace:'A manually entered village',nakshatra:'Rohini',rashi:'Vrishabha'};
+test('strict dates, manual birth details, assignment conflict, history and Pandit isolation',async()=>{const x=setup(),s=x.service;try{const u=(await x.login('919123456789')).user,a=(await x.login('919876543210')).user;
+assert.throws(()=>s.createBooking(u,{...details,dob:'1990-02-30'}),/date of birth/);
+assert.throws(()=>s.createBooking(u,{...details,ceremonyStart:'2027-02-30T09:00:00+05:30'}),/valid ceremony/);
+const b=s.createBooking(u,details);assert.equal(b.birthPlace,details.birthPlace);assert.equal(b.nakshatra,'Rohini');x.setBooking(b.id);await s.confirm(a,b.id,{paymentId:'pay_audit1'});s.change(a,b.id,'assign',{name:'Audit Pandit',phone:'9987654321'});
+const b2=s.createBooking(u,{...details,ceremonyStart:'2026-10-05T10:00:00+05:30'});x.setBooking(b2.id);await s.confirm(a,b2.id,{paymentId:'pay_audit2'});assert.throws(()=>s.change(a,b2.id,'assign',{name:'Audit Pandit',phone:'9987654321'}),/another ceremony/);
+const p=(await x.login('919987654321')).user;assert.equal(p.role,'pandit');assert.equal(s.listBookings(p).length,1);assert.throws(()=>s.own(p,b2.id),e=>e.status===404);assert.equal(s.unpack(s.own(a,b.id)).assignmentHistory.length,1);
+}finally{s.db.close();}});
+test('retired bypass endpoints reject anonymous access; malformed JSON and signed delivery events',async()=>{const x=setup(),s=x.service,server=createHttp(s,{origin:'http://audit.local',secure:false,webhookSecret:'audit-secret'});await new Promise(r=>server.listen(0,'127.0.0.1',r));const root='http://127.0.0.1:'+server.address().port;try{for(const path of ['users/profile','bookings/sync','gifts/sync','settings','whatsapp/send','razorpay/order','razorpay/verify'])assert.equal((await fetch(root+'/api/'+path)).status,401,path);
+assert.equal((await fetch(root+'/api/auth/request',{method:'POST',headers:{origin:'http://audit.local','content-type':'application/json'},body:'{'})).status,400);
+const body=JSON.stringify({entry:[{changes:[{value:{statuses:[{id:'audit-message',status:'read'}]}}]}]});const signature='sha256='+createHmac('sha256','audit-secret').update(body).digest('hex');assert.equal((await fetch(root+'/api/webhooks/whatsapp',{method:'POST',headers:{'x-hub-signature-256':signature},body})).status,200);s.recordDelivery('audit-message','sent');assert.equal(s.db.prepare('SELECT status FROM deliveries WHERE id=?').get('audit-message').status,'read');
+}finally{await new Promise(r=>server.close(r));s.db.close();}});
+test('failed OTP delivery creates no usable challenge or session',async()=>{const s=createService({database:':memory:',secret:'a'.repeat(64),send:async()=>{throw new Error('provider down');}});try{await assert.rejects(()=>s.requestOtp('9123456789','audit'),e=>e.status===503);assert.equal(s.db.prepare('SELECT used FROM otp').get().used,1);assert.equal(s.db.prepare('SELECT count(*) AS n FROM sessions').get().n,0);}finally{s.db.close();}});

@@ -7,6 +7,11 @@ node_modules/
 dist/
 .next/
 /*.png
+docs/*.png
+docs/*-diagnostics*.json
+docs/*-readiness*.json
+docs/secret-scan*.json
 .neon
 .agents/
 skills-lock.json
+*.tsbuildinfo

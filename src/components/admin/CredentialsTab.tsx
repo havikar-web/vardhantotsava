@@ -49,7 +49,7 @@ export const CredentialsTab: React.FC = () => {
     () => localStorage.getItem('mantrakshata_razorpay_key_id') || 'rzp_test_TM656gFCGoH0nD'
   );
   const [razorpaySecret, setRazorpaySecret] = useState(
-    () => localStorage.getItem('mantrakshata_razorpay_secret') || '30BQTyuKu3OKLkzcp68ZxHPx'
+    () => localStorage.getItem('mantrakshata_razorpay_secret') || ''
   );
   const [showRzpSecret, setShowRzpSecret] = useState(false);
 

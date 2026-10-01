@@ -4,14 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 3201",
+    "dev": "node server/next.mjs --dev",
     "build": "next build",
-    "start": "next start -p 3201",
+    "start": "node server/next.mjs",
     "dev:vite": "vite --host 127.0.0.1 --port 3201 --strictPort",
     "build:vite": "tsc && vite build",
     "preview": "vite preview --port 3200",
     "start:server": "node server/index.mjs",
     "dev:api": "node --watch server/index.mjs",
+    "test": "node --test server/*.test.mjs",
     "test:server": "node --test server/*.test.mjs"
   },
   "dependencies": {
