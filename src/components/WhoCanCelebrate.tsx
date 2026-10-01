@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Heart, Users, Shield } from 'lucide-react';
+import { Sun, Heart, Users, Shield } from 'lucide-react';
 
 interface WhoCanProps {
   navigate: (path: string) => void;
@@ -12,7 +12,7 @@ export const WhoCanCelebrate: React.FC<WhoCanProps> = ({ navigate }) => {
       sanskrit: 'बाल्यावस्था',
       title: 'Children',
       desc: 'Start their year with blessings. A pure, auspicious foundation for health and growth.',
-      icon: <Sparkles className="w-5 h-5 text-gold-dark" />
+      icon: <Sun className="w-5 h-5 text-gold-dark" />
     },
     {
       age: '18 years',
@@ -68,7 +68,7 @@ export const WhoCanCelebrate: React.FC<WhoCanProps> = ({ navigate }) => {
           {categories.map((c, i) => (
             <div 
               key={i}
-              className="bg-cream/20 p-6 rounded-2xl border border-gold/25 shadow-sm hover:border-gold/50 transition-all space-y-4 flex flex-col justify-between"
+              className="bg-cream/20 p-6 rounded-md border border-gold/30 hover:border-gold/60 transition-colors space-y-4 flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-full bg-cream border border-gold/30 flex items-center justify-center">
@@ -97,7 +97,7 @@ export const WhoCanCelebrate: React.FC<WhoCanProps> = ({ navigate }) => {
         </div>
 
         {/* Note on Vivaha Vardhantotsava */}
-        <div className="mt-12 bg-cream/40 p-6 rounded-2xl border border-gold/25 max-w-2xl mx-auto text-center space-y-2">
+        <div className="mt-12 bg-cream/40 p-6 rounded-md border border-gold/30 max-w-2xl mx-auto text-center space-y-2">
           <span className="text-[10px] uppercase tracking-widest text-gold-dark font-bold">
             Expanding Beyond Birthdays
           </span>

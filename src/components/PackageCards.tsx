@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Check, Award, Box, Flame } from 'lucide-react';
+import { ArrowRight, Award, Box, Flame } from 'lucide-react';
 import { PACKAGES, PackageDetail, HAVIKAR_PRODUCTS } from '../lib/content';
 
 interface PackageCardsProps {
@@ -101,7 +101,7 @@ export const PackageCards: React.FC<PackageCardsProps> = ({ navigate, onSelectPa
                   <ul className="mt-2.5 space-y-1.5 text-[11px] text-[#4A3E33]">
                     {pkg.features.slice(0, 5).map((f) => (
                       <li key={f} className="flex items-start gap-1.5">
-                        <Check className="w-3 h-3 text-[#B37418] flex-shrink-0 mt-0.5" />
+                        <span className="text-[#B37418] font-bold text-xs select-none mt-[-1px]">·</span>
                         <span className="leading-snug">{f}</span>
                       </li>
                     ))}

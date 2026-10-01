@@ -7,7 +7,7 @@ import {
   ArrowRight, 
   ShieldCheck, 
   Truck, 
-  Sparkles, 
+  Sun, 
   ExternalLink, 
   X, 
   Plus, 
@@ -206,9 +206,9 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
 
         {/* Highlights Banner */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-white border border-[#D5C2A4] flex items-center gap-3 shadow-2xs">
-            <div className="w-10 h-10 rounded-xl bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center text-[#B37418] shrink-0">
-              <Sparkles className="w-5 h-5" />
+          <div className="p-4 rounded-md bg-[#FDFBF7] border border-[#D5C2A4] flex items-center gap-3">
+            <div className="w-10 h-10 rounded-md bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center text-[#B37418] shrink-0">
+              <Sun className="w-5 h-5" />
             </div>
             <div className="text-left">
               <strong className="text-xs font-bold block text-[#1F1914]">Mysore Sandalwood</strong>
@@ -216,8 +216,8 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#D5C2A4] flex items-center gap-3 shadow-2xs">
-            <div className="w-10 h-10 rounded-xl bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center text-[#B37418] shrink-0">
+          <div className="p-4 rounded-md bg-[#FDFBF7] border border-[#D5C2A4] flex items-center gap-3">
+            <div className="w-10 h-10 rounded-md bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center text-[#B37418] shrink-0">
               <HeartHandshake className="w-5 h-5" />
             </div>
             <div className="text-left">
@@ -226,8 +226,8 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#D5C2A4] flex items-center gap-3 shadow-2xs">
-            <div className="w-10 h-10 rounded-xl bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center text-[#B37418] shrink-0">
+          <div className="p-4 rounded-md bg-[#FDFBF7] border border-[#D5C2A4] flex items-center gap-3">
+            <div className="w-10 h-10 rounded-md bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center text-[#B37418] shrink-0">
               <Truck className="w-5 h-5" />
             </div>
             <div className="text-left">
@@ -244,10 +244,10 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
                   selectedCategory === cat.id
-                    ? 'bg-[#B37418] text-white shadow-sacred'
-                    : 'bg-white border border-[#D5C2A4] text-[#5C5147] hover:border-[#B37418]'
+                    ? 'bg-[#B37418] text-white'
+                    : 'bg-[#FDFBF7] border border-[#D5C2A4] text-[#5C5147] hover:border-[#B37418]'
                 }`}
               >
                 {cat.label}
@@ -259,7 +259,7 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
           {cartItemCount > 0 && (
             <button
               onClick={handleOpenCheckout}
-              className="px-5 py-2 bg-[#B37418] hover:bg-[#8C5D0D] text-white rounded-full text-xs font-bold shadow-sacred flex items-center gap-2 cursor-pointer transition-all transform hover:scale-105"
+              className="px-5 py-2 bg-[#B37418] hover:bg-[#8C5D0D] text-white rounded-md text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Review Hamper ({cartItemCount}) • ₹{grandTotal}</span>
@@ -275,7 +275,7 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
             return (
               <div 
                 key={prod.id} 
-                className="bg-white rounded-2xl border border-[#D5C2A4] overflow-hidden shadow-2xs hover:shadow-sacred transition-all flex flex-col justify-between text-left group"
+                className="bg-[#FDFBF7] rounded-md border border-[#D5C2A4] overflow-hidden transition-colors hover:border-[#B37418] flex flex-col justify-between text-left group"
               >
                 <div>
                   {/* Image Frame */}
@@ -283,7 +283,7 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                     <img 
                       src={prod.image} 
                       alt={prod.name}
-                      className="max-h-full max-w-full object-contain transform group-hover:scale-105 transition-transform duration-300"
+                      className="max-h-full max-w-full object-contain"
                     />
                     <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                       <span className="text-[9.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#1F1914] text-[#FAF5ED]">
@@ -368,8 +368,8 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
         </div>
 
         {/* Bottom Keepsake Packaging Banner */}
-        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-[#D5C2A4] shadow-sacred text-left grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-4 h-48 rounded-2xl bg-[#2A1D13] overflow-hidden border border-[#D5C2A4]">
+        <section className="bg-[#FDFBF7] rounded-md p-6 sm:p-8 border border-[#D5C2A4] text-left grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div className="md:col-span-4 h-48 rounded-md bg-[#2A1D13] overflow-hidden border border-[#D5C2A4]">
             <img 
               src="/assets/ivory-gift-box.png" 
               alt="Rigid Ivory Keepsake Box" 
@@ -414,8 +414,8 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
 
       {/* CHECKOUT MODAL */}
       {isCheckoutOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 border border-[#D5C2A4] shadow-2xl space-y-5 text-left relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
+          <div className="bg-[#FDFBF7] rounded-md max-w-xl w-full p-6 sm:p-8 border border-[#D5C2A4] shadow-md space-y-5 text-left relative max-h-[90vh] overflow-y-auto">
             
             <div className="flex items-center justify-between border-b border-[#E5D7C3] pb-3">
               <div>
@@ -585,8 +585,8 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
 
       {/* ORDER CONFIRMED MODAL */}
       {orderConfirmed && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-[#D5C2A4] shadow-2xl text-center space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#FDFBF7] rounded-md max-w-lg w-full p-6 sm:p-8 border border-[#D5C2A4] shadow-md text-center space-y-4">
             <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 mx-auto flex items-center justify-center">
               <Check className="w-7 h-7" />
             </div>

@@ -10,7 +10,6 @@ import {
   Phone, 
   Clock, 
   User, 
-  Sparkles,
   ArrowRight,
   Copy,
   Code
@@ -229,12 +228,12 @@ export const WhatsAppAdminPage: React.FC<Props> = ({ navigate }) => {
                       <strong className="font-mono text-sm text-[#1F1914]">{tmpl.name}</strong>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
                         tmpl.category === 'AUTHENTICATION' 
-                          ? 'bg-blue-100 text-blue-800' 
+                          ? 'bg-[#F4ECE0] text-[#8C5D0D]' 
                           : tmpl.category === 'MARKETING'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-[#FAF5ED] border border-[#D5C2A4] text-[#5C5147]'
                       }`}>
                         {tmpl.category}
                       </span>
@@ -432,7 +431,7 @@ export const WhatsAppAdminPage: React.FC<Props> = ({ navigate }) => {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-3xl p-10 border border-gold/20 text-center space-y-4">
+          <div className="bg-[#FDFBF7] rounded-md p-10 border border-gold/20 text-center space-y-4">
             <div className="w-14 h-14 mx-auto rounded-full bg-cream border border-gold/30 flex items-center justify-center text-gold-dark">
               <MessageSquare className="w-7 h-7" />
             </div>

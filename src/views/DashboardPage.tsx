@@ -88,7 +88,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
   if (booking.status === 'draft') {
     return (
       <main className="min-h-[65vh] bg-ivory px-6 py-12">
-        <section className="max-w-2xl mx-auto rounded-3xl border border-gold/30 bg-white p-8 space-y-5">
+        <section className="max-w-2xl mx-auto rounded-md border border-gold/30 bg-white p-8 space-y-5">
           <span className="text-xs uppercase tracking-widest text-gold-dark font-semibold">
             Payment Pending · Complete via Razorpay
           </span>
@@ -182,7 +182,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
         )}
 
         {/* Top Header Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-sacred-lg flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-white rounded-md p-6 sm:p-8 border border-gold/30 shadow-sacred-lg flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 text-left">
             <div className="flex flex-wrap items-center gap-3">
               <span className="bg-emerald-50 text-emerald-800 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 border border-emerald-300">
@@ -246,7 +246,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
         </div>
 
         {/* Status Timeline */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gold/25 shadow-xs space-y-4">
+        <div className="bg-white p-6 sm:p-8 rounded-md border border-gold/25 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-xl font-bold text-charcoal">Ritual Journey Progression</h3>
             <span className="text-xs font-semibold text-gold-dark">Step {completedCount} of 6</span>
@@ -284,7 +284,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
           <div className="lg:col-span-7 space-y-6 text-left">
             
             {/* Sacred Sankalpa & Reservation Details */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-xs space-y-5">
+            <div className="bg-white rounded-md p-6 sm:p-8 border border-gold/30 shadow-xs space-y-5">
               <div className="flex items-center gap-2 pb-3 border-b border-gold/15">
                 <Compass className="w-5 h-5 text-gold-dark" />
                 <h3 className="font-serif text-lg font-bold text-charcoal">
@@ -363,7 +363,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
 
             {/* Sacred Gifts & Keepsakes Order Card */}
             {booking.giftItems && booking.giftItems.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
+              <div className="bg-white rounded-md p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-gold/15 pb-3">
                   <div className="flex items-center gap-2">
                     <Gift className="w-5 h-5 text-gold-dark" />
@@ -426,7 +426,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
             
             {/* Acharya Scholar Card (Conditional on assignment) */}
             {booking.assignedPanditId && (assignedAcharya || assignedName) ? (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
+              <div className="bg-white rounded-md p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-gold-dark block">
                   Your Assigned Acharya
                 </span>
@@ -466,7 +466,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
+              <div className="bg-white rounded-md p-6 sm:p-8 border border-gold/30 shadow-xs space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
                   <span className="text-[10px] uppercase font-bold tracking-widest text-[#B37418] block">

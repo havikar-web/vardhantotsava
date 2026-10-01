@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Sparkles, Check } from 'lucide-react';
+import { Flame, Check } from 'lucide-react';
 
 interface AkshataCelebrationProps {
   onDismiss: () => void;
@@ -33,12 +33,12 @@ export const AkshataCelebration: React.FC<AkshataCelebrationProps> = ({ onDismis
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/70 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-ivory rounded-3xl p-8 sm:p-10 max-w-md w-full border-2 border-gold shadow-2xl text-center space-y-6 relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 animate-fadeIn">
+      <div className="bg-ivory rounded-md p-8 sm:p-10 max-w-md w-full border border-gold shadow-md text-center space-y-6 relative overflow-hidden">
         
         {/* Sanskrit Auspicious Blessing Tag */}
-        <div className="w-16 h-16 rounded-full bg-gold/15 border-2 border-gold mx-auto flex items-center justify-center text-gold-dark shadow-sacred">
-          <Sparkles className="w-8 h-8 animate-flame" />
+        <div className="w-16 h-16 rounded-full bg-gold/15 border border-gold mx-auto flex items-center justify-center text-gold-dark">
+          <Flame className="w-8 h-8 animate-flame" />
         </div>
 
         <div className="space-y-2">

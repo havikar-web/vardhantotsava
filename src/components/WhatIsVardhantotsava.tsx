@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowDown, Sparkles } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 
 export const WhatIsVardhantotsava: React.FC = () => {
   return (

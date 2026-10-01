@@ -264,7 +264,7 @@ export const RITUAL_STEPS: RitualStep[] = [
     subtitle: 'Purification and sanctification',
     description: 'Sacred water is consecrated with Vedic mantras, sanctifying the household, family members, and the ritual space.',
     image: '/assets/ritual.png',
-    icon: 'sparkles'
+    icon: 'sun'
   },
   {
     number: '04',

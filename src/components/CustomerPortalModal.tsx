@@ -21,7 +21,7 @@ import {
   Phone, 
   MessageSquare, 
   ChevronRight, 
-  Sparkles, 
+  CalendarCheck2, 
   ExternalLink,
   ShieldCheck,
   Download,
@@ -291,7 +291,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
       
       {/* Main Container */}
-      <div className="bg-[#FAF5ED] w-full max-w-4xl h-[92vh] sm:h-[88vh] rounded-3xl border border-[#D5C2A4] shadow-2xl flex flex-col overflow-hidden text-[#1F1914] relative">
+      <div className="bg-[#FAF5ED] w-full max-w-4xl h-[92vh] sm:h-[88vh] rounded-md border border-[#D5C2A4] shadow-2xl flex flex-col overflow-hidden text-[#1F1914] relative">
         
         {/* Top Sacred Bar */}
         <div className="px-6 py-4 border-b border-[#E3D6C3] bg-[#FAF5ED]/95 backdrop-blur-md flex items-center justify-between flex-shrink-0 z-20">
@@ -328,10 +328,10 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
         {/* --- IF USER NOT LOGGED IN: SHOW AUTH FLOW --- */}
         {!user ? (
           <div className="flex-1 overflow-y-auto p-6 sm:p-12 flex flex-col items-center justify-center">
-            <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-[#E3D6C3] shadow-lg text-center space-y-6">
+            <div className="max-w-md w-full bg-[#FDFBF7] p-8 rounded-md border border-[#D5C2A4] text-center space-y-6">
               
-              <div className="w-16 h-16 mx-auto rounded-full bg-[#FAF5ED] border border-[#B37418] flex items-center justify-center shadow-xs">
-                <Sparkles className="w-8 h-8 text-[#B37418]" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-[#FAF5ED] border border-[#B37418] flex items-center justify-center">
+                <ShieldCheck className="w-8 h-8 text-[#B37418]" />
               </div>
 
               {authStep === 'phone' && (() => {
@@ -621,7 +621,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                     <div className="space-y-6">
                       
                       {/* Celebration Card */}
-                      <div className="bg-white rounded-3xl p-6 border border-[#B37418] shadow-md space-y-4">
+                      <div className="bg-white rounded-md p-6 border border-[#B37418] shadow-md space-y-4">
                         <div className="flex items-center justify-between border-b border-[#E3D6C3] pb-3">
                           <span className="text-[11px] uppercase tracking-wider text-[#9E6B2D] font-bold">
                             Your Next Vardhantotsava
@@ -673,7 +673,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                       </div>
 
                       {/* Your Journey Timeline */}
-                      <div className="bg-white rounded-3xl p-6 border border-[#E3D6C3] shadow-xs space-y-3">
+                      <div className="bg-white rounded-md p-6 border border-[#E3D6C3] shadow-xs space-y-3">
                         <h3 className="font-serif text-lg font-normal text-[#1F1914]">
                           Your Sacred Journey
                         </h3>
@@ -782,9 +782,9 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                     </div>
                   ) : (
                     /* Clean Authentic Empty State - No Fake Data */
-                    <div className="bg-white rounded-3xl p-8 border border-[#E3D6C3] shadow-xs text-center space-y-5">
+                    <div className="bg-[#FDFBF7] rounded-md p-8 border border-[#D5C2A4] text-center space-y-5">
                       <div className="w-16 h-16 mx-auto rounded-full bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center">
-                        <Sparkles className="w-8 h-8 text-[#B37418]" />
+                        <CalendarCheck2 className="w-8 h-8 text-[#B37418]" />
                       </div>
 
                       <div className="space-y-1.5 max-w-md mx-auto">
@@ -871,7 +871,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
 
                         if (upcomingList.length === 0) {
                           return (
-                            <div className="bg-white rounded-3xl p-8 border border-[#E3D6C3] text-center space-y-4">
+                            <div className="bg-white rounded-md p-8 border border-[#E3D6C3] text-center space-y-4">
                               <p className="text-xs text-[#5C5147]">No upcoming celebrations.</p>
                               <button
                                 onClick={() => {
@@ -909,7 +909,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                                 : null;
 
                               return (
-                                <div key={cb.id} className="bg-white rounded-3xl p-6 border border-[#B37418] shadow-xs space-y-4">
+                                <div key={cb.id} className="bg-white rounded-md p-6 border border-[#B37418] shadow-xs space-y-4">
                                   <div className="flex flex-wrap items-center justify-between gap-2">
                                     <div className="flex flex-wrap items-center gap-2">
                                       <span className="text-xs font-bold text-[#9E6B2D] uppercase tracking-wider">
@@ -1054,7 +1054,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
 
                   {/* Completed list */}
                   {celebrationSubTab === 'completed' && (
-                    <div className="bg-white rounded-3xl p-8 border border-[#E3D6C3] text-center space-y-2">
+                    <div className="bg-white rounded-md p-8 border border-[#E3D6C3] text-center space-y-2">
                       <p className="text-xs text-[#5C5147]">No completed celebrations in this account yet.</p>
                       <p className="text-[11px] text-[#8C7E72]">
                         Completed rituals, photos, and recordings will appear here for lifetime keepsake.
@@ -1140,7 +1140,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <div className="bg-white rounded-3xl p-8 border border-dashed border-[#E3D6C3] text-center space-y-4">
+                    <div className="bg-white rounded-md p-8 border border-dashed border-[#E3D6C3] text-center space-y-4">
                       <div className="w-12 h-12 mx-auto rounded-full bg-[#FAF5ED] border border-[#B37418]/40 flex items-center justify-center">
                         <Users className="w-6 h-6 text-[#B37418]" />
                       </div>
@@ -1162,7 +1162,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                   {/* Add Family Member Modal */}
                   {showAddFamily && (
                     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-                      <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-[#D5C2A4] shadow-2xl space-y-4">
+                      <div className="bg-white rounded-md p-6 sm:p-8 max-w-md w-full border border-[#D5C2A4] shadow-2xl space-y-4">
                         <div className="flex items-center justify-between border-b border-[#E3D6C3] pb-3">
                           <h3 className="font-serif text-xl font-normal text-[#1F1914]">
                             Add someone you love
@@ -1408,7 +1408,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalProps> = ({
                   {/* Add Address Modal */}
                   {showAddAddress && (
                     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-                      <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-[#D5C2A4] shadow-2xl space-y-4">
+                      <div className="bg-white rounded-md p-6 sm:p-8 max-w-md w-full border border-[#D5C2A4] shadow-2xl space-y-4">
                         <div className="flex items-center justify-between border-b border-[#E3D6C3] pb-3">
                           <h3 className="font-serif text-xl font-normal text-[#1F1914]">Add Address</h3>
                           <button onClick={() => setShowAddAddress(false)} className="text-xs text-[#5C5147] hover:text-[#1F1914] p-1">

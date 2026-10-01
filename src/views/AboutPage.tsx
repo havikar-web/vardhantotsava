@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles, Heart, Award, MapPin } from 'lucide-react';
+import { ArrowRight, Heart, Award, MapPin } from 'lucide-react';
 import { WhyMantrakshata } from '../components/WhyMantrakshata';
 import { PanditScholars } from '../components/PanditScholars';
 
@@ -27,19 +27,19 @@ export const AboutPage: React.FC<AboutProps> = ({ navigate }) => {
       {/* Story Narrative */}
       <section className="bg-cream/30 py-16 border-y border-gold/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-charcoal/80 leading-relaxed text-base sm:text-lg">
-          <div className="bg-ivory p-8 sm:p-10 rounded-3xl border border-gold/30 shadow-sacred space-y-5">
+          <div className="bg-ivory p-8 sm:p-10 rounded-md border border-gold/30 space-y-5">
             <h3 className="font-serif text-3xl font-bold text-charcoal">
               A Quiet Awakening at Home
             </h3>
             <p>
-              Growing up in India, the most sacred memories often didn't happen in distant pilgrimage queues. 
-              They happened on living room floors — when grandfather lit a brass deepa, grandmother tied a sacred raksha, 
+              Growing up in India, the most sacred memories often did not happen in distant pilgrimage queues. 
+              They happened on living room floors, when grandfather lit a brass deepa, grandmother tied a sacred raksha, 
               and a scholarly priest recited ancient mantras that made the home feel instantly still and blessed.
             </p>
             <p>
               Over the last two decades, modern family lives became faster, busier, and more fragmented. 
               Birthdays became exclusively about ordering cakes, buying things, and having parties. 
-              There is nothing wrong with cake or dinner — we love them. But somewhere along the way, 
+              There is nothing wrong with cake or dinner; we enjoy them. But somewhere along the way, 
               the grounding spiritual start to the year was lost.
             </p>
             <p>
@@ -66,7 +66,7 @@ export const AboutPage: React.FC<AboutProps> = ({ navigate }) => {
 
       {/* Bengaluru Hub Contact */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-6">
-        <div className="bg-cream/40 p-8 rounded-3xl border border-gold/30 space-y-3">
+        <div className="bg-cream/40 p-8 rounded-md border border-gold/30 space-y-3">
           <span className="text-xs uppercase font-bold text-gold-dark tracking-widest">Operations & Care</span>
           <h4 className="font-serif text-2xl font-bold text-charcoal">Bengaluru Centre</h4>
           <p className="text-xs text-charcoal/70 max-w-md mx-auto">

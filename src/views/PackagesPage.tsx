@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, X, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { PACKAGES } from '../lib/content';
 
 interface PackagesProps {
@@ -80,8 +80,8 @@ export const PackagesPage: React.FC<PackagesProps> = ({ navigate }) => {
                     <span className="text-[10.5px] uppercase tracking-wider font-semibold text-[#8C5D0D] block">Key Inclusions</span>
                     <ul className="space-y-1.5">
                       {pkg.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-xs text-[#4A3E33]">
-                          <Check className="w-3.5 h-3.5 text-[#B37418] flex-shrink-0 mt-0.5" />
+                        <li key={i} className="flex items-start gap-2 text-xs text-[#4A3E33]">
+                          <span className="text-[#B37418] font-bold text-xs select-none">·</span>
                           <span>{f}</span>
                         </li>
                       ))}
@@ -117,7 +117,7 @@ export const PackagesPage: React.FC<PackagesProps> = ({ navigate }) => {
           <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#1F1914]">Detailed Feature Matrix</h2>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#D5C2A4] shadow-sacred overflow-hidden">
+        <div className="bg-[#FDFBF7] rounded-md border border-[#D5C2A4] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -133,13 +133,13 @@ export const PackagesPage: React.FC<PackagesProps> = ({ navigate }) => {
                   <tr key={i} className="hover:bg-[#FAF8F5]">
                     <td className="p-3 sm:p-3.5 font-medium text-[#1F1914]">{row.feature}</td>
                     <td className="p-3 sm:p-3.5 text-center">
-                      {row.aarambha ? <Check className="w-4 h-4 text-[#B37418] mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}
+                      {row.aarambha ? <span className="font-semibold text-[#8C5D0D]">Included</span> : <span className="text-[#C2B5A3]">—</span>}
                     </td>
                     <td className="p-3 sm:p-3.5 text-center bg-[#FAF5ED]/50">
-                      {row.sampoorna ? <Check className="w-4 h-4 text-[#8C5D0D] font-bold mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}
+                      {row.sampoorna ? <span className="font-bold text-[#8C5D0D]">Included</span> : <span className="text-[#C2B5A3]">—</span>}
                     </td>
                     <td className="p-3 sm:p-3.5 text-center">
-                      {row.parampara ? <Check className="w-4 h-4 text-[#B37418] mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}
+                      {row.parampara ? <span className="font-semibold text-[#8C5D0D]">Included</span> : <span className="text-[#C2B5A3]">—</span>}
                     </td>
                   </tr>
                 ))}

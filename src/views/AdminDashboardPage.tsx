@@ -352,7 +352,7 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
         {/* Top Console Bar */}
-        <div className="bg-white p-6 rounded-3xl border border-gold/30 shadow-sacred flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-[#FDFBF7] p-6 rounded-md border border-[#D5C2A4] flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -431,7 +431,7 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
           <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gold/30 shadow-xs space-y-1">
             <div className="flex items-center justify-between text-charcoal/60">
               <span className="text-[11px] uppercase font-semibold">Havikar Gift Orders</span>
-              <Gift className="w-4 h-4 text-purple-600" />
+              <Gift className="w-4 h-4 text-gold-dark" />
             </div>
             <p className="text-2xl font-bold font-serif text-charcoal">
               {giftOrders.length}
@@ -595,7 +595,7 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
               <div className="bg-white p-5 rounded-2xl border border-gold/30 shadow-xs space-y-1">
                 <div className="flex items-center justify-between text-charcoal/60">
                   <span className="text-[11px] uppercase font-semibold">Registered Host Families</span>
-                  <Users className="w-4 h-4 text-purple-600" />
+                  <Users className="w-4 h-4 text-gold-dark" />
                 </div>
                 <p className="text-2xl font-bold font-serif text-charcoal">
                   {users.length}
@@ -669,7 +669,7 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
                             </div>
                             <div className="p-3 bg-[#FAF8F5] rounded-xl border border-gold/20 space-y-1">
                               <span className="text-[11px] font-semibold text-charcoal block">Direct Courier Post</span>
-                              <p className="text-xl font-bold font-serif text-purple-700">{courierCount}</p>
+                              <p className="text-xl font-bold font-serif text-gold-dark">{courierCount}</p>
                               <span className="text-[10px] text-charcoal/50">Dispatched via speed post</span>
                             </div>
                           </>
@@ -944,21 +944,21 @@ CREATE INDEX IF NOT EXISTS idx_gift_orders_phone ON gift_orders(customer_phone);
         {/* TAB 2: HAVIKAR GIFTS STORE ORDERS */}
         {activeTab === 'gifts' && (
           <div className="space-y-4">
-            <div className="p-4 bg-purple-50 rounded-2xl border border-purple-200 text-left">
-              <span className="text-xs uppercase font-bold text-purple-900 block mb-0.5">
+            <div className="p-4 bg-amber-50/70 rounded-md border border-amber-200 text-left">
+              <span className="text-xs uppercase font-bold text-amber-900 block mb-0.5">
                 Direct Havikar Gifts & Sacred Keepsakes Fulfillment
               </span>
-              <p className="text-xs text-purple-800/80">
+              <p className="text-xs text-amber-900/80">
                 Standalone orders placed through the `/gifts` store for Sandalwood bracelets, Japa malas, Havikar Rasapanchaka, Rose Kumkum, and sacred dravyas.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
               {giftOrders.map((order) => (
-                <div key={order.id} className="bg-white rounded-2xl border border-gold/30 p-5 shadow-xs space-y-4 text-left">
+                <div key={order.id} className="bg-[#FDFBF7] rounded-md border border-gold/30 p-5 shadow-xs space-y-4 text-left">
                   <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gold/15">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-purple-100 border border-purple-300 text-purple-900">
+                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-900">
                         {order.id}
                       </span>
                       <div>

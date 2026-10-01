@@ -49,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate, onOpenPor
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FAF5ED]/95 backdrop-blur-md border-b border-[#E5D7C3]/60 transition-colors">
+    <header className="sticky top-0 z-50 bg-[#FAF5ED] border-b border-[#E5D7C3] transition-colors">
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 h-[74px] flex items-center justify-between">
         
         {/* Brand Logo - Sacred Emblem Only (No Text) */}
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate, onOpenPor
           className="flex items-center text-left group focus:outline-none"
           aria-label="Home"
         >
-          <BrandLogo className="h-11 sm:h-12 w-auto transition-transform group-hover:scale-105" variant="light" />
+          <BrandLogo className="h-11 sm:h-12 w-auto transition-opacity group-hover:opacity-90" variant="light" />
         </button>
 
         {/* Desktop Navigation Links */}

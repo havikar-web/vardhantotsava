@@ -1,6 +1,6 @@
 import { normalizeIndianPhone } from '../lib/flowValidation';
 import React, { useState } from 'react';
-import { Gift, ArrowRight, Heart, Check, Share2, MessageSquare, Package, Sparkles, Lock } from 'lucide-react';
+import { Gift, ArrowRight, Heart, Check, Share2, MessageSquare, Package, Lock } from 'lucide-react';
 import { PACKAGES, HAVIKAR_PRODUCTS, HavikarProduct } from '../lib/content';
 import { saveGift, GiftPlan, getUserProfile } from '../lib/store';
 import { launchRazorpayCheckout } from '../lib/razorpay';
@@ -516,17 +516,17 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
 
             {/* Right Interactive Gift Box Card Preview */}
             <div className="lg:col-span-5">
-              <div className="bg-ivory rounded-3xl p-6 sm:p-8 border-2 border-gold/40 shadow-sacred-lg relative overflow-hidden text-center space-y-4">
+              <div className="bg-ivory rounded-md p-6 sm:p-8 border border-gold/40 shadow-sm relative overflow-hidden text-center space-y-4">
                 
-                <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-cream relative border border-gold/30">
+                <div className="w-full aspect-[4/3] rounded-md overflow-hidden bg-cream relative border border-gold/30">
                   <img src="/assets/gift.png" alt="Gift Box" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-charcoal/20" />
-                  <div className="absolute bottom-3 left-3 right-3 bg-ivory/95 backdrop-blur-md p-2 rounded-lg text-xs font-serif italic text-charcoal">
+                  <div className="absolute bottom-3 left-3 right-3 bg-ivory p-2 rounded text-xs font-serif italic text-charcoal border border-gold/20">
                     Mantrakshata Sacred Offering
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-cream/30 border border-gold/30 text-left space-y-3">
+                <div className="p-5 rounded-md bg-cream/30 border border-gold/30 text-left space-y-3">
                   <div className="flex items-center justify-between border-b border-gold/20 pb-2">
                     <span className="text-[10px] uppercase font-bold text-gold-dark tracking-wider">A Sacred Gift</span>
                     <span className="text-[10px] text-charcoal/60">{giftName}</span>

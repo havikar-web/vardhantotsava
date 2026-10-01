@@ -10,7 +10,6 @@ import {
   Phone,
   MessageSquare,
   BookOpen,
-  Sparkles,
   ExternalLink,
   RefreshCw,
   AlertCircle,
@@ -237,7 +236,7 @@ export const AcharyaAssignmentPage: React.FC<Props> = ({ navigate }) => {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-3xl border border-gold/30 shadow-sacred p-12 text-center space-y-4">
+          <div className="bg-[#FDFBF7] rounded-md border border-gold/30 p-12 text-center space-y-4">
             <RefreshCw className="w-8 h-8 text-gold animate-spin mx-auto" />
             <h2 className="font-serif text-xl font-medium text-charcoal">Retrieving Reservation Records...</h2>
             <p className="text-xs text-charcoal/60">Fetching verified booking details from the central database.</p>
@@ -246,8 +245,8 @@ export const AcharyaAssignmentPage: React.FC<Props> = ({ navigate }) => {
 
         {/* Load Error / Search Fallback */}
         {!loading && (!booking || loadError) && (
-          <div className="bg-white rounded-3xl border border-gold/30 shadow-sacred p-6 sm:p-8 space-y-6">
-            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-xs">
+          <div className="bg-[#FDFBF7] rounded-md border border-gold/30 p-6 sm:p-8 space-y-6">
+            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-md text-amber-900 text-xs">
               <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
               <div>
                 <strong className="block font-semibold">Booking Not Found</strong>
@@ -310,7 +309,7 @@ export const AcharyaAssignmentPage: React.FC<Props> = ({ navigate }) => {
 
         {/* Loaded Ceremony Card */}
         {!loading && booking && (
-          <div className="bg-white rounded-3xl border border-gold/30 shadow-sacred p-6 sm:p-8 space-y-6">
+          <div className="bg-[#FDFBF7] rounded-md border border-gold/30 p-6 sm:p-8 space-y-6">
 
             {/* Reservation Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gold/20 gap-3">

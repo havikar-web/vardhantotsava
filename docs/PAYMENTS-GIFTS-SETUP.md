@@ -53,3 +53,5 @@ Parameters: customer name, gift order ID, recipient name, India Post number, off
 Supply final all-inclusive prices/shipping, coordinator details and policies. Confirm hosting runs Node 24 continuously with private persistent disk; your hosting confirmation is accepted, but HTTPS/restart/persistence checks still need deployment evidence. Configure provider dashboard capture/webhooks and perform supervised Razorpay test-mode and live handset tests. Rotate previously exposed credentials before release. The local mock tests establish implementation behavior, not live settlement or handset delivery.
 
 Implementation follows [Razorpay Standard Checkout](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/build-integration/) and [Razorpay webhook validation](https://github.com/razorpay/markdown-docs/blob/master/webhooks/validate-test.md).
+
+Delivery status reference: [Meta WhatsApp status objects](https://www.postman.com/meta/whatsapp-business-platform/folder/fuaee8l/statuses-object).

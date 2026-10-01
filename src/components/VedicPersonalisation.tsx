@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Compass, Award, Calendar, Sparkles } from 'lucide-react';
+import { ArrowRight, Compass, Award, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { NAKSHATRAS, RASHIS } from '../lib/panchanga';
 import { VedicFloatingAtmosphere } from './VedicFloatingAtmosphere';

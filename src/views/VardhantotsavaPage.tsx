@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles, Heart, Sun, Flame, Check } from 'lucide-react';
+import { ArrowRight, Heart, Sun, Flame, Check } from 'lucide-react';
 import { RitualJourney } from '../components/RitualJourney';
 import { WhoCanCelebrate } from '../components/WhoCanCelebrate';
 import { HomaLivestreamSection } from '../components/HomaLivestreamSection';

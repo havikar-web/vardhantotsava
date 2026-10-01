@@ -250,7 +250,7 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
   if (!isAuthed) {
     return (
       <div className="min-h-screen bg-[#FAF5ED] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl border border-[#E3D6C3] shadow-xl p-10 space-y-6 text-center">
+        <div className="max-w-md w-full bg-[#FDFBF7] rounded-md border border-[#D5C2A4] p-10 space-y-6 text-center">
           <div className="flex justify-center">
             <BrandLogo className="h-12 w-auto" variant="light" />
           </div>
@@ -307,8 +307,8 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
         const b = bookings.find(bk => bk.id === assigningId);
         if (!b) return null;
         return (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white w-full max-w-md rounded-3xl border border-[#E3D6C3] shadow-2xl p-7 space-y-5">
+          <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+            <div className="bg-[#FDFBF7] w-full max-w-md rounded-md border border-[#D5C2A4] shadow-md p-7 space-y-5">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-serif text-lg text-[#1F1914]">Assign Pandit</h3>

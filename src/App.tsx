@@ -75,7 +75,7 @@ export function App({ initialPath }: { initialPath?: string }) {
       case '/packages':
         return <PackagesPage navigate={navigate} />;
       case '/gift':
-        return <SecureGiftsPage navigate={navigate} />;
+        return <SecurePortalPage mode="gift" navigate={navigate} />;
       case '/gifts':
       case '/store':
         return <SecureGiftsPage navigate={navigate} />;

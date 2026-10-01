@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, ArrowDown, Flame, Sun, Heart, Shield, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ArrowDown, Flame, Sun, Heart, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const stages = [
@@ -117,16 +117,16 @@ export const HeroSection: React.FC<{ navigate: (path: string) => void }> = ({ na
 
           {/* Assurances Banner */}
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-2 text-[11.5px] font-medium text-[#736353]">
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#B37418]" />
+            <span className="inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B37418]" />
               <span>Bengaluru home visits</span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#B37418]" />
+            <span className="inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B37418]" />
               <span>Initiated Vedic Acharyas</span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#B37418]" />
+            <span className="inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B37418]" />
               <span>Consecrated dravyas and Havikar samagri</span>
             </span>
           </div>

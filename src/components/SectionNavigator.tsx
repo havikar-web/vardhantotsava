@@ -97,16 +97,16 @@ export const SectionNavigator: React.FC = () => {
         onClick={goPrev}
         disabled={currentIdx === 0}
         aria-label="Previous Section"
-        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+        className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
           currentIdx === 0
             ? 'opacity-20 cursor-not-allowed text-[#8C7A6E]'
-            : 'text-[#9E6B2D] hover:bg-[#FAF5ED] hover:scale-110 active:scale-95 border border-[#D5C2A4]/60'
+            : 'text-[#9E6B2D] hover:bg-[#FAF5ED] border border-[#D5C2A4]'
         }`}
       >
         <ChevronUp className="w-3.5 h-3.5" />
       </button>
 
-      <div className="flex flex-col items-center gap-2 py-2.5 px-1 rounded-full bg-[#FAF5ED]/90 backdrop-blur-md border border-[#D5C2A4]/60 shadow-sacred">
+      <div className="flex flex-col items-center gap-2 py-2.5 px-1 rounded-full bg-[#FAF5ED] border border-[#D5C2A4]">
         {SECTIONS.map((sec, idx) => {
           const isActive = activeSection === sec.id;
           const isHovered = hoveredIdx === idx;
@@ -119,7 +119,7 @@ export const SectionNavigator: React.FC = () => {
               onMouseLeave={() => setHoveredIdx(null)}
             >
               <div
-                className={`absolute right-7 px-2.5 py-1 rounded-lg bg-[#251B14]/95 text-white backdrop-blur-md border border-[#B37418]/40 shadow-xl pointer-events-none transition-all duration-150 whitespace-nowrap z-50 flex items-center gap-1.5 ${
+                className={`absolute right-7 px-2.5 py-1 rounded bg-[#251B14] text-white border border-[#B37418]/40 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 flex items-center gap-1.5 ${
                   isHovered
                     ? 'opacity-100 translate-x-0'
                     : 'opacity-0 translate-x-2'
@@ -139,10 +139,10 @@ export const SectionNavigator: React.FC = () => {
               <button
                 onClick={() => scrollToSection(sec.id)}
                 aria-label={`Go to section ${sec.num}: ${sec.name}`}
-                className={`transition-all duration-200 rounded-full flex items-center justify-center ${
+                className={`transition-colors duration-200 rounded-full flex items-center justify-center ${
                   isActive
-                    ? 'w-6 h-6 bg-[#B37418] text-white shadow-gold-glow scale-105'
-                    : 'w-2 h-2 bg-[#8C7A6E]/40 hover:bg-[#B37418] hover:scale-125'
+                    ? 'w-6 h-6 bg-[#B37418] text-white'
+                    : 'w-2 h-2 bg-[#8C7A6E]/40 hover:bg-[#B37418]'
                 }`}
               >
                 {isActive && (
@@ -158,10 +158,10 @@ export const SectionNavigator: React.FC = () => {
         onClick={goNext}
         disabled={currentIdx === SECTIONS.length - 1}
         aria-label="Next Section"
-        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+        className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
           currentIdx === SECTIONS.length - 1
             ? 'opacity-20 cursor-not-allowed text-[#8C7A6E]'
-            : 'text-[#9E6B2D] hover:bg-[#FAF5ED] hover:scale-110 active:scale-95 border border-[#D5C2A4]/60'
+            : 'text-[#9E6B2D] hover:bg-[#FAF5ED] border border-[#D5C2A4]'
         }`}
       >
         <ChevronDown className="w-3.5 h-3.5" />
