@@ -26,6 +26,8 @@ The source was audited against `MANTRAKSHATA-PRD.md`. Its September implementati
 
 `scripts/browser-diagnostics.mjs` tests the **production-built website** with a mock provider and an isolated in-memory database. It checks route refreshes, wrong OTP rejection, correct OTP login, registration, server-persisted ceremony request, dashboard reload, mobile overflow and logout. See `browser-diagnostics-2026-10-01.json` for the latest run outcome. Provider sends and payment charges are not real in this test.
 
+The current browser test also exercises staff availability approval, customer Razorpay checkout/confirmation, gift request/approval/payment, packing, India Post shipment entry and customer tracking visibility. Production output is now isolated in `.next-production` to avoid contamination by a running `.next` development server.
+
 Read-only live Meta evidence: `provider-readiness-2026-10-01.json`. Credential leak scan: `secret-scan-2026-10-01.json`. Build/type-check and dependency audit are local checks, not hosting or field-performance measurements.
 
 ## PRD compliance

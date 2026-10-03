@@ -2,6 +2,8 @@
 
 ## Implemented flow
 
+Local verification on 1 October 2026: 24 backend test groups, TypeScript and production build passed. Browser checks passed 20 routes and both staff-approved checkout journeys, including India Post tracking visible to the customer. Providers/Checkout were mocked; no real payments or messages were sent. The final credential scan passed for source and both development/production browser bundles.
+
 Customers sign in with WhatsApp OTP and save a ceremony or gift request. Staff approve ceremony availability or gift stock/delivery coverage. Approval snapshots the server price. The customer then pays the full approved amount through Razorpay Checkout. The browser never supplies the payable amount.
 
 The server verifies the checkout HMAC against its recorded Razorpay order, then fetches the payment and checks capture, amount, currency and order association. Duplicate callbacks are idempotent. A captured ceremony queues confirmation/assignment/reminders; a captured gift becomes paid. The persistent worker also polls recorded Razorpay orders to recover a missed browser callback. Signed Razorpay webhooks provide another recovery path.

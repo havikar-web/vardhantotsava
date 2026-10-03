@@ -34,10 +34,11 @@
     "esModuleInterop": true
   },
   "include": [
-    "src",
-    "app",
+    ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "app",
+    "src",
+    ".next-production/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
