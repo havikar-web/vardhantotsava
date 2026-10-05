@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { createHmac,timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve,extname,sep } from 'node:path';
-export function createHttp(service,{origin,secure=true,webhookSecret='',verifyToken='',paymentWebhookSecret='',dist,trustProxy=false}){
+export function createHttp(service,{origin,secure=true,webhookSecret='',verifyToken='',paymentWebhookSecret='',cashfreeSecretKey='',dist,trustProxy=false}){
  const cookieName=secure?'__Host-mantrakshata_session':'mantrakshata_session';
  return createServer(async(req,res)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('X-Frame-Options','DENY');res.setHeader('Cache-Control','no-store');if(secure)res.setHeader('Strict-Transport-Security','max-age=31536000');
  const json=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
@@ -16,6 +16,21 @@ export function createHttp(service,{origin,secure=true,webhookSecret='',verifyTo
  if(req.method!=='POST')return json(405,{error:'Method not allowed'});
  const expected=createHmac('sha256',paymentWebhookSecret).update(raw).digest('hex'),actual=String(req.headers['x-razorpay-signature']||'');if(!paymentWebhookSecret||!/^[a-f0-9]{64}$/i.test(actual)||!timingSafeEqual(Buffer.from(actual,'hex'),Buffer.from(expected,'hex')))return json(403,{error:'Invalid payment signature'});
  if(!service.commerce)return json(503,{error:'Payments unavailable'});return json(200,await service.commerce.webhook(JSON.parse(raw),String(req.headers['x-razorpay-event-id']||'')));}
+ if(path==='/api/webhooks/cashfree'){
+ if(req.method!=='POST')return json(405,{error:'Method not allowed'});
+ const timestamp=String(req.headers['x-webhook-timestamp']||''),signature=String(req.headers['x-webhook-signature']||'');
+ const secret=cashfreeSecretKey||paymentWebhookSecret;if(!secret||!signature)return json(403,{error:'Invalid payment signature'});
+ const payloadToSign=timestamp?(timestamp+raw.toString('utf8')):raw;
+ const expB64=createHmac('sha256',secret).update(payloadToSign).digest('base64');
+ const expHex=createHmac('sha256',secret).update(payloadToSign).digest('hex');
+ const sigBuf=Buffer.from(signature);
+ const validB64=sigBuf.length===Buffer.byteLength(expB64)&&timingSafeEqual(sigBuf,Buffer.from(expB64));
+ const validHex=sigBuf.length===Buffer.byteLength(expHex)&&timingSafeEqual(sigBuf,Buffer.from(expHex));
+ if(!validB64&&!validHex)return json(403,{error:'Invalid payment signature'});
+ if(!service.commerce)return json(503,{error:'Payments unavailable'});
+ const event=JSON.parse(raw);
+ const eventId=String(req.headers['x-webhook-id']||event.data?.payment?.cf_payment_id||(event.data?.order?.order_id?event.data.order.order_id+'_'+(event.event_time||timestamp):'event_'+Date.now()));
+ return json(200,await service.commerce.webhook(event,eventId));}
  if(path==='/api/webhooks/whatsapp'){
  if(req.method==='GET'){if(verifyToken&&url.searchParams.get('hub.verify_token')===verifyToken&&url.searchParams.get('hub.mode')==='subscribe'){res.writeHead(200);return res.end(url.searchParams.get('hub.challenge'));}return json(403,{error:'Invalid verification token'});}
  const expected='sha256='+createHmac('sha256',webhookSecret).update(raw).digest('hex'),actual=String(req.headers['x-hub-signature-256']||'');if(!webhookSecret||actual.length!==expected.length||!timingSafeEqual(Buffer.from(actual),Buffer.from(expected)))return json(403,{error:'Invalid signature'});const event=JSON.parse(raw);for(const entry of event.entry||[])for(const change of entry.changes||[])for(const status of change.value?.statuses||[])service.recordDelivery(status.id,status.status);return json(200,{ok:true});}
@@ -27,8 +42,8 @@ export function createHttp(service,{origin,secure=true,webhookSecret='',verifyTo
  if(path==='/api/auth/verify'&&req.method==='POST'){const result=service.verifyOtp(input.challengeId,input.code,ip);if(token)service.logout(token);setCookie(result.token,86400);return json(200,{user:result.user});}
  if(path==='/api/auth/logout'&&req.method==='POST'){service.logout(token);setCookie('',0);return json(200,{ok:true});}
  const u=service.session(token);
- if(path==='/api/razorpay/order'&&req.method==='POST')return json(200,await service.commerce.order(u,input));
- if(path==='/api/razorpay/verify'&&req.method==='POST')return json(200,await service.commerce.verify(u,input));
+ if((path==='/api/razorpay/order'||path==='/api/cashfree/order'||path==='/api/payments/order')&&req.method==='POST')return json(200,await service.commerce.order(u,input));
+ if((path==='/api/razorpay/verify'||path==='/api/cashfree/verify'||path==='/api/payments/verify')&&req.method==='POST')return json(200,await service.commerce.verify(u,input));
  if(path==='/api/gifts'&&req.method==='GET')return json(200,{gifts:service.commerce.listGifts(u)});
  if(path==='/api/gifts'&&req.method==='POST')return json(201,{gift:service.commerce.createGift(u,input)});
  if(path==='/api/admin/payments'&&req.method==='GET')return json(200,{payments:service.commerce.payments(u)});

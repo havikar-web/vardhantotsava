@@ -128,14 +128,18 @@ export interface LaunchRazorpayOptions {
  */
 export async function launchRazorpayCheckout(options: LaunchRazorpayOptions): Promise<void> {
   try {
-    const response=await fetch('/api/razorpay/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({targetId:options.bookingId,kind:options.kind||'booking'})});
+    const response=await fetch('/api/payments/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({targetId:options.bookingId,kind:options.kind||'booking'})});
     const order=await response.json();
     if(!response.ok||!order.orderId)throw new Error(order.error||'Could not create your payment order.');
+    if(order.paymentSessionId||order.gateway==='cashfree'){
+      const {launchCashfreeWithOrder}=await import('./cashfree');
+      return await launchCashfreeWithOrder(order,options);
+    }
     if(!await loadRazorpayScript())throw new Error('Payment checkout could not load. Please try again.');
     const checkout=new window.Razorpay({key:order.keyId,order_id:order.orderId,amount:order.amount,currency:order.currency,name:'Mantrakshata',description:options.packageName,
       prefill:{name:options.customerName,contact:options.customerPhone,email:options.customerEmail||''},notes:{booking_id:options.kind==='gift'?'':options.bookingId,target_id:options.bookingId},
       modal:{ondismiss:()=>options.onDismiss?.()},handler:async(result:any)=>{
-        try{const r=await fetch('/api/razorpay/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(result)});const data=await r.json();if(!r.ok||!data.verified)throw new Error(data.error||'Payment verification is pending. Check your dashboard before paying again.');if(!['confirmed','completed','paid','packed','shipped','delivered'].includes(data.status))throw new Error('Payment received but the request needs staff review. Do not pay again; contact hello@bhatco.com.');options.onSuccess({paymentId:data.paymentId,orderId:data.orderId,signature:result.razorpay_signature});}catch(e:any){options.onFailure(e.message||'Payment verification is pending. Check your dashboard before paying again.');}
+        try{const r=await fetch('/api/payments/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(result)});const data=await r.json();if(!r.ok||!data.verified)throw new Error(data.error||'Payment verification is pending. Check your dashboard before paying again.');if(!['confirmed','completed','paid','packed','shipped','delivered'].includes(data.status))throw new Error('Payment received but the request needs staff review. Do not pay again; contact hello@bhatco.com.');options.onSuccess({paymentId:data.paymentId,orderId:data.orderId,signature:result.razorpay_signature});}catch(e:any){options.onFailure(e.message||'Payment verification is pending. Check your dashboard before paying again.');}
       }});
     checkout.on('payment.failed',()=>options.onFailure('Payment was not completed. Your request is still unpaid.'));
     checkout.open();
