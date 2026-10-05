@@ -103,7 +103,7 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
       },
       onFailure: (errMsg) => {
         setIsPaying(false);
-        alert(errMsg || 'Payment was not completed. Please complete payment via Razorpay to confirm your sacred gift.');
+        alert(errMsg || 'Payment was not completed. Please complete payment via Cashfree to confirm your sacred gift.');
       },
       onDismiss: () => {
         setIsPaying(false);
@@ -499,11 +499,11 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
                         className="flex-1 bg-gold hover:bg-gold-hover text-white text-xs uppercase tracking-widest font-semibold py-3.5 rounded-xl shadow-sacred transition-colors flex items-center justify-center gap-2 cursor-pointer"
                       >
                         {isPaying ? (
-                          <span>Launching Razorpay Checkout...</span>
+                          <span>Launching Cashfree Checkout...</span>
                         ) : (
                           <>
                             <Lock className="w-4 h-4" />
-                            <span>Pay & Confirm Gift via Razorpay (₹{totalGiftPrice.toLocaleString('en-IN')})</span>
+                            <span>Pay & Confirm Gift via Cashfree (₹{totalGiftPrice.toLocaleString('en-IN')})</span>
                           </>
                         )}
                       </button>
@@ -566,21 +566,21 @@ export const GiftPage: React.FC<GiftProps> = ({ navigate }) => {
           </div>
           
           <div className="space-y-1">
-            <span className="text-xs uppercase font-bold text-emerald-700 tracking-wider">Payment Confirmed via Razorpay</span>
+            <span className="text-xs uppercase font-bold text-emerald-700 tracking-wider">Payment Confirmed via Cashfree</span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal">
               Your Sacred Gift Is Confirmed
             </h2>
           </div>
           
           <p className="text-sm text-charcoal/75 leading-relaxed">
-            Payment of <strong>₹{totalGiftPrice.toLocaleString('en-IN')}</strong> has been received via Razorpay. A dignified invitation and sacred keepsakes have been scheduled for <strong>{recipientName}</strong>.
+            Payment of <strong>₹{totalGiftPrice.toLocaleString('en-IN')}</strong> has been received via Cashfree. A dignified invitation and sacred keepsakes have been scheduled for <strong>{recipientName}</strong>.
           </p>
 
           <div className="p-6 rounded-2xl bg-ivory border border-gold/30 shadow-sacred text-left space-y-3">
             <p className="text-xs uppercase font-bold text-gold-dark">Confirmed Sacred Gift</p>
             {paidPaymentId && (
               <p className="text-xs font-mono text-charcoal/80 bg-cream/40 p-2.5 rounded-lg break-all">
-                Razorpay Payment ID: <strong>{paidPaymentId}</strong>
+                Payment ID: <strong>{paidPaymentId}</strong>
               </p>
             )}
             

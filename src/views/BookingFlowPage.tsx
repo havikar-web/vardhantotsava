@@ -416,11 +416,11 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
       },
       onFailure: (errMsg) => {
         setIsPaying(false);
-        setOtpError(errMsg || 'Payment was not completed. Please complete payment via Razorpay to confirm your ceremony.');
+        setOtpError(errMsg || 'Payment was not completed. Please complete payment via Cashfree to confirm your ceremony.');
       },
       onDismiss: () => {
         setIsPaying(false);
-        setOtpError('Payment cancelled. Please complete payment via Razorpay to confirm your ceremony.');
+        setOtpError('Payment cancelled. Please complete payment via Cashfree to confirm your ceremony.');
       }
     });
   };
@@ -1369,7 +1369,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
 
                 <div className="pt-1 flex justify-between items-center text-sm">
                   <span className="font-serif font-bold text-[#1F1914]">Reservation Status:</span>
-                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Payment via Razorpay</span>
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Payment via Cashfree</span>
                 </div>
               </div>
 
@@ -1379,7 +1379,7 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                   <span>256-bit SSL Encrypted & PCI-DSS Compliant</span>
                 </div>
                 <span className="font-mono text-[10px] font-bold text-[#0C2340] bg-[#FAF6EE] px-2 py-0.5 rounded border border-[#D5C2A4]">
-                  RAZORPAY
+                  CASHFREE
                 </span>
               </div>
 
@@ -1398,11 +1398,11 @@ export const BookingFlowPage: React.FC<BookingProps> = ({ navigate, initialPacka
                   className="flex-1 bg-[#B37418] hover:bg-[#8C5D0D] text-white text-xs uppercase tracking-wider font-semibold py-3 rounded-xl shadow-sacred flex items-center justify-center gap-2 cursor-pointer transition-all"
                 >
                   {isPaying ? (
-                    <span>Launching Razorpay Checkout...</span>
+                    <span>Launching Cashfree Checkout...</span>
                   ) : (
                     <>
                       <Lock className="w-4 h-4" />
-                      <span>Confirm & Pay via Razorpay</span>
+                      <span>Confirm & Pay via Cashfree</span>
                     </>
                   )}
                 </button>

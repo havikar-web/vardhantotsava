@@ -664,7 +664,7 @@ export const PanditPanelPage: React.FC<Props> = ({ navigate }) => {
 
                         {(b.razorpayOrderId || b.razorpayPaymentId) && (
                           <div className="text-[10.5px] text-[#7A6B5D] font-mono space-y-0.5">
-                            {b.razorpayOrderId && <p>Razorpay Order: {b.razorpayOrderId}</p>}
+                            {b.razorpayOrderId && <p>Gateway Order: {b.razorpayOrderId}</p>}
                             {b.razorpayPaymentId && <p>Payment ID: {b.razorpayPaymentId}</p>}
                           </div>
                         )}

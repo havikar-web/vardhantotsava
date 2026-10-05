@@ -49,7 +49,7 @@ export const AkshataCelebration: React.FC<AkshataCelebrationProps> = ({ onDismis
             Sacred Celebration Confirmed
           </h3>
           <p className="text-xs sm:text-sm text-charcoal/75 leading-relaxed">
-            Your sacred Vardhantotsava ceremony has been reserved and payment confirmed via Razorpay. Your Acharya and celebration team have been notified.
+            Your sacred Vardhantotsava ceremony has been reserved and payment confirmed via Cashfree. Your Acharya and celebration team have been notified.
           </p>
         </div>
 

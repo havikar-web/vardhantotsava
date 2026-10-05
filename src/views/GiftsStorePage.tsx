@@ -558,14 +558,14 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                 </div>
               </div>
 
-              {/* Razorpay Secure Checkout Badge */}
+              {/* Cashfree Secure Checkout Badge */}
               <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between text-xs text-blue-900">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-[#0C2340]" />
-                  <span>Secured by Razorpay · UPI, Cards, Netbanking</span>
+                  <span>Secured by Cashfree · UPI, Cards, Netbanking</span>
                 </div>
                 <span className="font-mono text-[10px] font-bold px-2 py-0.5 bg-blue-200 rounded text-blue-800">
-                  RAZORPAY
+                  CASHFREE
                 </span>
               </div>
 
@@ -575,7 +575,7 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                 className="w-full py-3.5 bg-[#B37418] hover:bg-[#8C5D0D] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sacred transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Lock className="w-4 h-4" />
-                <span>{isProcessing ? 'Opening Razorpay...' : `Pay via Razorpay · ₹${grandTotal}`}</span>
+                <span>{isProcessing ? 'Opening Cashfree...' : `Pay via Cashfree · ₹${grandTotal}`}</span>
               </button>
             </form>
 
@@ -592,7 +592,7 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">Payment Confirmed via Razorpay</span>
+              <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">Payment Confirmed via Cashfree</span>
               <h2 className="font-serif text-2xl font-bold text-[#1F1914]">
                 Sacred Keepsake Order Confirmed
               </h2>
@@ -600,7 +600,7 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                 Order Reference: <strong className="font-mono text-[#B37418]">{orderConfirmed.id}</strong>
                 {orderConfirmed.paymentId && (
                   <span className="block text-[11px] text-[#7A6E62] mt-0.5">
-                    Razorpay Payment ID: <strong className="font-mono text-[#1F1914]">{orderConfirmed.paymentId}</strong>
+                    Payment ID: <strong className="font-mono text-[#1F1914]">{orderConfirmed.paymentId}</strong>
                   </span>
                 )}
               </p>
@@ -622,13 +622,13 @@ export const GiftsStorePage: React.FC<Props> = ({ navigate }) => {
                 <strong className="text-[#1F1914] text-right">{orderConfirmed.deliveryAddress}, {orderConfirmed.city} - {orderConfirmed.pincode}</strong>
               </div>
               <div className="flex justify-between font-bold pt-1 text-sm text-[#1F1914]">
-                <span>Total Paid via Razorpay:</span>
+                <span>Total Paid via Cashfree:</span>
                 <span className="text-[#B37418]">₹{orderConfirmed.totalAmount}</span>
               </div>
             </div>
 
             <p className="text-xs text-[#5C5147] leading-relaxed">
-              Your payment has been received via Razorpay. Your sacred keepsakes order is confirmed and our Malnad heritage team is preparing your package for dispatch.
+              Your payment has been received via Cashfree. Your sacred keepsakes order is confirmed and our Malnad heritage team is preparing your package for dispatch.
             </p>
 
             <div className="flex gap-3 pt-2">

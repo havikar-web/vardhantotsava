@@ -90,7 +90,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
       <main className="min-h-[65vh] bg-ivory px-6 py-12">
         <section className="max-w-2xl mx-auto rounded-md border border-gold/30 bg-white p-8 space-y-5">
           <span className="text-xs uppercase tracking-widest text-gold-dark font-semibold">
-            Payment Pending · Complete via Razorpay
+            Payment Pending · Complete via Cashfree
           </span>
           <h1 className="font-serif text-3xl font-bold text-charcoal">Complete Your Reservation</h1>
           <p className="text-sm text-charcoal/80">
@@ -103,13 +103,13 @@ export const DashboardPage: React.FC<DashboardProps> = ({ navigate }) => {
             Venue: {booking.address}, Bengaluru - {booking.pincode}
           </p>
           <p className="text-sm text-charcoal/70">
-            Complete your Razorpay payment to confirm your ceremony and dispatch the Acharya notification.
+            Complete your Cashfree payment to confirm your ceremony and dispatch the Acharya notification.
           </p>
           <button 
             onClick={() => navigate('/book?name=' + encodeURIComponent(booking.name) + '&dob=' + booking.dob + '&package=' + booking.packageId)} 
             className="rounded-xl bg-[#B37418] hover:bg-[#8C5D0D] px-6 py-3 text-white text-xs font-semibold uppercase tracking-wider cursor-pointer shadow-sacred"
           >
-            Pay & Confirm via Razorpay
+            Pay & Confirm via Cashfree
           </button>
         </section>
       </main>
