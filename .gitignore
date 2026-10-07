@@ -6,6 +6,7 @@ server/data/
 node_modules/
 dist/
 .next/
+.next-development/
 .next-production/
 /*.png
 docs/*.png

@@ -25,5 +25,5 @@ const nextConfig = {
 // Keep the production build separate from a running development server.
 export default phase => ({
   ...nextConfig,
-  distDir: phase === 'phase-development-server' ? '.next' : '.next-production'
+  distDir: phase === 'phase-development-server' ? '.next-development' : '.next'
 });
