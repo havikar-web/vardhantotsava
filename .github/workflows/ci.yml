@@ -36,3 +36,6 @@ jobs:
 
       - name: Verify Standalone Deployment and Worker
         run: npm run test:deployment
+
+      - name: Verify Public Pages Without Backend Configuration
+        run: node scripts/test-standalone.mjs --without-backend

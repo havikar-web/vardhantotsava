@@ -9,6 +9,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const source = resolve(import.meta.dirname, '../.next/standalone');
+const withoutBackend = process.argv.includes('--without-backend');
 const temporary = await mkdtemp(join(tmpdir(), 'mantrakshata-deployment-'));
 const application = join(temporary, 'app');
 let child;
@@ -30,6 +31,8 @@ try {
     /^(path|systemroot|windir|temp|tmp|home|userprofile)$/i.test(key)));
   Object.assign(env, {
     NODE_ENV: 'production', PORT: String(port), HOSTNAME: '127.0.0.1',
+  });
+  if (!withoutBackend) Object.assign(env, {
     APP_ORIGIN: 'https://deployment-test.invalid',
     DATA_PATH: join(temporary, 'test.sqlite'),
     PERSISTENT_STORAGE_CONFIRMED: 'true',
@@ -39,13 +42,14 @@ try {
   child.stdout.on('data', chunk => { logs = (logs + chunk).slice(-8000); });
   child.stderr.on('data', chunk => { logs = (logs + chunk).slice(-8000); });
   const base = `http://127.0.0.1:${port}`;
+  console.log(`Checking packaged website at ${base} (${withoutBackend ? 'backend unconfigured' : 'backend configured'}).`);
   let ready = false;
   for (let attempt = 0; attempt < 120; attempt++) {
     assert.equal(child.exitCode, null, 'Packaged server exited');
     assert.ok(!logs.includes('Failed to prepare server'), 'Packaged server initialization failed');
     try {
-      const response = await fetch(base + '/api/health', { signal: AbortSignal.timeout(2000) });
-      if (response.ok && (await response.json()).ok) { ready = true; break; }
+      const response = await fetch(base + '/', { signal: AbortSignal.timeout(2000) });
+      if (response.ok) { ready = true; break; }
     } catch {}
     await delay(250);
   }
@@ -57,6 +61,20 @@ try {
   assert.ok(script, 'Home page must reference a Next.js JavaScript asset');
   assert.equal((await fetch(new URL(script[1], base))).status, 200);
   assert.equal((await fetch(base + '/assets/official-logo.webp')).status, 200);
+  if (withoutBackend) {
+    assert.equal((await fetch(base + '/about')).status, 200);
+    assert.equal((await fetch(base + '/book')).status, 200);
+    const health = await fetch(base + '/api/health');
+    assert.equal(health.status, 503);
+    assert.equal((await health.json()).status, 'degraded');
+    const protectedResponse = await fetch(base + '/api/bookings');
+    assert.equal(protectedResponse.status, 503);
+    assert.match((await protectedResponse.json()).error, /unavailable/i);
+    console.log('Unconfigured deployment passed: public pages and assets load; backend health and protected APIs return 503.');
+  } else {
+  const health = await fetch(base + '/api/health');
+  assert.equal(health.status, 200);
+  assert.equal((await health.json()).ok, true);
   assert.equal((await fetch(base + '/api/bookings')).status, 401);
   assert.equal((await fetch(base + '/api/settings')).status, 401);
   assert.equal((await fetch(base + '/api/webhooks/cashfree', { method: 'POST', body: '{}' })).status, 403);
@@ -70,6 +88,7 @@ try {
   assert.equal(database.prepare('SELECT 1 FROM sessions WHERE hash=?').get('deployment-test'), undefined,
     'Standalone startup must run the background worker');
   console.log('Isolated standalone deployment passed: startup, page, JavaScript, image, protected APIs, webhook rejection and background worker.');
+  }
 } catch (error) {
   console.error(logs);
   throw error;
