@@ -15,3 +15,11 @@ Use Node.js 24 and one persistent process. The production entry point is **`npm 
 Run `npm run test:deployment` after building to verify the actual standalone package outside the source directory. It uses temporary SQLite storage and test credentials to check startup, the home page, static assets, API authentication, webhook rejection and a real background worker tick. CI runs this check on Linux after every production build. A successful local check does not verify hosting environment variables or persistent disk configuration.
 
 Run `node scripts/test-standalone.mjs --without-backend` to verify that absent backend settings cannot take down public pages. This regression check also runs in CI. Configure server-side settings in Hostinger; browser-only `VITE_*` values do not configure the protected backend, and ignored local `.env.server` files are not included in Git deployments.
+
+Backend configuration troubleshooting:
+
+- Existing WhatsApp and payment credentials remain unchanged. `.env.server.example` is a template and is never loaded as credentials.
+- `node scripts/check-backend.mjs` reports missing/invalid setting names and whether provider keys are present, without printing their values or contacting providers.
+- The standalone runtime reads `.env.server` in its working directory, then the project-root `.env.server` when running from `.next/standalone`. Host environment variables take precedence.
+- `/api/health` returns a safe `backend.code` and `backend.settings` list when initialization fails. `BACKEND_CONFIGURATION` identifies invalid/missing settings. `BACKEND_STORAGE_OR_ENV_FILE` means the database or environment file cannot be accessed.
+- Set `APP_ORIGIN=https://www.mantrakshata.com`. `DATA_PATH` must identify a private writable persistent SQLite file on the hosting server. Confirm storage survives a restart/redeployment before setting `PERSISTENT_STORAGE_CONFIRMED=true`. Existing provider keys cannot substitute for these storage settings.

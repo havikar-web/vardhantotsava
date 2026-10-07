@@ -3,9 +3,10 @@ export async function register() {
     try {
       const { getRuntime, startWorker } = await import('./server/runtime.mjs');
       startWorker(getRuntime());
-    } catch {
+    } catch (error) {
+      const { describeBackendFailure } = await import('./server/environment.mjs');
       // Public pages must remain available when the protected backend cannot start.
-      console.error('Protected backend unavailable. Check APP_ORIGIN (HTTPS), DATA_PATH (writable persistent storage), PERSISTENT_STORAGE_CONFIRMED, SESSION_SECRET and pricing JSON. Public pages remain available; backend readiness is reported by /api/health.');
+      console.error('Protected backend startup failed:', JSON.stringify(describeBackendFailure(error)));
     }
   }
 }
