@@ -1,8 +1,7 @@
 import { Readable } from 'node:stream';
 import { getRuntime } from './runtime.mjs';
 
-// Fallback for a direct Next CLI launch: apply exactly the same protected handler.
-// The documented custom start additionally runs the durable worker.
+// Apply the protected handler to Next.js routes. The startup hook runs the worker.
 export async function handleNextRequest(request){
  try{
  const chunks=[];let size=0;

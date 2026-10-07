@@ -34,11 +34,12 @@
     "esModuleInterop": true
   },
   "include": [
+    "instrumentation.ts",
     ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
     "app",
     "src",
-    ".next-production/types/**/*.ts"
+    ".next-development/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

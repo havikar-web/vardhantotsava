@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node server/next.mjs --dev",
     "build": "next build",
-    "start": "node server/next.mjs",
+    "postbuild": "node scripts/prepare-standalone.mjs",
+    "start": "node .next/standalone/server.js",
+    "test:deployment": "node scripts/test-standalone.mjs",
     "dev:vite": "vite --host 127.0.0.1 --port 3201 --strictPort",
     "build:vite": "tsc && vite build",
     "preview": "vite preview --port 3200",

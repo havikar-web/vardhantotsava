@@ -3,7 +3,7 @@ import { createService, phone } from './core.mjs';
 import { createHttp } from './http.mjs';
 import { metaProvider, verifyRazorpayPayment, razorpayProvider, cashfreeProvider } from './provider.mjs';
 import {createCommerce} from './commerce.mjs';
-import {readFileSync} from 'node:fs';
+import catalog from './catalog.json' with { type: 'json' };
 
 const key=Symbol.for('mantrakshata.protected.runtime');
 export function getRuntime(){
@@ -11,7 +11,6 @@ export function getRuntime(){
  try{process.loadEnvFile(resolve('.env.server'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const e=process.env,origin=e.APP_ORIGIN||'http://127.0.0.1:3201';
  if(e.NODE_ENV==='production'&&(!origin.startsWith('https://')||!e.DATA_PATH||e.PERSISTENT_STORAGE_CONFIRMED!=='true'))throw new Error('Configure HTTPS origin and verified persistent private storage before production startup.');
- const catalog=JSON.parse(readFileSync(new URL('./catalog.json',import.meta.url),'utf8'));
  const service=createService({database:resolve(e.DATA_PATH||'server/data/mantrakshata.sqlite'),secret:e.SESSION_SECRET,send:metaProvider(e).send,adminPhones:(e.ADMIN_PHONES||'').split(',').map(phone).filter(Boolean),mainPhone:phone(e.MAIN_ACHARYA_PHONE),origin,prices:JSON.parse(e.PACKAGE_PRICES_PAISE||'{}'),packageNames:catalog.packages,verifyPayment:id=>verifyRazorpayPayment(e,id)});
  const isCashfree=Boolean(e.CASHFREE_APP_ID&&e.CASHFREE_SECRET_KEY);
  const provider=isCashfree?cashfreeProvider(e):razorpayProvider(e);
