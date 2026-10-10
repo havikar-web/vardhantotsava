@@ -1,13 +1,13 @@
 import { basename, dirname, resolve } from 'node:path';
 
 export function loadServerEnvironment(cwd = process.cwd()) {
- const candidates = [resolve(cwd, '.env.server')];
+ const candidates = [resolve(cwd, '.env.server'), resolve(cwd, '.env.production'), resolve(cwd, '.env')];
  // The generated Next.js server changes cwd to .next/standalone.
  if (basename(cwd) === 'standalone' && basename(dirname(cwd)) === '.next') {
-  candidates.push(resolve(cwd, '../..', '.env.server'));
+  candidates.push(resolve(cwd, '../..', '.env.server'), resolve(cwd, '../..', '.env.production'), resolve(cwd, '../..', '.env'));
  }
  for (const file of candidates) {
-  try { process.loadEnvFile(file); return; }
+  try { process.loadEnvFile(file); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
  }
 }

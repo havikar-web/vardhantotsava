@@ -104,7 +104,9 @@ export async function launchCashfreeWithOrder(order: any, options: LaunchCashfre
       throw new Error('Payment gateway could not load. Please check your network and try again.');
     }
 
-    const mode = (import.meta.env.VITE_CASHFREE_ENV === 'sandbox' ? 'sandbox' : 'production') as 'sandbox' | 'production';
+    const mode = ((order?.environment === 'sandbox' || order?.environment === 'production')
+      ? order.environment
+      : (import.meta.env.VITE_CASHFREE_ENV === 'production' ? 'production' : 'sandbox')) as 'sandbox' | 'production';
     const cashfree = window.Cashfree({ mode });
 
     const result = await cashfree.checkout({

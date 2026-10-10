@@ -15,5 +15,5 @@ export async function handleNextRequest(request){
  startWorker(runtime);
  runtime.http.emit('request',req,res);
  });
- }catch{return Response.json({error:'Booking and payment services are temporarily unavailable. Please contact support.'},{status:503,headers:{'Cache-Control':'no-store'}});}
+ }catch(err){console.error('Next route error in handleNextRequest:',err);return Response.json({error:'Booking and payment services are temporarily unavailable. Please contact support.'},{status:503,headers:{'Cache-Control':'no-store'}});}
 }
